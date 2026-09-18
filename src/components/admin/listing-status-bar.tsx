@@ -31,7 +31,7 @@ export function ListingStatusBar({
       aria-labelledby="listing-status-heading"
       className="flex flex-col rounded-xl border border-border bg-card shadow-[var(--shadow-subtle)]"
     >
-      <div className="flex flex-col gap-4 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+      <div className="flex flex-col gap-4 px-6 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
         <div className="flex min-w-0 flex-wrap items-center gap-x-4 gap-y-2">
           <h2 id="listing-status-heading" className="text-small font-medium text-muted-foreground">
             Listing status
@@ -55,7 +55,7 @@ export function ListingStatusBar({
       </div>
 
       {hasMessages ? (
-        <div className="flex flex-col gap-3 border-t border-border px-5 py-4 sm:px-6">{children}</div>
+        <div className="flex flex-col gap-3 border-t border-border px-6 py-4 sm:px-6">{children}</div>
       ) : null}
     </section>
   )

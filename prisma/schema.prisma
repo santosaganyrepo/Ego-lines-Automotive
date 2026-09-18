@@ -124,6 +124,7 @@ enum VehicleBodyType {
 enum CountryOfOrigin {
   JAPAN
   KOREA
+  CHINA
 }
 
 // ─────────────────────────────────────────────
@@ -317,10 +318,18 @@ enum QuoteDispatchChannel {
   BOTH
 }
 
+/// How a quotation's optional discount is expressed.
+enum QuoteDiscountType {
+  FIXED_AMOUNT
+  PERCENTAGE
+}
+
+/// EITHER predates CHINA and means "no preference" — any sourcing market.
 enum PreferredCountry {
   JAPAN
   KOREA
   EITHER
+  CHINA
 }
 
 /// The coarse, list-view state of an order. The stage-by-stage detail lives
@@ -1045,6 +1054,20 @@ model Quote {
   otherCostsLabel  String?
   otherCostsAmount Decimal? @db.Decimal(12, 2)
 
+  /// An optional discount the dealership has agreed with this customer.
+  ///
+  /// Applied to the goods — the vehicle or parts and any accessories — and
+  /// never to shipping, clearing, duty or the other cost, which are passed on
+  /// at cost. A percentage is taken of that subtotal; a fixed amount is capped
+  /// at it, so a quotation can never total less than its fees. `discountValue`
+  /// is the percentage (0–100) or the amount, per `discountType`; both are null
+  /// together when there is no discount (Quote_discount_check). Derived into
+  /// the total by `computeQuoteTotals`, like every other figure, and frozen
+  /// into Order.discountAmount when the quote is converted.
+  discountType  QuoteDiscountType?
+  discountValue Decimal?           @db.Decimal(12, 2)
+  discountLabel String?
+
   /// The last day these figures are honoured. Freight rates and auction
   /// stock move, and a quotation without an end date is a price the
   /// dealership has promised indefinitely.
@@ -1196,6 +1219,15 @@ model Order {
   /// those must each sell exactly one product — so the itemisation stays on
   /// the converted quote (1:1, frozen once WON) and the money lands here.
   otherCharges          Decimal?           @db.Decimal(12, 2)
+  /// The quotation's miscellaneous fourth fee (Quote.otherCostsLabel /
+  /// otherCostsAmount), frozen at conversion. Part of `totalAmount`; kept
+  /// here so the order's own cost lines add up to its total.
+  otherCostsLabel       String?
+  otherCostsAmount      Decimal?           @db.Decimal(12, 2)
+  /// The quotation's discount, in money, frozen at conversion. Already taken
+  /// off `totalAmount` — shown so the order explains its own total.
+  discountAmount        Decimal            @default(0) @db.Decimal(12, 2)
+  discountLabel         String?
   totalAmount           Decimal            @db.Decimal(12, 2)
   requiredDepositAmount Decimal?           @db.Decimal(12, 2)
   milestones            PaymentMilestone[]
@@ -1441,7 +1473,7 @@ model BusinessSettings {
   /// The one place the company's name is written. Header, footer, page
   /// titles, emails, quotation PDFs and every WhatsApp message read it, so a
   /// rename is a settings change rather than a hunt through the codebase.
-  businessName        String @default("Crownline Motors")
+  businessName        String @default("EGO-Lines Automotive")
   businessDescription String @default("Quality vehicles sourced from Japan and Korea and delivered to South Sudan.") @db.Text
   /// ISO 3166-1 alpha-2. The dial code a customer's phone number is assumed
   /// to start from on public forms. A CHECK keeps it two capital letters;

@@ -40,8 +40,8 @@ export function VehicleConditionTag({
   return (
     <span
       className={cn(
-        "inline-flex w-fit items-center rounded-md border px-2.5 py-1",
-        "text-[0.6875rem] font-bold tracking-[0.12em] uppercase",
+        "inline-flex w-fit items-center rounded-md border px-3 py-1",
+        "text-xs font-bold tracking-[0.12em] uppercase",
         CONDITION_STYLES[condition],
         className
       )}

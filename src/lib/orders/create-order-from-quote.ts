@@ -8,7 +8,7 @@ import {
   sparePartMilestoneTemplates,
   vehicleMilestoneTemplates,
 } from "@/lib/orders/milestones"
-import { computeQuoteTotals, type PricedQuoteLine, type QuoteFees } from "@/lib/quotes/quote-pricing"
+import { computeQuoteTotals, type PricedQuoteLine, type QuoteDiscount, type QuoteFees } from "@/lib/quotes/quote-pricing"
 import { fromCents, toCents } from "@/lib/utils/money"
 import { generateReference } from "@/lib/utils/generate-reference"
 
@@ -99,6 +99,11 @@ export interface CreateOrderFromQuoteInput {
   clearingCost: number | null
   importDuty: number | null
   otherCosts: number | null
+  otherCostsLabel: string | null
+  /** The quotation's discount, or null. Applied by `computeQuoteTotals`. */
+  discount: QuoteDiscount | null
+  /** How the discount line reads — see `discountLineLabel`. */
+  discountLabel: string | null
   /** Carried over verbatim from the quote's internal notes, so whoever picks
    *  up the order next does not have to reopen the quote to see context an
    *  earlier operator already recorded. A snapshot, not a live link — the
@@ -186,7 +191,7 @@ export async function createOrderFromQuote(
     importDuty: input.importDuty,
     otherCosts: input.otherCosts,
   }
-  const totals = computeQuoteTotals(priced, fees)
+  const totals = computeQuoteTotals(priced, fees, input.discount)
 
   const orderNumber = await generateReference(tx, "ORDER")
 
@@ -208,6 +213,10 @@ export async function createOrderFromQuote(
       clearingCost: input.clearingCost,
       importDuty: input.importDuty,
       otherCharges: totals.accessoriesTotal > 0 ? totals.accessoriesTotal : null,
+      otherCostsLabel: input.otherCosts !== null ? (input.otherCostsLabel ?? "Other costs") : null,
+      otherCostsAmount: input.otherCosts,
+      discountAmount: totals.discountTotal,
+      discountLabel: totals.discountTotal > 0 ? input.discountLabel : null,
       totalAmount: totals.total,
       notes: input.adminNotes,
       items: {
@@ -248,6 +257,7 @@ export async function createOrderFromQuote(
         orderNumber: order.orderNumber,
         quoteId: input.quoteId,
         totalAmount: totals.total,
+        discountAmount: totals.discountTotal,
         type: input.quoteType,
         itemCount: itemLines.length,
         accessoryCount: accessoryLines.length,

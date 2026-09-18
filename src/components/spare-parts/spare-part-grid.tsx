@@ -94,7 +94,7 @@ export function SparePartGrid({
       <EmptyState
         icon={<Wrench />}
         title="No parts listed yet"
-        description="Parts from Japan and Korea are added as they arrive. Tell us what you need — the part number or the make, model and year — and we will source it for you."
+        description="Parts from Japan, South Korea and China are added as they arrive. Tell us what you need — the part number or the make, model and year — and we will source it for you."
         action={
           <PartsCatalogueQuoteButton variant="outline" size="default">
             Request a part
@@ -105,7 +105,7 @@ export function SparePartGrid({
   }
 
   return (
-    <ul className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3 xl:grid-cols-4 xl:gap-4">
+    <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-3 xl:grid-cols-4 xl:gap-4">
       {parts.map((part, index) => (
         <li key={part.slug} className="flex">
           <Reveal delay={(index % COLUMNS) * 60} className="flex w-full">

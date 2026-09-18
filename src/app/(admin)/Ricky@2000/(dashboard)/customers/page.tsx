@@ -180,7 +180,7 @@ function CustomerInitials({ name }: { name: string }) {
   return (
     <span
       aria-hidden="true"
-      className="flex size-8 shrink-0 items-center justify-center rounded-full border border-border bg-secondary text-[0.6875rem] font-semibold text-muted-foreground"
+      className="flex size-8 shrink-0 items-center justify-center rounded-full border border-border bg-secondary text-xs font-semibold text-muted-foreground"
     >
       {initials}
     </span>

@@ -2,6 +2,7 @@
 
 import * as React from "react"
 
+import { DEFAULT_BUSINESS_NAME } from "@/lib/constants/branding-options"
 import { DEFAULT_CATALOG_DISPLAY, type CatalogDisplaySettings } from "@/lib/settings/catalog-display"
 
 /**
@@ -31,7 +32,7 @@ export interface ClientSiteSettings {
 }
 
 const DEFAULT_SETTINGS: ClientSiteSettings = {
-  businessName: "Crownline Motors",
+  businessName: DEFAULT_BUSINESS_NAME,
   whatsappNumber: "",
   defaultCountry: "SS",
   phone: "",

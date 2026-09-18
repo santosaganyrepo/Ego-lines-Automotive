@@ -167,7 +167,7 @@ export function RotatingPlaceholder({
         <span
           key={current}
           className={cn(
-            "block truncate font-medium text-foreground/55",
+            "block truncate font-medium text-foreground/65",
             mayAnimate && "duration-base ease-crownline animate-in fade-in-0 slide-in-from-bottom-2"
           )}
         >

@@ -65,7 +65,7 @@ export function AdminBreadcrumbs({ groups, className }: { groups: AdminNavGroup[
 
   return (
     <nav aria-label="Breadcrumb" className={cn("min-w-0", className)}>
-      <ol className="flex min-w-0 items-center gap-1.5 text-small">
+      <ol className="flex min-w-0 items-center gap-2 text-small">
         {trail.map((crumb, index) => {
           const last = index === trail.length - 1
 
@@ -75,7 +75,7 @@ export function AdminBreadcrumbs({ groups, className }: { groups: AdminNavGroup[
             <li
               key={`${crumb.label}-${index}`}
               className={cn(
-                "flex min-w-0 items-center gap-1.5",
+                "flex min-w-0 items-center gap-2",
                 index < trail.length - 2 && "max-sm:hidden"
               )}
             >

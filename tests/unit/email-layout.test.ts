@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest"
 
 import { renderEmailHtml, renderEmailText, safeHttpUrl, type EmailContent } from "@/lib/email/email-layout"
 
-const BRAND = { siteName: "Crownline Motors", siteUrl: "https://crownlinemotors.com" }
+const BRAND = { siteName: "EGO-Lines Automotive", siteUrl: "https://ego-lines.example" }
 
 const CONTENT: EmailContent = {
   preheader: "Your request has been received",
@@ -10,7 +10,7 @@ const CONTENT: EmailContent = {
   greeting: "Hello <b>Santos</b>,",
   paragraphs: ['Notes: <script>alert("x")</script>'],
   details: [{ label: "Reference", value: "CLM-Q-2026-000045" }],
-  callToAction: { label: "Track my order", url: "https://crownlinemotors.com/track-my-order" },
+  callToAction: { label: "Track my order", url: "https://ego-lines.example/track-my-order" },
 }
 
 describe("renderEmailHtml", () => {
@@ -34,8 +34,8 @@ describe("renderEmailText", () => {
     const text = renderEmailText(CONTENT, BRAND)
 
     expect(text).toContain("Reference: CLM-Q-2026-000045")
-    expect(text).toContain("Track my order: https://crownlinemotors.com/track-my-order")
-    expect(text.endsWith("Crownline Motors\nhttps://crownlinemotors.com")).toBe(true)
+    expect(text).toContain("Track my order: https://ego-lines.example/track-my-order")
+    expect(text.endsWith("EGO-Lines Automotive\nhttps://ego-lines.example")).toBe(true)
   })
 })
 

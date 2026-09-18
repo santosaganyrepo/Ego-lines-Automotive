@@ -40,13 +40,13 @@ export function SettingsPanel({
       aria-labelledby={id ? `${id}-title` : undefined}
       data-settings-section=""
       className={cn(
-        "min-w-0 scroll-mt-24 rounded-xl border border-border bg-card p-5 shadow-[var(--shadow-subtle)] sm:p-6",
+        "min-w-0 scroll-mt-24 rounded-xl border border-border bg-card p-6 shadow-[var(--shadow-subtle)] sm:p-6",
         className
       )}
     >
       {/* Wraps: a short control stays beside the title, a wide one drops below
           the description rather than squeezing it into a narrow column. */}
-      <header className="mb-5 flex flex-wrap items-start justify-between gap-x-4 gap-y-2">
+      <header className="mb-6 flex flex-wrap items-start justify-between gap-x-4 gap-y-2">
         <div className="flex min-w-0 flex-[1_1_16rem] flex-col gap-1">
           <h2 id={id ? `${id}-title` : undefined} className="text-h3 text-foreground">
             {title}
@@ -76,7 +76,7 @@ export function SettingsField({
   className?: string
 }) {
   return (
-    <div data-settings-field="" className={cn("flex min-w-0 scroll-mt-28 flex-col gap-1.5", className)}>
+    <div data-settings-field="" className={cn("flex min-w-0 scroll-mt-28 flex-col gap-2", className)}>
       <label htmlFor={htmlFor} className="text-small font-medium text-foreground">
         {label}
       </label>
@@ -112,7 +112,7 @@ export function SettingsReadOnlyValue({
   icon?: React.ReactNode
 }) {
   return (
-    <div className="flex min-w-0 flex-col gap-1.5">
+    <div className="flex min-w-0 flex-col gap-2">
       <span className="text-small font-medium text-foreground">{label}</span>
       <div className="flex h-(--control-height) items-center gap-2 rounded-lg border border-dashed border-border bg-sunken/70 px-3 text-small text-foreground">
         {icon}

@@ -115,7 +115,7 @@ export default async function SessionSecurityPage() {
             {events.map((event) => {
               const copy = EVENT_COPY[event.kind]
               return (
-                <li key={event.id} className="flex min-w-0 items-center gap-3 py-2.5 first:pt-0 last:pb-0">
+                <li key={event.id} className="flex min-w-0 items-center gap-3 py-3 first:pt-0 last:pb-0">
                   <span
                     aria-hidden="true"
                     className={cn("size-1.5 shrink-0 rounded-full", copy.ok ? "bg-success" : "bg-destructive")}

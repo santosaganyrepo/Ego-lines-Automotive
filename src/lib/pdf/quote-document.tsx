@@ -144,6 +144,11 @@ const styles = StyleSheet.create({
   totalsLabel: {
     color: MUTED,
   },
+  // A deep green, legible in print: the discount is money back, and reads as
+  // a reduction rather than as one more charge.
+  discountValue: {
+    color: "#1c7a45",
+  },
   grandTotalRow: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -239,7 +244,7 @@ export function QuoteDocument({ data }: { data: QuotePdfData }) {
         </View>
 
         <View style={styles.totalsBlock}>
-          {data.accessoriesTotal > 0 ? (
+          {data.accessoriesTotal > 0 || data.discount ? (
             <>
               <View style={styles.totalsRow}>
                 <Text style={styles.totalsLabel}>
@@ -247,11 +252,22 @@ export function QuoteDocument({ data }: { data: QuotePdfData }) {
                 </Text>
                 <Text>{formatCurrency(data.itemsSubtotal)}</Text>
               </View>
-              <View style={styles.totalsRow}>
-                <Text style={styles.totalsLabel}>Accessories &amp; extras</Text>
-                <Text>{formatCurrency(data.accessoriesTotal)}</Text>
-              </View>
+              {data.accessoriesTotal > 0 ? (
+                <View style={styles.totalsRow}>
+                  <Text style={styles.totalsLabel}>Accessories &amp; extras</Text>
+                  <Text>{formatCurrency(data.accessoriesTotal)}</Text>
+                </View>
+              ) : null}
             </>
+          ) : null}
+
+          {/* Taken from the goods above, before any fee — shown as a
+              reduction so the customer sees exactly what was taken off. */}
+          {data.discount ? (
+            <View style={styles.totalsRow}>
+              <Text style={styles.totalsLabel}>{data.discount.label}</Text>
+              <Text style={styles.discountValue}>−{formatCurrency(data.discount.amount)}</Text>
+            </View>
           ) : null}
 
           {data.shippingCost !== null ? (

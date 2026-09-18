@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import Link from "next/link"
 
 import { Container } from "@/components/layout/container"
-import { Pagination } from "@/components/shared/pagination"
+import { LoadMore } from "@/components/shared/load-more"
 import { Section } from "@/components/layout/section"
 import { Button } from "@/components/ui/button"
 import { VehicleCatalogueQuoteButton } from "@/components/quotes/quote-request-triggers"
@@ -16,7 +16,6 @@ import {
   listPublishedVehicles,
   listVehicleBodyTypes,
   listVehicleFacets,
-  PUBLIC_VEHICLES_PER_PAGE,
 } from "@/lib/queries/public-vehicle.queries"
 import { VEHICLE_BODY_TYPE_PLURAL_LABELS } from "@/lib/constants/vehicle-options"
 import { formatNumber } from "@/lib/utils/format-currency"
@@ -54,7 +53,7 @@ import {
 
 const TITLE = "Cars for sale in South Sudan"
 const DESCRIPTION =
-  "Browse quality vehicles imported from Japan and South Korea, delivered to Juba and across South Sudan. Full specifications, photographs and delivered-price estimates on every listing."
+  "Browse quality vehicles imported from Japan, South Korea and China, delivered to Juba and across South Sudan. Full specifications, photographs and delivered-price estimates on every listing."
 
 /**
  * Metadata that knows whether a filter is applied.
@@ -133,7 +132,7 @@ export default async function CarsPage({
    * round trip is the expensive part, not the query.
    */
   const [{ vehicles, total, page, pageCount }, facets, bodyTypes] = await Promise.all([
-    listPublishedVehicles({ page: requestedPage, criteria }),
+    listPublishedVehicles({ page: requestedPage, criteria, through: true }),
     listVehicleFacets(),
     listVehicleBodyTypes(),
   ])
@@ -147,8 +146,7 @@ export default async function CarsPage({
    * back is what keeps the range line ("Showing 1,177–36" on a page holding
    * twelve vehicles) and the pager honest.
    */
-  const first = (page - 1) * PUBLIC_VEHICLES_PER_PAGE + 1
-  const last = Math.min(page * PUBLIC_VEHICLES_PER_PAGE, total)
+  const shown = vehicles.length
 
   return (
     <>
@@ -164,7 +162,7 @@ export default async function CarsPage({
           visible copy rather than hidden text.
         */
         phrases={["Quality vehicles.", "Trusted sourcing.", "Seamless delivery."]}
-        supporting="Imported from Japan and South Korea, delivered across South Sudan."
+        supporting="Imported from Japan, South Korea and China, delivered across South Sudan."
       />
 
       {/*
@@ -176,7 +174,7 @@ export default async function CarsPage({
         reason. The closing padding stays at the standard step so the grid
         does not run into the section beneath it.
       */}
-      <Section spacing="compact" containerSize="wide" className="pb-16 md:pb-24">
+      <Section spacing="compact" containerSize="wide" className="bg-canvas pb-16 md:pb-24">
         {/*
           The catalogue runs to the wide measure, and the grid is four
           columns from `xl`.
@@ -240,12 +238,10 @@ export default async function CarsPage({
                 : total === 0
                   ? "No vehicles listed right now"
                   : `${formatNumber(total)} vehicle${total === 1 ? "" : "s"} available`}
-              {total > PUBLIC_VEHICLES_PER_PAGE ? (
+              {total > shown ? (
                 <>
                   {" · "}
-                  <span className="tabular">
-                    Showing {formatNumber(first)}–{formatNumber(last)}
-                  </span>
+                  <span className="tabular">Showing {formatNumber(shown)}</span>
                 </>
               ) : null}
             </p>
@@ -257,6 +253,8 @@ export default async function CarsPage({
             </VehicleCatalogueQuoteButton>
           </div>
 
+          {/* The grid's heading, for the document outline: card titles are h3s. */}
+          <h2 className="sr-only">Vehicles</h2>
           <VehicleGrid vehicles={vehicles} filtered={isFiltered} />
 
           {/*
@@ -266,12 +264,14 @@ export default async function CarsPage({
             that is invisible until someone has enough inventory for a
             second page.
           */}
-          <Pagination
-            page={page}
-            pageCount={pageCount}
-            hrefFor={(target) => catalogueHref(criteria, target)}
-            label="Catalogue pages"
-          />
+          {pageCount > 1 ? (
+            <LoadMore
+              shown={shown}
+              total={total}
+              nextHref={page < pageCount ? catalogueHref(criteria, page + 1) : null}
+              noun="vehicles"
+            />
+          ) : null}
         </div>
       </Section>
 
@@ -298,7 +298,7 @@ export default async function CarsPage({
           <h2 className="text-h2">Haven&rsquo;t found what you&rsquo;re looking for?</h2>
           <p className="max-w-xl text-body text-background/75">
             Tell us the make, model and budget you have in mind. We source to
-            order from auction houses in Japan and Korea, and confirm the
+            order from auction houses and dealers in Japan, South Korea and China, and confirm the
             delivered price before you commit to anything.
           </p>
           <div className="flex flex-wrap justify-center gap-3">

@@ -100,4 +100,10 @@ export const cancelOrderSchema = z.object({
   refundPayments: z
     .union([z.literal("on"), z.literal("true"), z.literal("false"), z.undefined(), z.null()])
     .transform((value) => value === "on" || value === "true"),
+  /**
+   * The order number, typed out by the operator. Required by the action only
+   * when the customer has confirmed payments on the order — the one
+   * cancellation serious enough to deserve a deliberate second step.
+   */
+  confirmOrderNumber: z.preprocess(blankToUndefined, z.string().trim().max(40).optional()),
 })

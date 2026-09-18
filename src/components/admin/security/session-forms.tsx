@@ -29,7 +29,7 @@ export function SecurityControlsForm({
   const [allowRecovery, setAllowRecovery] = React.useState(settings.allowPasswordRecovery)
 
   return (
-    <form {...formProps} className="flex flex-col gap-5">
+    <form {...formProps} className="flex flex-col gap-6">
       <SettingsFormAlert state={state} />
 
       <SettingsSwitchList>
@@ -63,7 +63,7 @@ export function SecurityControlsForm({
       {fieldError("requireTwoFactor") ? <p className="text-small text-destructive">{fieldError("requireTwoFactor")}</p> : null}
 
       {!allowRecovery ? (
-        <div className="flex items-start gap-2.5 rounded-lg border border-warning/35 bg-warning/5 px-4 py-3 text-small">
+        <div className="flex items-start gap-3 rounded-lg border border-warning/35 bg-warning/5 px-4 py-3 text-small">
           <AlertTriangle aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-warning" />
           <p>
             With recovery off, an administrator who forgets their password cannot reset it themselves. Your technical
@@ -138,7 +138,7 @@ export function SessionList({ sessions }: { sessions: SessionRow[] }) {
                 <span className="flex items-center gap-2 text-small font-medium">
                   <span className="truncate">{session.device}</span>
                   {session.current ? (
-                    <span className="shrink-0 rounded-full bg-success/10 px-2 py-0.5 text-[0.625rem] font-semibold tracking-wide text-success uppercase">
+                    <span className="shrink-0 rounded-full bg-success/10 px-2 py-0.5 text-xs font-semibold tracking-wide text-success uppercase">
                       This device
                     </span>
                   ) : null}

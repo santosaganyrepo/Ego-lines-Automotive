@@ -36,7 +36,44 @@ import { renderQuotePdfBuffer } from "@/lib/pdf/render-quote-pdf"
  */
 export const runtime = "nodejs"
 
-const NOT_FOUND_BODY = "This quotation link is invalid or has expired."
+/**
+ * What a customer sees when the link cannot produce their PDF — a small,
+ * self-contained page rather than a bare line of text, since they arrive here
+ * from WhatsApp or an email and need a way back. No scripts, no external
+ * assets; the only dynamic value (the business name, set by an administrator)
+ * is escaped.
+ */
+function escapeHtml(value: string): string {
+  return value.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c] ?? c)
+}
+
+async function failurePage(status: number, title: string, message: string, headers?: Record<string, string>) {
+  let businessName = "Quotation"
+  try {
+    businessName = (await getPublicSiteSettings()).businessName
+  } catch (error) {
+    console.error("[quotation-pdf] could not read settings for the failure page", error)
+  }
+
+  const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex"><title>${escapeHtml(title)} | ${escapeHtml(businessName)}</title><style>
+body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#1c1b19;color:#f7f6f3;font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif;padding:24px}
+main{max-width:28rem}p.brand{color:#e8b93a;font-size:12px;letter-spacing:.2em;text-transform:uppercase;font-weight:600;margin:0 0 16px}
+h1{font-size:28px;line-height:1.2;margin:0 0 12px}p{margin:0 0 24px;color:#c9c6bf}
+a{display:inline-flex;align-items:center;min-height:44px;padding:0 20px;border-radius:8px;margin:0 8px 8px 0;font-weight:600;text-decoration:none}
+a.primary{background:#e8b93a;color:#1c1b19}a.secondary{border:1px solid rgba(255,255,255,.3);color:#f7f6f3}
+a:focus-visible{outline:2px solid #e8b93a;outline-offset:2px}
+</style></head><body><main><p class="brand">${escapeHtml(businessName)}</p><h1>${escapeHtml(title)}</h1><p>${escapeHtml(message)}</p><a class="primary" href="/contact">Contact us</a><a class="secondary" href="/">Go to the website</a></main></body></html>`
+
+  return new NextResponse(html, {
+    status,
+    headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store", ...headers },
+  })
+}
+
+const NOT_FOUND = {
+  title: "This quotation link is not valid",
+  message: "The link may have been mistyped, or the quotation may have been withdrawn. Contact us and we will send you a new link.",
+}
 
 export async function GET(
   _request: NextRequest,
@@ -48,7 +85,7 @@ export async function GET(
   // shorter or oddly shaped is not a token this application ever issued, so
   // it is refused before it reaches the database at all.
   if (!token || !/^[A-Za-z0-9_-]{20,128}$/.test(token)) {
-    return new NextResponse(NOT_FOUND_BODY, { status: 404 })
+    return failurePage(404, NOT_FOUND.title, NOT_FOUND.message)
   }
 
   const ip = await getClientIp()
@@ -60,17 +97,19 @@ export async function GET(
     )
 
     if (!verdict.allowed) {
-      return new NextResponse("Too many requests. Please try again shortly.", {
-        status: 429,
-        headers: { "Retry-After": "300" },
-      })
+      return failurePage(
+        429,
+        "Please try again in a few minutes",
+        "This link has been opened many times in a short period. Wait a few minutes and open it again.",
+        { "Retry-After": "300" }
+      )
     }
   }
 
   const quote = await getQuoteForPdf(token)
 
   if (!quote) {
-    return new NextResponse(NOT_FOUND_BODY, { status: 404 })
+    return failurePage(404, NOT_FOUND.title, NOT_FOUND.message)
   }
 
   let buffer: Buffer
@@ -79,9 +118,11 @@ export async function GET(
     buffer = await renderQuotePdfBuffer(buildQuotePdfData(quote, (await getPublicSiteSettings()).businessName))
   } catch (error) {
     console.error("[quotation-pdf] failed to render PDF", error)
-    return new NextResponse("Could not generate this document. Please try again shortly.", {
-      status: 500,
-    })
+    return failurePage(
+      500,
+      "We could not prepare your quotation",
+      "Your quotation is safe, but the document could not be generated just now. Please open the link again in a moment."
+    )
   }
 
   const filename = buildQuotationFilename(quote.quoteNumber, quote.contactName ?? "Customer")

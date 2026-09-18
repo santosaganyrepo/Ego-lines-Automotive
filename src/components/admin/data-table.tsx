@@ -22,8 +22,11 @@ export interface DataTableColumn<TRow> {
   id: string
   header: React.ReactNode
   render: (row: TRow) => React.ReactNode
-  /** Right-align numeric columns so digits line up down the page. */
-  align?: "left" | "right"
+  /**
+   * Text left, numbers and money right (with tabular figures, so digits and
+   * decimals stack down the page), status badges and icons centred.
+   */
+  align?: "left" | "right" | "center"
   /**
    * Hide below the given breakpoint.
    *
@@ -100,8 +103,9 @@ export function DataTable<TRow>({
                   // Sentence case at 12px rather than tracked capitals: a
                   // header row is read once, then the eye lives in the body,
                   // and capitals are the loudest thing a table can carry.
-                  "h-10 px-4 text-xs font-medium text-muted-foreground first:pl-5 last:pr-5",
+                  "h-10 px-4 text-xs font-medium text-muted-foreground first:pl-6 last:pr-6",
                   column.align === "right" && "text-right",
+                  column.align === "center" && "text-center",
                   column.hideBelow && HIDE_CLASSES[column.hideBelow]
                 )}
               >
@@ -121,8 +125,9 @@ export function DataTable<TRow>({
                 <TableCell
                   key={column.id}
                   className={cn(
-                    "h-14 px-4 align-middle first:pl-5 last:pr-5",
-                    column.align === "right" && "text-right",
+                    "h-14 px-4 align-middle first:pl-6 last:pr-6",
+                    column.align === "right" && "text-right tabular-nums",
+                    column.align === "center" && "text-center",
                     column.hideBelow && HIDE_CLASSES[column.hideBelow]
                   )}
                 >

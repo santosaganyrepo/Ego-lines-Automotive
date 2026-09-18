@@ -60,7 +60,7 @@ export function SettingsNav({ links }: { links: SettingsNavLink[] }) {
       {/* ── Phone and tablet: one scrolling row of tabs ───────────── */}
       <ul
         ref={rowRef}
-        className="no-scrollbar -mx-4 flex gap-5 overflow-x-auto border-b border-border px-4 sm:-mx-6 sm:px-6 lg:hidden"
+        className="no-scrollbar -mx-4 flex gap-6 overflow-x-auto border-b border-border px-4 sm:-mx-6 sm:px-6 lg:hidden"
       >
         {links.map((link) => {
           const active = isSettingsLinkActive(link, pathname)
@@ -97,7 +97,7 @@ export function SettingsNav({ links }: { links: SettingsNavLink[] }) {
                 aria-current={active && !link.children ? "page" : undefined}
                 data-active={active}
                 className={cn(
-                  "group/item relative flex h-9 items-center gap-2.5 rounded-md px-2.5 text-small",
+                  "group/item relative flex h-9 items-center gap-3 rounded-md px-3 text-small",
                   "transition-colors duration-fast ease-crownline",
                   active
                     ? "bg-card font-medium text-foreground shadow-[var(--shadow-subtle)] ring-1 ring-border"
@@ -106,7 +106,7 @@ export function SettingsNav({ links }: { links: SettingsNavLink[] }) {
               >
                 <Icon
                   aria-hidden="true"
-                  strokeWidth={1.75}
+                 
                   className={cn(
                     "size-4 shrink-0 transition-colors duration-fast",
                     active ? "text-gold-ink" : "text-muted-foreground group-hover/item:text-foreground"
@@ -126,7 +126,7 @@ export function SettingsNav({ links }: { links: SettingsNavLink[] }) {
                           href={child.href}
                           aria-current={childActive ? "page" : undefined}
                           className={cn(
-                            "relative block truncate rounded-md px-2 py-1.5 text-small transition-colors duration-fast",
+                            "relative block truncate rounded-md px-2 py-2 text-small transition-colors duration-fast",
                             childActive
                               ? "font-medium text-foreground before:absolute before:top-1/2 before:-left-[0.6875rem] before:h-4 before:w-0.5 before:-translate-y-1/2 before:rounded-full before:bg-gold"
                               : "text-muted-foreground hover:text-foreground"
@@ -158,7 +158,7 @@ export function SecuritySubNav({ links }: { links: { label: string; href: string
 
   return (
     <nav aria-label="Security settings" className="min-w-0 lg:hidden">
-      <ul className="no-scrollbar -mx-4 flex gap-1.5 overflow-x-auto px-4 sm:-mx-6 sm:px-6">
+      <ul className="no-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4 sm:-mx-6 sm:px-6">
         {links.map((link) => {
           const active = pathname === link.href
           return (

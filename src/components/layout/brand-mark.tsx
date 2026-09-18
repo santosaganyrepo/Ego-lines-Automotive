@@ -25,7 +25,7 @@ const markSizes = {
   },
   lg: {
     word: "text-2xl md:text-3xl",
-    sub: "text-[0.6875rem]",
+    sub: "text-xs",
     gap: "gap-[0.25rem]",
     logo: "h-10 md:h-12",
     lockupWord: "text-xl md:text-2xl",
@@ -90,7 +90,7 @@ function BrandMark({
 
   if (layout === "lockup") {
     return (
-      <span data-slot="brand-mark" className={cn("inline-flex min-w-0 items-center gap-2.5", className)} {...props}>
+      <span data-slot="brand-mark" className={cn("inline-flex min-w-0 items-center gap-3", className)} {...props}>
         {logoUrl ? (
           <Image
             src={logoUrl}
@@ -150,7 +150,7 @@ function BrandMark({
       <span className={cn("font-heading font-bold tracking-[0.18em] uppercase", scale.word)}>{lead}</span>
 
       {!compact && accent ? (
-        <span className={cn("flex items-center gap-1.5", scale.sub)}>
+        <span className={cn("flex items-center gap-2", scale.sub)}>
           {/* Thin gold rule — the one piece of brand colour in the mark. */}
           <span aria-hidden="true" className="h-px w-3 bg-gold-ink" />
           <span className="font-heading font-semibold tracking-[0.34em] text-current/70 uppercase">{accent}</span>

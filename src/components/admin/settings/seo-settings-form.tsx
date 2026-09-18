@@ -145,7 +145,7 @@ export function SeoSettingsForm({
           </SettingsSwitchList>
 
           {!indexing ? (
-            <div className="flex items-start gap-2.5 rounded-lg border border-warning/35 bg-warning/5 px-4 py-3 text-small">
+            <div className="flex items-start gap-3 rounded-lg border border-warning/35 bg-warning/5 px-4 py-3 text-small">
               <AlertTriangle aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-warning" />
               <p>
                 With indexing off, every page asks search engines not to list it and robots.txt disallows the whole

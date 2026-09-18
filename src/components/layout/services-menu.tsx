@@ -51,7 +51,7 @@ export function ServicesMenu({
             </NavigationMenu.Icon>
           </NavigationMenu.Trigger>
 
-          <NavigationMenu.Content className="w-52 p-1.5 transition-opacity duration-base data-ending-style:opacity-0 data-starting-style:opacity-0">
+          <NavigationMenu.Content className="w-52 p-2 transition-opacity duration-base data-ending-style:opacity-0 data-starting-style:opacity-0">
             {/* Two words each, not cards: the labels already say what the pages
                 are, and a quiet list keeps the menu a glance rather than a read. */}
             <ul className="flex flex-col">
@@ -65,7 +65,7 @@ export function ServicesMenu({
                       active={current}
                       closeOnClick
                       className={cn(
-                        "group/item flex items-center justify-between gap-3 rounded-md px-3 py-2.5 text-small font-medium outline-none",
+                        "group/item flex items-center justify-between gap-3 rounded-md px-3 py-3 text-small font-medium outline-none",
                         "transition-colors duration-fast ease-crownline",
                         "text-white/75 hover:bg-white/8 hover:text-white focus-visible:bg-white/8 focus-visible:text-white",
                         "data-active:text-gold-ink"

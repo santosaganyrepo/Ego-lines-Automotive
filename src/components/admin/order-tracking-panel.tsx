@@ -35,7 +35,7 @@ import { cn } from "@/lib/utils"
 
 const CREATE_INITIAL = { status: "idle" as const }
 
-const FIELD = "h-9 rounded-md border-input bg-card px-2.5 text-small placeholder:text-muted-foreground/70"
+const FIELD = "h-9 rounded-md border-input bg-card px-3 text-small placeholder:text-muted-foreground/70"
 const EVENT_DATE_FORMAT = new Intl.DateTimeFormat("en-GB", { dateStyle: "medium" })
 
 function todayInputValue(): string {
@@ -111,7 +111,7 @@ export function OrderTrackingPanel({
   }
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-3 rounded-lg border border-gold-ink/25 bg-accent/40 p-4">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="flex flex-col gap-1">
@@ -226,21 +226,21 @@ function AddTrackingEventForm({
       <h3 className="text-small font-medium text-foreground">Post an update</h3>
 
       {state.status === "error" && state.message ? (
-        <p className="flex items-center gap-1.5 text-xs text-destructive">
+        <p className="flex items-center gap-2 text-xs text-destructive">
           <AlertCircle aria-hidden="true" className="size-3.5" />
           {state.message}
         </p>
       ) : null}
 
       {state.status === "success" && state.message ? (
-        <p role="status" className="flex items-start gap-1.5 text-xs text-success">
+        <p role="status" className="flex items-start gap-2 text-xs text-success">
           <CheckCircle2 aria-hidden="true" className="mt-px size-3.5 shrink-0" />
           {state.message}
         </p>
       ) : null}
 
-      <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
-        <div className="flex flex-col gap-1.5">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div className="flex flex-col gap-2">
           <Label htmlFor={statusId} className="text-xs font-medium text-muted-foreground">
             New status
           </Label>
@@ -262,14 +262,14 @@ function AddTrackingEventForm({
           </select>
         </div>
 
-        <div className="flex flex-col gap-1.5">
+        <div className="flex flex-col gap-2">
           <Label htmlFor={dateId} className="text-xs font-medium text-muted-foreground">
             Date
           </Label>
           <Input id={dateId} name="eventDate" type="date" defaultValue={todayInputValue()} className={FIELD} />
         </div>
 
-        <div className="flex flex-col gap-1.5">
+        <div className="flex flex-col gap-2">
           <Label htmlFor={locationId} className="text-xs font-medium text-muted-foreground">
             Location
           </Label>
@@ -282,7 +282,7 @@ function AddTrackingEventForm({
         </div>
       </div>
 
-      <div className="flex flex-col gap-1.5">
+      <div className="flex flex-col gap-2">
         <Label htmlFor={notesId} className="text-xs font-medium text-muted-foreground">
           Notes
         </Label>
@@ -292,7 +292,7 @@ function AddTrackingEventForm({
           rows={2}
           maxLength={1000}
           placeholder="Internal"
-          className="min-h-16 rounded-md border-input bg-card px-2.5 py-2 text-small placeholder:text-muted-foreground/70"
+          className="min-h-16 rounded-md border-input bg-card px-3 py-2 text-small placeholder:text-muted-foreground/70"
         />
       </div>
 
@@ -369,7 +369,7 @@ function TrackingEventRow({ event, label }: { event: OrderTrackingEvent; label: 
                 rows={2}
                 maxLength={500}
                 placeholder="e.g. Wrong status selected"
-                className="min-h-16 rounded-md border-input px-2.5 py-2 text-small"
+                className="min-h-16 rounded-md border-input px-3 py-2 text-small"
               />
               <DialogFooter>
                 <DialogClose render={<Button type="button" variant="outline" />}>Cancel</DialogClose>

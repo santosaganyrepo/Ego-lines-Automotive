@@ -100,8 +100,8 @@ describe("catalogue display", () => {
 describe("settings audit diff", () => {
   it("records only what changed", () => {
     expect(
-      diffSettings({ businessName: "Crownline Motors", primaryPhone: "+211" }, { businessName: "Crown Motors", primaryPhone: "+211" })
-    ).toEqual([{ field: "businessName", from: "Crownline Motors", to: "Crown Motors" }])
+      diffSettings({ businessName: "EGO-Lines Automotive", primaryPhone: "+211" }, { businessName: "Crown Motors", primaryPhone: "+211" })
+    ).toEqual([{ field: "businessName", from: "EGO-Lines Automotive", to: "Crown Motors" }])
   })
 
   it("treats equal numbers and reordered objects as unchanged", () => {

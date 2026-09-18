@@ -172,7 +172,7 @@ export function SparePartDeliveryStepsEditor({
           <li key={row.key} className="flex min-w-0 flex-col gap-2 px-3 py-3 sm:px-4">
             {/* Number, title and the row's controls on one line; what
                 happens beneath at full width, where a sentence has room. */}
-            <div className="flex min-w-0 items-center gap-2.5">
+            <div className="flex min-w-0 items-center gap-3">
               <span
                 aria-hidden="true"
                 className="tabular flex size-6 shrink-0 items-center justify-center rounded-full bg-foreground text-xs font-bold text-background"

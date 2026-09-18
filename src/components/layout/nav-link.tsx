@@ -56,7 +56,7 @@ export function NavLink({
         {label}
         <span
           className={cn(
-            "rounded-4xl border px-1.5 py-px text-[0.625rem] font-semibold tracking-[0.08em] uppercase",
+            "rounded-4xl border px-2 py-px text-xs font-semibold tracking-[0.08em] uppercase",
             tone === "dark"
               ? "border-white/20 text-white/50"
               : "border-border text-muted-foreground"

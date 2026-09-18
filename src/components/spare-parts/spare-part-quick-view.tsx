@@ -119,7 +119,7 @@ export function SparePartQuickView({
         // each be too narrow to be worth splitting.
         className="max-h-[90vh] gap-0 overflow-y-auto p-0 sm:max-w-2xl"
       >
-        <div className="flex flex-col gap-5 p-5 sm:flex-row sm:gap-6 sm:p-6">
+        <div className="flex flex-col gap-6 p-6 sm:flex-row sm:gap-6 sm:p-6">
           {/* ── Photographs ──────────────────────────────────────
               Contained rather than cropped, unlike the catalogue card. The
               card's job is to be recognised at a glance and a consistent
@@ -148,7 +148,7 @@ export function SparePartQuickView({
                 ) : (
                   <div className="flex size-full flex-col items-center justify-center gap-2 text-muted-foreground">
                     <ImageOff aria-hidden="true" className="size-6" />
-                    <span className="text-small">Photographs coming soon</span>
+                    <span className="text-small">Photographs on request</span>
                   </div>
                 )}
               </div>
@@ -190,14 +190,14 @@ export function SparePartQuickView({
 
           {/* ── The decision ─────────────────────────────────────── */}
           <div className="flex min-w-0 flex-1 flex-col gap-4">
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-2">
               {/* Padded on the right so a long name does not run under the
                   dialog's own close button. */}
               <DialogTitle className="pr-8 text-title leading-snug font-semibold">
                 {part.name}
               </DialogTitle>
 
-              <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1.5">
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
                 {part.availability ? <SparePartAvailabilityTag availability={part.availability} /> : null}
 
                 {/*
@@ -223,9 +223,9 @@ export function SparePartQuickView({
             <SparePartPrice price={part.price} size="panel" />
 
             {part.preview.fitment.length > 0 ? (
-              <div className="flex flex-col gap-1.5">
+              <div className="flex flex-col gap-2">
                 <h3 className="eyebrow text-muted-foreground">Fits</h3>
-                <ul className="flex flex-wrap gap-1.5">
+                <ul className="flex flex-wrap gap-2">
                   {part.preview.fitment.map((line) => (
                     <li
                       key={line}
@@ -277,7 +277,7 @@ export function SparePartQuickView({
 
               <Link
                 href={`/spare-parts/${part.slug}`}
-                className="group/more inline-flex w-fit items-center gap-1.5 text-small font-medium text-muted-foreground transition-colors duration-fast hover:text-gold-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                className="group/more inline-flex w-fit items-center gap-2 text-small font-medium text-muted-foreground transition-colors duration-fast hover:text-gold-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
               >
                 Full details, photographs and fitment
                 <ArrowRight

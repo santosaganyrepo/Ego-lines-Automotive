@@ -14,6 +14,16 @@
  * carry transparency, which is the only reason a logo would want SVG here.
  */
 
+/**
+ * The business name used only when the Settings row cannot be read.
+ *
+ * Everything customers and staff see reads `BusinessSettings.businessName`
+ * instead, so a rename in Settings → Business information renames the whole
+ * system; this is the fallback behind that, and the name a fresh database
+ * row is seeded with.
+ */
+export const DEFAULT_BUSINESS_NAME = "EGO-Lines Automotive"
+
 export const BRANDING_BUCKET = "branding-assets"
 
 export const BRANDING_ASSET_KINDS = ["logoLight", "logoDark", "favicon", "ogImage"] as const

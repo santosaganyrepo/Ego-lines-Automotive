@@ -193,7 +193,7 @@ export function QuoteDispatchDialog({
               </DialogFooter>
             </div>
           ) : (
-            <form action={formAction} className="flex flex-col gap-5">
+            <form action={formAction} className="flex flex-col gap-6">
               <input type="hidden" name="quoteId" value={quoteId} />
               <input type="hidden" name="channel" value={channel} />
               <input type="hidden" name="note" value={note} />
@@ -210,11 +210,11 @@ export function QuoteDispatchDialog({
               {/* Customer summary — confirmation before anything goes out. */}
               <div className="flex flex-col gap-1 rounded-xl bg-accent/30 p-4 ring-1 ring-foreground/10">
                 <p className="text-small font-semibold text-foreground">{customerName}</p>
-                <p className="flex items-center gap-1.5 text-small text-muted-foreground">
+                <p className="flex items-center gap-2 text-small text-muted-foreground">
                   <WhatsAppGlyph className="size-3.5 shrink-0" />
                   {contactWhatsapp ?? "No WhatsApp number on file"}
                 </p>
-                <p className="flex items-center gap-1.5 text-small text-muted-foreground">
+                <p className="flex items-center gap-2 text-small text-muted-foreground">
                   <Mail aria-hidden="true" className="size-3.5 shrink-0" />
                   {contactEmail ?? "No email address on file"}
                 </p>
@@ -223,7 +223,7 @@ export function QuoteDispatchDialog({
               {/* Channel selector — two selectable cards. */}
               <div className="flex flex-col gap-2">
                 <span className="text-xs font-medium text-muted-foreground">Send via</span>
-                <div role="group" aria-label="Send via" className="grid grid-cols-2 gap-2.5">
+                <div role="group" aria-label="Send via" className="grid grid-cols-2 gap-3">
                   <ChannelCard
                     label="WhatsApp"
                     detail={contactWhatsapp ?? "Not on file"}
@@ -244,7 +244,7 @@ export function QuoteDispatchDialog({
                 </div>
               </div>
 
-              <label htmlFor={includeLinkId} className="flex items-start gap-2.5 text-small">
+              <label htmlFor={includeLinkId} className="flex items-start gap-3 text-small">
                 <input
                   id={includeLinkId}
                   type="checkbox"
@@ -256,7 +256,7 @@ export function QuoteDispatchDialog({
                 <span>Attach PDF quotation</span>
               </label>
 
-              <div className="flex flex-col gap-1.5">
+              <div className="flex flex-col gap-2">
                 <label htmlFor={noteId} className="text-xs font-medium text-muted-foreground">
                   Message
                 </label>
@@ -270,7 +270,7 @@ export function QuoteDispatchDialog({
                 />
               </div>
 
-              <div className="flex flex-col gap-1.5">
+              <div className="flex flex-col gap-2">
                 <label htmlFor={instructionsId} className="text-xs font-medium text-muted-foreground">
                   Notes for the customer
                 </label>
@@ -349,7 +349,7 @@ function ChannelCard({ label, detail, icon, selected, disabled, onSelect }: Chan
       disabled={disabled}
       onClick={onSelect}
       className={cn(
-        "relative flex flex-col items-start gap-2 rounded-xl border p-3.5 text-left transition-colors duration-fast",
+        "relative flex flex-col items-start gap-2 rounded-xl border p-4 text-left transition-colors duration-fast",
         "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
         "disabled:cursor-not-allowed disabled:opacity-45",
         selected

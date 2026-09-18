@@ -54,6 +54,9 @@ export default async function AdminQuoteDetailPage(props: PageProps<"/Ricky@2000
       importDuty={quote.importDuty}
       otherCostsLabel={quote.otherCostsLabel}
       otherCostsAmount={quote.otherCostsAmount}
+      discountType={quote.discountType}
+      discountValue={quote.discountValue}
+      discountLabel={quote.discountLabel}
       validUntil={quote.validUntil}
       paymentInstructions={quote.paymentInstructions}
       terms={quote.terms}
@@ -117,7 +120,7 @@ export default async function AdminQuoteDetailPage(props: PageProps<"/Ricky@2000
                 aria-hidden="true"
                 className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-card text-gold-ink ring-1 ring-gold-ink/20"
               >
-                <PackageCheck className="size-4.5" strokeWidth={1.75} />
+                <PackageCheck className="size-4.5" />
               </span>
               <div className="flex flex-col">
                 <p className="text-small text-muted-foreground">This quote became an order</p>
@@ -145,6 +148,7 @@ export default async function AdminQuoteDetailPage(props: PageProps<"/Ricky@2000
               requestedModel={quote.requestedModel}
               preferredYear={quote.preferredYear}
               maxBudget={quote.maxBudget}
+              preferredCountry={quote.preferredCountry}
               requestedPartName={quote.requestedPartName}
               requestedPartNumber={quote.requestedPartNumber}
               additionalRequirements={quote.additionalRequirements}
@@ -219,7 +223,7 @@ export default async function AdminQuoteDetailPage(props: PageProps<"/Ricky@2000
 
 function ReferenceCard({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <section className="flex flex-col gap-2 rounded-xl border border-border bg-card p-5 shadow-[var(--shadow-subtle)]">
+    <section className="flex flex-col gap-2 rounded-xl border border-border bg-card p-6 shadow-[var(--shadow-subtle)]">
       <h2 className="text-small font-medium text-foreground">{title}</h2>
       {children}
     </section>

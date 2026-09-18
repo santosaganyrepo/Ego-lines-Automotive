@@ -48,7 +48,7 @@ export function SparePartsTeaser({
               label="Spare parts"
               lead="Parts for the car"
               accent="you already drive."
-              description="Genuine and quality replacement parts from Japan and South Korea. Check fitment against your make, model and year, then order or ask us for a quote."
+              description="Genuine and quality replacement parts from Japan, South Korea and China. Check fitment against your make, model and year, then order or ask us for a quote."
             />
 
             <div className="rv-up" style={delay(650)}>
@@ -76,7 +76,7 @@ export function SparePartsTeaser({
                 <li key={category.slug} className="rv-up" style={delay(400 + index * ITEM_STEP_MS)}>
                   <Link
                     href={partCatalogueHref({ category: category.slug })}
-                    className="group/pc flex h-full min-h-32 flex-col justify-between gap-6 rounded-2xl border border-white/10 bg-card p-5 transition-[border-color,background-color,translate] duration-slow ease-crownline-soft hover:-translate-y-1 hover:border-gold/45"
+                    className="group/pc flex h-full min-h-32 flex-col justify-between gap-6 rounded-2xl border border-white/10 bg-card p-6 transition-[border-color,background-color,translate] duration-slow ease-crownline-soft hover:-translate-y-1 hover:border-gold/45"
                   >
                     <ArrowUpRight
                       aria-hidden="true"

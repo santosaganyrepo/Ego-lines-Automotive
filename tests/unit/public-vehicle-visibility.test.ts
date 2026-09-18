@@ -169,10 +169,20 @@ describe("listRelatedVehicles", () => {
       excludeSlug: "toyota-harrier-2021-clm-v-2026-000123",
     })
 
-    expect(queries).toHaveLength(1)
     expect(queries[0].where).toMatchObject({
       make: "Toyota",
       status: VehicleStatus.PUBLISHED,
+    })
+  })
+
+  it("tops the strip up from the rest of the live inventory, never a draft or itself", async () => {
+    // The mock finds no other Toyotas, so every slot is left for the top-up.
+    await listRelatedVehicles({ make: "Toyota", excludeSlug: "the-open-listing" })
+
+    expect(queries).toHaveLength(2)
+    expect(queries[1].where).toMatchObject({
+      status: VehicleStatus.PUBLISHED,
+      slug: { notIn: ["the-open-listing"] },
     })
   })
 

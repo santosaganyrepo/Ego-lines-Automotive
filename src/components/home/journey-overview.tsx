@@ -45,7 +45,7 @@ const STEPS: JourneyStep[] = [
     icon: ClipboardCheck,
     title: "Procurement and inspection",
     body: "We buy the vehicle, check its condition and documents, and prepare it for export.",
-    place: "Japan or South Korea",
+    place: "Japan, South Korea or China",
   },
   {
     icon: Ship,
@@ -85,7 +85,7 @@ export function JourneyOverview() {
             />
             <Link
               href="/how-it-works"
-              className="rv-up group/how inline-flex w-fit shrink-0 items-center gap-2 py-2 text-small font-semibold text-gold transition-colors duration-fast hover:text-gold-bright"
+              className="rv-up group/how inline-flex w-fit shrink-0 items-center gap-2 py-2 text-small font-semibold text-gold pointer-coarse:min-h-11 transition-colors duration-fast hover:text-gold-bright"
               style={delay(500)}
             >
               See the full process
@@ -114,7 +114,7 @@ export function JourneyOverview() {
               const at = 300 + index * STEP_MS
 
               return (
-                <li key={step.title} className="relative flex gap-6 lg:flex-col lg:items-center lg:gap-5 lg:text-center">
+                <li key={step.title} className="relative flex gap-6 lg:flex-col lg:items-center lg:gap-6 lg:text-center">
                   <span className="rv-pop relative z-10 shrink-0" style={delay(at)}>
                     <span className="group/node grid size-14 place-items-center rounded-full border border-gold/40 bg-night text-gold shadow-[0_0_0_6px_var(--background)] transition-colors duration-fast hover:bg-gold hover:text-gold-foreground">
                       <Icon aria-hidden="true" className="size-5" />
@@ -128,7 +128,7 @@ export function JourneyOverview() {
                     <h3 className="font-heading text-title text-foreground">{step.title}</h3>
                     <p className="text-body text-muted-foreground">{step.body}</p>
                     {step.place ? (
-                      <p className="inline-flex items-center gap-1.5 text-small text-foreground/70 lg:justify-center">
+                      <p className="inline-flex items-center gap-2 text-small text-foreground/70 lg:justify-center">
                         <MapPin aria-hidden="true" className="size-3.5 text-gold" />
                         {step.place}
                       </p>

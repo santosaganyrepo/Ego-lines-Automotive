@@ -5,6 +5,7 @@ import { AdminEmptyState } from "@/components/admin/admin-empty-state"
 import { AdminListCount } from "@/components/admin/admin-list-toolbar"
 import { AdminPageHeader } from "@/components/admin/admin-page-header"
 import { DataTable, DataTableRecordLink, type DataTableColumn } from "@/components/admin/data-table"
+import { OrderCancelDialog } from "@/components/admin/order-cancel-dialog"
 import { StatusBadge } from "@/components/admin/status-badge"
 import { Pagination } from "@/components/shared/pagination"
 import { requirePermission } from "@/lib/auth/admin-guard"
@@ -47,6 +48,7 @@ export default async function AdminOrdersPage(props: PageProps<"/Ricky@2000/orde
     {
       id: "status",
       header: "Status",
+      align: "center",
       render: (order) => (
         <StatusBadge tone={ORDER_STATUS_TONES[order.status]}>{ORDER_STATUS_LABELS[order.status]}</StatusBadge>
       ),
@@ -54,6 +56,7 @@ export default async function AdminOrdersPage(props: PageProps<"/Ricky@2000/orde
     {
       id: "finance",
       header: "Payment",
+      align: "center",
       render: (order) => (
         <StatusBadge tone={order.finance.financialStatus === "PAID_IN_FULL" ? "positive" : "warning"}>
           {FINANCIAL_STATUS_LABELS[order.finance.financialStatus]}
@@ -93,6 +96,20 @@ export default async function AdminOrdersPage(props: PageProps<"/Ricky@2000/orde
           {new Intl.DateTimeFormat("en-GB", { dateStyle: "medium" }).format(order.createdAt)}
         </span>
       ),
+    },
+    {
+      id: "actions",
+      header: <span className="sr-only">Actions</span>,
+      align: "right",
+      render: (order) =>
+        order.status === "CANCELLED" || order.status === "COMPLETED" ? null : (
+          <OrderCancelDialog
+            orderId={order.id}
+            orderNumber={order.orderNumber}
+            amountPaid={order.finance.amountPaid}
+            trigger="compact"
+          />
+        ),
     },
   ]
 

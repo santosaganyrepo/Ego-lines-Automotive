@@ -46,6 +46,8 @@ export interface QuoteMessageInput {
   importDuty: number | null
   otherCostsLabel: string | null
   otherCostsAmount: number | null
+  /** Null when the quotation carries no discount. */
+  discount: { label: string; amount: number } | null
   total: number
   validUntil: Date
   /** The secure PDF link, or null for a text-only message. */
@@ -120,7 +122,8 @@ export function buildQuoteMessage(
     input.shippingCost !== null ||
     input.clearingCost !== null ||
     input.importDuty !== null ||
-    input.otherCostsAmount !== null
+    input.otherCostsAmount !== null ||
+    input.discount !== null
 
   if (hasAdditions) {
     lines.push(
@@ -128,6 +131,9 @@ export function buildQuoteMessage(
     )
     if (input.accessoriesTotal > 0) {
       lines.push(`Accessories & extras: ${formatCurrency(input.accessoriesTotal)}`)
+    }
+    if (input.discount) {
+      lines.push(`${input.discount.label}: −${formatCurrency(input.discount.amount)}`)
     }
     if (input.shippingCost !== null) {
       lines.push(`Shipping: ${formatCurrency(input.shippingCost)}`)

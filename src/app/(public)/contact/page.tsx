@@ -196,7 +196,7 @@ export default async function ContactPage() {
                   <span className="grid size-11 shrink-0 place-items-center rounded-xl border border-gold/25 bg-gold/10 text-gold">
                     <Clock aria-hidden="true" className="size-5" />
                   </span>
-                  <div className="flex flex-col gap-1.5">
+                  <div className="flex flex-col gap-2">
                     <h2 className="font-heading text-title text-foreground">Opening hours</h2>
                     <ul className="flex flex-col gap-0.5 text-body text-muted-foreground">
                       {settings.hours.map((line) => (
@@ -210,7 +210,7 @@ export default async function ContactPage() {
               {settings.social.length > 0 ? (
                 <div className="rv-up flex flex-col gap-3" style={delay(600)}>
                   <h2 className="text-small text-muted-foreground">Follow us</h2>
-                  <ul className="flex flex-wrap gap-2.5">
+                  <ul className="flex flex-wrap gap-3">
                     {settings.social.map(({ network, label, url }) => (
                       <li key={network}>
                         <a
@@ -232,7 +232,7 @@ export default async function ContactPage() {
                 <h2 className="text-small text-muted-foreground">Already ordered?</h2>
                 <Link
                   href="/track-my-order"
-                  className="group/track inline-flex w-fit items-center gap-2 text-body font-semibold text-gold transition-colors duration-fast hover:text-gold-bright"
+                  className="group/track inline-flex w-fit items-center gap-2 text-body font-semibold text-gold transition-colors duration-fast hover:text-gold-bright pointer-coarse:min-h-11"
                 >
                   <Radar aria-hidden="true" className="size-4" />
                   Track your order
@@ -245,7 +245,7 @@ export default async function ContactPage() {
             </div>
 
             <div className="rv-up lg:col-span-7" style={delay(300)}>
-              <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-card p-5 sm:p-8">
+              <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-card p-6 sm:p-8">
                 <span aria-hidden="true" className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-gold/60 to-transparent" />
                 <QuoteRequestForm subject={{ kind: "GENERAL", source: "CONTACT_PAGE" }} submitLabel="Send message" />
               </div>

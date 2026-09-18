@@ -18,7 +18,7 @@ import {
 /** The six-digit field every 2FA form uses — numeric keypad, one-time-code autofill. */
 function CodeInput({ id, error, autoFocus }: { id: string; error?: string; autoFocus?: boolean }) {
   return (
-    <div className="flex flex-col gap-1.5">
+    <div className="flex flex-col gap-2">
       <label htmlFor={id} className="text-small font-medium">
         Authenticator code
       </label>
@@ -103,7 +103,7 @@ export function TwoFactorSetup() {
         <span className="text-xs text-muted-foreground">Scan with your app</span>
       </div>
 
-      <div className="flex min-w-0 flex-col gap-5">
+      <div className="flex min-w-0 flex-col gap-6">
         <ol className="flex flex-col gap-2 text-small text-muted-foreground">
           <li>
             <span className="font-medium text-foreground">1.</span> Open your authenticator app and add an account.
@@ -177,7 +177,7 @@ export function TwoFactorSignInForm({ next }: { next?: string }) {
   )
 
   return (
-    <form action={formAction} className="flex flex-col gap-5" noValidate>
+    <form action={formAction} className="flex flex-col gap-6" noValidate>
       {next ? <input type="hidden" name="next" value={next} /> : null}
       {state.status === "error" && !state.fieldErrors ? (
         <p role="alert" className="rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-3 text-small">

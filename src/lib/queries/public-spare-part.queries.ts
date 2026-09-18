@@ -6,6 +6,7 @@ import type { Prisma } from "@/generated/prisma/client"
 import type { SparePartAvailability } from "@/generated/prisma/enums"
 import { SparePartStatus } from "@/generated/prisma/enums"
 import { prisma } from "@/lib/prisma"
+import { shuffled } from "@/lib/utils/shuffle"
 import { getPublicSiteSettings } from "@/lib/queries/settings.queries"
 import { sparePartPhotoPublicUrl } from "@/lib/storage/spare-part-media"
 import { escapeLikePattern } from "@/lib/utils/like-pattern"
@@ -452,8 +453,11 @@ export async function listPublishedSpareParts(options?: {
    * fragment — everything here has been through `sparePartSearchSchema`.
    */
   criteria?: SparePartSearchCriteria
+  /** Every part from the first page through `page` — see `listPublishedVehicles`. */
+  through?: boolean
 }): Promise<PublicSparePartListResult> {
   const page = Math.max(1, options?.page ?? 1)
+  const through = options?.through ?? false
   const siteWide = await siteWideVisibility()
 
   const where = publicSparePartWhere(
@@ -467,13 +471,18 @@ export async function listPublishedSpareParts(options?: {
     prisma.sparePart.findMany({
       where,
       orderBy: CARD_ORDER_BY,
-      skip: (page - 1) * PUBLIC_SPARE_PARTS_PER_PAGE,
-      take: PUBLIC_SPARE_PARTS_PER_PAGE,
+      skip: through ? 0 : (page - 1) * PUBLIC_SPARE_PARTS_PER_PAGE,
+      take: through ? page * PUBLIC_SPARE_PARTS_PER_PAGE : PUBLIC_SPARE_PARTS_PER_PAGE,
       select: CARD_SELECT,
     }),
   ])
 
   const pageCount = Math.max(1, Math.ceil(total / PUBLIC_SPARE_PARTS_PER_PAGE))
+
+  // A cumulative read past the end already holds every part.
+  if (through) {
+    return { parts: rows.map((row) => toCard(row, siteWide)), total, page: Math.min(page, pageCount), pageCount }
+  }
 
   /**
    * A page past the end of the result set returns the last real page.
@@ -691,6 +700,9 @@ export const getPublishedSparePartBySlug = cache(
  */
 export const RELATED_SPARE_PARTS_LIMIT = 12
 
+/** How many of the newest other parts a related strip's random top-up is drawn from. */
+const RELATED_TOP_UP_POOL = 36
+
 /**
  * Other live parts in the same category.
  *
@@ -703,6 +715,11 @@ export const RELATED_SPARE_PARTS_LIMIT = 12
  * other public read does — a related strip is as capable of leaking a draft as
  * a catalogue page is, and it would be leaking it onto a page the customer is
  * already reading.
+ *
+ * ── Never an empty strip ───────────────────────────────────────────────
+ * Same-category parts come first; any room left — all of it, for a part alone
+ * in its category — is filled with a random selection from the rest of the
+ * live catalogue (drawn from the newest `RELATED_TOP_UP_POOL`).
  *
  * `excludeSlug` keeps the part out of its own suggestions.
  */
@@ -733,5 +750,18 @@ export async function listRelatedSpareParts({
     siteWideVisibility(),
   ])
 
-  return rows.map((row) => toCard(row, siteWide))
+  const remaining = Math.max(0, limit) - rows.length
+  const topUp =
+    remaining > 0
+      ? shuffled(
+          await prisma.sparePart.findMany({
+            where: publicSparePartWhere({ slug: { notIn: [excludeSlug, ...rows.map((row) => row.slug)] } }),
+            orderBy: CARD_ORDER_BY,
+            take: RELATED_TOP_UP_POOL,
+            select: CARD_SELECT,
+          })
+        ).slice(0, remaining)
+      : []
+
+  return [...rows, ...topUp].map((row) => toCard(row, siteWide))
 }

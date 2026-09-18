@@ -74,7 +74,7 @@ function CardSkeleton({ className, ...props }: React.ComponentProps<"div">) {
       {...props}
     >
       <Skeleton className="aspect-video w-full rounded-t-xl rounded-b-none" />
-      <div className="flex flex-col gap-3 px-4 pb-5">
+      <div className="flex flex-col gap-3 px-4 pb-6">
         <Skeleton className="h-5 w-3/5" />
         <div className="grid grid-cols-2 gap-2">
           <Skeleton className="h-3.5 w-full" />

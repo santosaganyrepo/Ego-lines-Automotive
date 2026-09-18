@@ -18,7 +18,7 @@ function SkipLink({ className }: { className?: string }) {
       className={cn(
         "sr-only focus:not-sr-only",
         "focus:fixed focus:top-3 focus:left-3 focus:z-100",
-        "focus:rounded-lg focus:bg-foreground focus:px-4 focus:py-2.5",
+        "focus:rounded-lg focus:bg-foreground focus:px-4 focus:py-3",
         "focus:text-small focus:font-medium focus:text-background",
         "focus:shadow-[var(--shadow-raised)]",
         className

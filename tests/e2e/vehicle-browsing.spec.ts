@@ -273,25 +273,15 @@ test.describe("vehicle page", () => {
     await expect(page.getByText(/^Condition: (New|Used)$/)).toBeVisible()
 
     /**
-     * Queried as a *button*, not a link, because that is what it actually
-     * exposes: the project's `Button` renders through Base UI, which stamps
-     * `role="button"` on whatever element it is given — including the
-     * `<a href>` produced by `render={<Link/>}`.
+     * The vehicle's own quote request — "Get a quote" since the quotation
+     * request system replaced "Request this vehicle". It opens the request
+     * panel in place, so it is a real button.
      *
-     * That is site-wide existing behaviour, not something this page chose,
-     * and it is asserted here as-is rather than papered over. It is worth
-     * revisiting centrally: an anchor that navigates should keep its link
-     * role, or a screen-reader user is told "button" for something that can
-     * be opened in a new tab. Changing it belongs in the Button primitive,
-     * where every CTA on the site would move together.
-     *
-     * Two exist on the page — beneath the price breakdown, and below `lg`
-     * in the pinned action bar as well — which is intentional. The
-     * assertion is that at least one is there.
+     * Two exist on the page — beside the price, and below `lg` in the pinned
+     * action bar as well — which is intentional. The assertion is that at
+     * least one is there.
      */
-    await expect(
-      page.getByRole("button", { name: "Request this vehicle" }).first()
-    ).toBeVisible()
+    await expect(page.getByRole("button", { name: /get a quote/i }).first()).toBeVisible()
   })
 
   test("shows specifications or features, never both at once", async ({ page }) => {
@@ -408,7 +398,7 @@ test.describe("vehicle page", () => {
     await expect(bar).toBeInViewport()
 
     await expect(
-      bar.getByRole("button", { name: "Request this vehicle" })
+      bar.getByRole("button", { name: /get a quote/i })
     ).toBeVisible()
   })
 

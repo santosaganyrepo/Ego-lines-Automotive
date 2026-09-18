@@ -65,8 +65,9 @@ function DialogContent({
             render={
               <Button
                 variant="ghost"
-                className="absolute top-3 right-3"
-                size="icon-sm"
+                // 44px: the smallest target a thumb can hit reliably.
+                className="absolute top-2 right-2"
+                size="icon-lg"
               />
             }
           >

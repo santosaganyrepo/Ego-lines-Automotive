@@ -278,7 +278,7 @@ export function QuoteRequestForm({
         <div
           id="quote-form-error"
           role="alert"
-          className="flex items-start gap-2.5 rounded-lg border border-destructive/30 bg-destructive/5 px-3.5 py-3 text-small text-destructive"
+          className="flex items-start gap-3 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-small text-destructive"
         >
           <AlertCircle aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
           <span>{state.message}</span>
@@ -595,7 +595,9 @@ function PhoneField({
             value={country}
             onChange={(event) => setCountry(event.target.value)}
             aria-label={`${label} country code`}
-            className="absolute inset-0 cursor-pointer opacity-0"
+            // 16px even though invisible: iOS Safari zooms the page when a
+            // field under 16px takes focus, and this select is the one focused.
+            className="absolute inset-0 cursor-pointer text-base opacity-0"
           >
             {DIAL_CODES.map((entry) => (
               <option key={entry.country} value={entry.country}>
@@ -648,7 +650,7 @@ function WhatsAppFields({
     <div className="flex flex-col gap-3">
       <label
         htmlFor={id}
-        className="flex w-fit cursor-pointer items-center gap-2.5 text-small text-foreground select-none"
+        className="flex min-h-11 w-fit cursor-pointer items-center gap-3 text-small text-foreground select-none"
       >
         <input
           id={id}
@@ -658,7 +660,7 @@ function WhatsAppFields({
           onChange={(event) => setSame(event.target.checked)}
           className="size-4 rounded border-input accent-[#11823f]"
         />
-        <span className="flex items-center gap-1.5">
+        <span className="flex items-center gap-2">
           <WhatsAppGlyph className="size-4 text-[#11823f]" />
           My WhatsApp number is the same as my phone number
         </span>
@@ -783,7 +785,7 @@ function VehicleSummary({
 }) {
   return (
     <SubjectFrame heading="Vehicle">
-      <div className="flex items-center gap-3.5 rounded-lg border border-gold-ink/25 bg-accent/60 p-3">
+      <div className="flex items-center gap-4 rounded-lg border border-gold-ink/25 bg-accent/60 p-3">
         <Thumbnail url={subject.imageUrl} fallback="car" />
         <p className="min-w-0 text-body font-semibold text-foreground">{subject.label}</p>
       </div>
@@ -800,7 +802,7 @@ function PartsSummary({ items }: { items: readonly CartItem[] }) {
     <SubjectFrame heading={units === 1 ? "1 item" : `${units} items`}>
       <ul className="flex flex-col divide-y divide-border overflow-hidden rounded-lg border border-gold-ink/25 bg-accent/60">
         {shown.map((item) => (
-          <li key={item.slug} className="flex items-center gap-3 p-2.5">
+          <li key={item.slug} className="flex items-center gap-3 p-3">
             <Thumbnail url={item.imageUrl} fallback="part" />
             <p className="min-w-0 flex-1 text-small font-medium text-foreground">
               <span className="line-clamp-2">{item.name}</span>
@@ -811,7 +813,7 @@ function PartsSummary({ items }: { items: readonly CartItem[] }) {
           </li>
         ))}
         {hidden > 0 ? (
-          <li className="flex items-center gap-2 px-3 py-2.5 text-small text-muted-foreground">
+          <li className="flex items-center gap-2 px-3 py-3 text-small text-muted-foreground">
             <Package aria-hidden="true" className="size-4" />
             and {hidden} more {hidden === 1 ? "part" : "parts"}
           </li>
@@ -826,7 +828,7 @@ function PartsSummary({ items }: { items: readonly CartItem[] }) {
 // ─────────────────────────────────────────────────────────────────────
 
 const PREFERRED_COUNTRY_OPTIONS = [
-  { value: "", label: "Either" },
+  { value: "", label: "Any market" },
   ...COUNTRY_OPTIONS,
 ] as const
 
@@ -865,7 +867,7 @@ function GeneralRequestFields({
                 <label
                   key={option.value}
                   className={cn(
-                    "flex cursor-pointer items-center gap-2.5 rounded-lg border px-3.5 py-3 text-small font-semibold",
+                    "flex cursor-pointer items-center gap-3 rounded-lg border px-4 py-3 text-small font-semibold",
                     "transition-colors duration-fast has-focus-visible:ring-3 has-focus-visible:ring-ring/50",
                     active
                       ? "border-gold-ink/50 bg-accent text-accent-foreground"
@@ -1111,7 +1113,7 @@ function QuoteRequestConfirmation({
       </div>
 
       {quoteNumber ? (
-        <div className="flex flex-col items-center gap-1.5">
+        <div className="flex flex-col items-center gap-2">
           <span className="eyebrow text-muted-foreground">Your reference</span>
           <button
             type="button"
@@ -1133,17 +1135,17 @@ function QuoteRequestConfirmation({
       ) : null}
 
       {skippedItems > 0 ? (
-        <p className="max-w-sm rounded-lg border border-warning/30 bg-warning/5 px-3.5 py-2.5 text-small text-warning">
+        <p className="max-w-sm rounded-lg border border-warning/30 bg-warning/5 px-4 py-3 text-small text-warning">
           {skippedItems === 1
             ? "One part in your list is no longer listed and was left out. Mention it in a message if you still need it."
             : `${skippedItems} parts in your list are no longer listed and were left out. Mention them in a message if you still need them.`}
         </p>
       ) : null}
 
-      <ol className="flex w-full max-w-sm flex-col gap-2.5 text-left">
+      <ol className="flex w-full max-w-sm flex-col gap-3 text-left">
         {NEXT_STEPS.map((step, index) => (
           <li key={step} className="flex gap-3 text-small text-muted-foreground">
-            <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-secondary text-[0.6875rem] font-bold text-foreground">
+            <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-secondary text-xs font-bold text-foreground">
               {index + 1}
             </span>
             {step}

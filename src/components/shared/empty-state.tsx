@@ -51,7 +51,7 @@ function EmptyState({
         </div>
       )}
 
-      <div className="flex flex-col gap-1.5">
+      <div className="flex flex-col gap-2">
         <p className="font-heading text-h3 text-foreground">{title}</p>
         {description && (
           <p className="mx-auto max-w-md text-small text-muted-foreground">{description}</p>

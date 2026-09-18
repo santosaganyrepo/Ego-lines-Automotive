@@ -13,13 +13,19 @@ export function QuoteSummaryCard() {
   const { totals } = useQuotePricing()
 
   return (
-    <section className="flex flex-col gap-3 rounded-xl border border-border bg-card p-5 shadow-[var(--shadow-subtle)]">
+    <section className="flex flex-col gap-3 rounded-xl border border-border bg-card p-6 shadow-[var(--shadow-subtle)]">
       <h2 className="text-small font-medium text-foreground">Quote summary</h2>
 
       <dl className="flex flex-col gap-2 text-small">
         <Row label="Items" value={formatCurrency(totals.itemsSubtotal)} />
         {totals.accessoriesTotal > 0 ? (
           <Row label="Accessories" value={formatCurrency(totals.accessoriesTotal)} />
+        ) : null}
+        {totals.discountTotal > 0 ? (
+          <div className="flex items-center justify-between gap-3">
+            <dt className="text-muted-foreground">Discount</dt>
+            <dd className="text-success tabular-nums">−{formatCurrency(totals.discountTotal)}</dd>
+          </div>
         ) : null}
         {totals.feesTotal > 0 ? (
           <Row label="Additional costs" value={formatCurrency(totals.feesTotal)} />
@@ -34,7 +40,7 @@ export function QuoteSummaryCard() {
       </div>
 
       {totals.unpricedLines > 0 ? (
-        <p className="rounded-md bg-warning/10 px-2.5 py-1.5 text-xs font-medium text-warning">
+        <p className="rounded-md bg-warning/10 px-3 py-2 text-xs font-medium text-warning">
           {totals.unpricedLines} line{totals.unpricedLines === 1 ? "" : "s"} still need a price
         </p>
       ) : null}

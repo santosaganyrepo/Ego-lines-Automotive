@@ -34,13 +34,31 @@ export interface QuoteFees {
   otherCosts: number | null
 }
 
+export type QuoteDiscountTypeValue = "FIXED_AMOUNT" | "PERCENTAGE"
+
+/**
+ * An optional discount — see `Quote.discountType`. `value` is a percentage
+ * (0–100) or an amount, per `type`.
+ */
+export interface QuoteDiscount {
+  type: QuoteDiscountTypeValue
+  value: number
+}
+
 export interface QuoteTotals {
   /** ITEM lines — the vehicle or parts themselves. */
   itemsSubtotal: number
   /** ACCESSORY lines. */
   accessoriesTotal: number
+  /**
+   * The discount, in money. Taken from the goods (items and accessories)
+   * only — never from the fees — and never more than they come to. Zero when
+   * the quote has none.
+   */
+  discountTotal: number
   /** The four fees, summed. Unquoted fees contribute nothing. */
   feesTotal: number
+  /** Goods, less the discount, plus the fees. */
   total: number
   /** Lines with no price yet. A quote with any cannot be sent or converted. */
   unpricedLines: number
@@ -55,9 +73,33 @@ export function lineTotalCents(line: Pick<PricedQuoteLine, "quantity" | "unitPri
   return toCents(line.unitPrice) * line.quantity
 }
 
+/**
+ * The discount in cents on a goods subtotal (also in cents).
+ *
+ * A percentage is rounded to the nearest cent; a fixed amount is capped at
+ * the subtotal, so a discount can reduce the goods to nothing but never
+ * spill into the fees.
+ */
+export function discountCents(goodsCents: number, discount: QuoteDiscount | null): number {
+  if (!discount || goodsCents <= 0) return 0
+
+  const raw =
+    discount.type === "PERCENTAGE"
+      ? Math.round((goodsCents * toCents(discount.value)) / 10_000)
+      : toCents(discount.value)
+
+  return Math.min(Math.max(0, raw), goodsCents)
+}
+
+/**
+ * `discount` is required, not optional, on purpose: every figure that reaches
+ * a customer or an order goes through here, and a caller that forgot the
+ * discount would quietly quote the undiscounted price. Pass `null` for none.
+ */
 export function computeQuoteTotals(
   lines: readonly PricedQuoteLine[],
-  fees: QuoteFees
+  fees: QuoteFees,
+  discount: QuoteDiscount | null
 ): QuoteTotals {
   let itemsCents = 0
   let accessoriesCents = 0
@@ -84,11 +126,15 @@ export function computeQuoteTotals(
     (toCentsOrNull(fees.importDuty) ?? 0) +
     (toCentsOrNull(fees.otherCosts) ?? 0)
 
+  const goodsCents = itemsCents + accessoriesCents
+  const offCents = discountCents(goodsCents, discount)
+
   return {
     itemsSubtotal: fromCents(itemsCents),
     accessoriesTotal: fromCents(accessoriesCents),
+    discountTotal: fromCents(offCents),
     feesTotal: fromCents(feesCents),
-    total: fromCents(itemsCents + accessoriesCents + feesCents),
+    total: fromCents(goodsCents - offCents + feesCents),
     unpricedLines,
     itemLineCount,
   }
@@ -104,6 +150,7 @@ export function computeQuoteTotals(
 export function quoteReadinessProblem(input: {
   lines: readonly PricedQuoteLine[]
   fees: QuoteFees
+  discount: QuoteDiscount | null
   validUntil: Date | null
   now?: Date
   /**
@@ -114,7 +161,7 @@ export function quoteReadinessProblem(input: {
    */
   enforceValidity?: boolean
 }): string | null {
-  const totals = computeQuoteTotals(input.lines, input.fees)
+  const totals = computeQuoteTotals(input.lines, input.fees, input.discount)
 
   if (totals.itemLineCount === 0) {
     return "Add at least one item to the quotation before sending it."
@@ -168,4 +215,31 @@ export function validityDateFrom(days: number, now: Date = new Date()): Date {
   return new Date(
     Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + days)
   )
+}
+
+/**
+ * The stored discount columns as a `QuoteDiscount`, or null when the quote
+ * has none. The database keeps the two columns set together or not at all
+ * (Quote_discount_check); anything else is treated as no discount.
+ */
+export function toQuoteDiscount(
+  type: QuoteDiscountTypeValue | null | undefined,
+  value: number | null | undefined
+): QuoteDiscount | null {
+  if (!type || value === null || value === undefined) return null
+  return { type, value }
+}
+
+/**
+ * How the discount line reads wherever it is printed — the editor, the PDF,
+ * the WhatsApp and email messages and the order: the operator's label, or
+ * "Discount", with the rate appended for a percentage.
+ */
+export function discountLineLabel(discount: QuoteDiscount, label: string | null | undefined): string {
+  const name = label?.trim() || "Discount"
+
+  if (discount.type !== "PERCENTAGE") return name
+
+  const rate = Number.isInteger(discount.value) ? String(discount.value) : discount.value.toFixed(2).replace(/0$/, "")
+  return `${name} (${rate}%)`
 }

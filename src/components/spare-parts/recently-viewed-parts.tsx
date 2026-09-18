@@ -196,7 +196,7 @@ export function RecentlyViewedTile({ part }: { part: RecentlyViewedPart }) {
         )}
       </div>
 
-      <div className="flex flex-1 flex-col gap-1 p-2.5">
+      <div className="flex flex-1 flex-col gap-1 p-3">
         <span className="line-clamp-2 text-xs leading-snug font-medium text-foreground">
           {part.name}
         </span>

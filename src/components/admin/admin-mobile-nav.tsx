@@ -41,7 +41,7 @@ export function AdminMobileNav({ groups }: AdminMobileNavProps) {
           "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
         )}
       >
-        <MenuIcon className="size-5" strokeWidth={1.75} />
+        <MenuIcon className="size-5" />
       </DialogPrimitive.Trigger>
 
       <DialogPrimitive.Portal>
@@ -72,7 +72,7 @@ export function AdminMobileNav({ groups }: AdminMobileNavProps) {
               aria-label="Close menu"
               className="flex size-9 items-center justify-center rounded-md text-rail-muted transition-colors duration-fast hover:bg-rail-raised hover:text-rail-foreground"
             >
-              <XIcon className="size-5" strokeWidth={1.75} />
+              <XIcon className="size-5" />
             </DialogPrimitive.Close>
           </div>
 

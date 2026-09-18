@@ -16,7 +16,7 @@ export function QuoteLinkPanel({ quoteId, link }: { quoteId: string; link: strin
   const formRef = useRef<HTMLFormElement>(null)
 
   return (
-    <section className="flex flex-col gap-3 rounded-xl border border-border bg-card p-5 shadow-[var(--shadow-subtle)]">
+    <section className="flex flex-col gap-3 rounded-xl border border-border bg-card p-6 shadow-[var(--shadow-subtle)]">
       <div className="flex flex-col gap-2">
         <h2 className="text-small font-medium text-foreground">Customer PDF link</h2>
         <a

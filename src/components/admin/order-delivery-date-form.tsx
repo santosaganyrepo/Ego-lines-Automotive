@@ -39,7 +39,7 @@ export function OrderDeliveryDateForm({
       <input type="hidden" name="orderId" value={orderId} />
 
       <div className="flex flex-col gap-0.5">
-        <span className="flex items-center gap-1.5 text-small font-medium">
+        <span className="flex items-center gap-2 text-small font-medium">
           <CalendarRange aria-hidden="true" className="size-4 text-muted-foreground" />
           Expected delivery
         </span>
@@ -56,7 +56,7 @@ export function OrderDeliveryDateForm({
             name="deliveryDate"
             type="date"
             defaultValue={toDateInputValue(deliveryDate)}
-            className="h-9 w-40 rounded-md border-input bg-card px-2.5 text-small"
+            className="h-9 w-40 rounded-md border-input bg-card px-3 text-small"
           />
         </label>
         <label htmlFor={toId} className="flex flex-col gap-1 text-xs text-muted-foreground">
@@ -66,7 +66,7 @@ export function OrderDeliveryDateForm({
             name="deliveryDateLatest"
             type="date"
             defaultValue={toDateInputValue(deliveryDateLatest)}
-            className="h-9 w-40 rounded-md border-input bg-card px-2.5 text-small"
+            className="h-9 w-40 rounded-md border-input bg-card px-3 text-small"
           />
         </label>
         <Button type="submit" size="sm" variant="outline" disabled={isPending} className="h-9">
@@ -76,7 +76,7 @@ export function OrderDeliveryDateForm({
       </div>
 
       {state.status === "success" && state.message ? (
-        <p role="status" className="flex items-center gap-1.5 text-xs text-success">
+        <p role="status" className="flex items-center gap-2 text-xs text-success">
           <CheckCircle2 aria-hidden="true" className="size-3.5" />
           {state.message}
         </p>

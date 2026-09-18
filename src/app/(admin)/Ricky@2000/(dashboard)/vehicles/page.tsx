@@ -68,6 +68,7 @@ export default async function AdminVehiclesPage(
     {
       id: "status",
       header: "Status",
+      align: "center",
       render: (vehicle) => <VehicleStatusBadge status={vehicle.status} />,
     },
     {

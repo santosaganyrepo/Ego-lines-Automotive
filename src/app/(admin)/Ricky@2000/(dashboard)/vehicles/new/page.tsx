@@ -26,7 +26,7 @@ export default async function AdminVehicleNewPage() {
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="flex flex-col gap-5">
+      <div className="flex flex-col gap-6">
         <AdminPageHeader
           back={{ href: `${ADMIN_BASE_PATH}/vehicles`, label: "All vehicles" }}
           title="Add vehicle"

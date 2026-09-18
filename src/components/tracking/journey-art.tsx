@@ -42,7 +42,7 @@ export function JourneyArt({
     >
       <div aria-hidden="true" className="absolute inset-0 flex items-center justify-center">
         <span className="flex size-14 items-center justify-center rounded-full bg-gold/10 ring-1 ring-gold/25">
-          <Icon className={cn("size-6 text-gold", iconClassName)} strokeWidth={1.5} />
+          <Icon className={cn("size-6 text-gold", iconClassName)} />
         </span>
       </div>
 

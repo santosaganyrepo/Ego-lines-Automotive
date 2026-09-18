@@ -53,7 +53,7 @@ export function FinalCta({
                 </h2>
                 <p className="rv-up text-body-lg text-white/75" style={delay(700)}>
                   Tell us the make, model, year and budget you have in mind. We will source it from
-                  Japan or South Korea and send you a full quotation before you commit to anything.
+                  Japan, South Korea or China and send you a full quotation before you commit to anything.
                 </p>
 
                 <div className="rv-up flex flex-wrap gap-3 pt-2" style={delay(850)}>

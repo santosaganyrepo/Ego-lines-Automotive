@@ -53,7 +53,7 @@ export function OrderJourneyExplainer() {
                     sizes="(min-width: 1024px) 18vw, (min-width: 640px) 45vw, 90vw"
                     className="aspect-[16/10]"
                   />
-                  <div className="flex flex-1 flex-col gap-2 p-5">
+                  <div className="flex flex-1 flex-col gap-2 p-6">
                     <span className="tabular font-heading text-small font-bold text-gold-ink">
                       {String(index + 1).padStart(2, "0")}
                     </span>

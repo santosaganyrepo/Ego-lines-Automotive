@@ -4,7 +4,7 @@ import Link from "next/link"
 import { Container } from "@/components/layout/container"
 import { Breadcrumbs } from "@/components/layout/breadcrumbs"
 import { Section } from "@/components/layout/section"
-import { Pagination } from "@/components/shared/pagination"
+import { LoadMore } from "@/components/shared/load-more"
 import { Button } from "@/components/ui/button"
 import { PartsCatalogueQuoteButton } from "@/components/quotes/quote-request-triggers"
 import { RecentlyViewedParts } from "@/components/spare-parts/recently-viewed-parts"
@@ -19,7 +19,6 @@ import { getPublicSiteSettings } from "@/lib/queries/settings.queries"
 import {
   listPublicSparePartCategories,
   listPublishedSpareParts,
-  PUBLIC_SPARE_PARTS_PER_PAGE,
 } from "@/lib/queries/public-spare-part.queries"
 import { formatNumber } from "@/lib/utils/format-currency"
 import {
@@ -81,9 +80,9 @@ import {
  * module note in public-spare-part.queries.ts.
  */
 
-const TITLE = "Spare parts for Japanese and Korean cars in South Sudan"
+const TITLE = "Spare parts for Japanese, Korean and Chinese cars in South Sudan"
 const DESCRIPTION =
-  "Genuine and quality spare parts imported from Japan and South Korea, delivered across South Sudan. Search by part number or browse by category, with fitment listed on every part."
+  "Genuine and quality spare parts imported from Japan, South Korea and China, delivered across South Sudan. Search by part number or browse by category, with fitment listed on every part."
 
 /**
  * Metadata that knows whether a filter is applied.
@@ -157,7 +156,7 @@ export default async function SparePartsPage({
    * connection the round trip is the expensive part, not the query.
    */
   const [{ parts, total, page, pageCount }, categories] = await Promise.all([
-    listPublishedSpareParts({ page: requestedPage, criteria }),
+    listPublishedSpareParts({ page: requestedPage, criteria, through: true }),
     listPublicSparePartCategories(),
   ])
 
@@ -167,16 +166,14 @@ export default async function SparePartsPage({
   /**
    * `page` is what the query actually served, not what the URL asked for —
    * `listPublishedSpareParts` clamps a request past the end of the result set
-   * back to the last real page. Reading the clamped value back is what keeps
-   * the range line and the pager honest.
+   * to the last real page, and in `through` mode returns every part up to it.
    */
-  const first = (page - 1) * PUBLIC_SPARE_PARTS_PER_PAGE + 1
-  const last = Math.min(page * PUBLIC_SPARE_PARTS_PER_PAGE, total)
+  const shown = parts.length
 
   return (
     <>
       {/* ── The one utility row ──────────────────────────────────── */}
-      <SparePartsBar backHref="/" backLabel="Home" title="Spare Parts" />
+      <SparePartsBar backHref="/" backLabel="Home" title="Spare Parts" titleAs="p" />
 
       {/*
         The trail, rendered for machines only.
@@ -196,11 +193,12 @@ export default async function SparePartsPage({
           It carries its own trail, which is why the machine-only one above
           stays hidden. */}
       <CatalogueHero
-        imageSrc="/images/spare-parts/hero.jpg"
+        imageSrc="/images/spare-parts/hero-2.jpg"
         breadcrumbLabel="Spare Parts"
+        showTrail={false}
         eyebrow="Genuine &amp; aftermarket"
         phrases={["The right part.", "Checked fitment.", "Delivered to you."]}
-        supporting="Parts for Japanese and Korean vehicles, sourced from the same suppliers our cars come from."
+        supporting="Parts for Japanese, Korean and Chinese vehicles, sourced from the same suppliers our cars come from."
       />
 
       {/* ── Search and categories ────────────────────────────────────
@@ -218,10 +216,10 @@ export default async function SparePartsPage({
         showSearch={total > 0 || isFiltered}
       />
 
-      <Section spacing="compact" className="pb-16 md:pb-24">
+      <Section spacing="compact" className="bg-canvas pb-16 md:pb-24">
         {/* The catalogue runs to the container's full 80rem, which is what
             gives the grid three ~19rem cards at `lg` and four at `xl`. */}
-        <div className="flex w-full flex-col gap-5 sm:gap-6">
+        <div className="flex w-full flex-col gap-6 sm:gap-6">
           <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
             {/*
               The one place the result count is stated.
@@ -246,33 +244,33 @@ export default async function SparePartsPage({
                 : total === 0
                   ? "No parts listed right now"
                   : `${formatNumber(total)} part${total === 1 ? "" : "s"} available`}
-              {total > PUBLIC_SPARE_PARTS_PER_PAGE ? (
+              {total > shown ? (
                 <>
                   {" · "}
-                  <span className="tabular">
-                    Showing {formatNumber(first)}–{formatNumber(last)}
-                  </span>
+                  <span className="tabular">Showing {formatNumber(shown)}</span>
                 </>
               ) : null}
             </p>
           </div>
 
+          {/* The grid's heading, for the document outline: card titles are h3s. */}
+          <h2 className="sr-only">Spare parts</h2>
           <SparePartGrid parts={parts} filtered={isFiltered} stock={stock} />
 
-          {parts.length > 0 ? <PriceEstimateNote className="max-w-2xl" /> : null}
-
           {/*
-            `criteria` is carried into every page link. Without it, stepping to
-            page two would silently drop the customer's category and search —
-            the classic paginated-search bug, invisible until there is enough
-            stock for a second page.
+            `criteria` is carried into the next link. Without it, loading more
+            would silently drop the customer's category and search.
           */}
-          <Pagination
-            page={page}
-            pageCount={pageCount}
-            hrefFor={(target) => partCatalogueHref(criteria, target)}
-            label="Catalogue pages"
-          />
+          {pageCount > 1 ? (
+            <LoadMore
+              shown={shown}
+              total={total}
+              nextHref={page < pageCount ? partCatalogueHref(criteria, page + 1) : null}
+              noun="parts"
+            />
+          ) : null}
+
+          {parts.length > 0 ? <PriceEstimateNote className="max-w-2xl" /> : null}
         </div>
       </Section>
 

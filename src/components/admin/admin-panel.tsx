@@ -53,7 +53,7 @@ export function AdminPanel({
       )}
     >
       {title || actions ? (
-        <header className="flex items-start justify-between gap-4 px-5 pt-5 sm:px-6">
+        <header className="flex items-start justify-between gap-4 px-6 pt-6 sm:px-6">
           <div className="flex min-w-0 flex-1 flex-col gap-1">
             {title ? (
               <h2 id={headingId} className="text-h3 text-foreground">
@@ -69,7 +69,7 @@ export function AdminPanel({
       <div
         className={cn(
           "flex min-w-0 flex-1 flex-col gap-4",
-          flush ? (title || actions ? "pt-4" : "") : cn("px-5 pb-5 sm:px-6 sm:pb-6", title || actions ? "pt-4" : "pt-5 sm:pt-6"),
+          flush ? (title || actions ? "pt-4" : "") : cn("px-6 pb-6 sm:px-6 sm:pb-6", title || actions ? "pt-4" : "pt-6 sm:pt-6"),
           bodyClassName
         )}
       >
@@ -77,7 +77,7 @@ export function AdminPanel({
       </div>
 
       {footer ? (
-        <footer className="flex flex-wrap items-center justify-between gap-3 rounded-b-xl border-t border-border bg-sunken/60 px-5 py-3.5 sm:px-6">
+        <footer className="flex flex-wrap items-center justify-between gap-3 rounded-b-xl border-t border-border bg-sunken/60 px-6 py-4 sm:px-6">
           {footer}
         </footer>
       ) : null}
@@ -111,7 +111,7 @@ export function AdminStat({
   return (
     <div className={cn("flex min-w-0 flex-col gap-2", className)}>
       <span className="flex items-center gap-2 text-small text-muted-foreground">
-        {Icon ? <Icon aria-hidden="true" className="size-4 shrink-0" strokeWidth={1.75} /> : null}
+        {Icon ? <Icon aria-hidden="true" className="size-4 shrink-0" /> : null}
         {label}
       </span>
       <span

@@ -187,7 +187,7 @@ export default async function TrackMyOrderPage(props: PageProps<"/track-my-order
           {/* ── The box ──────────────────────────────────────────── */}
           <div className="flex flex-col gap-6">
             <SectionHeading title="Track your order" description="Enter the tracking number our team sent you." />
-            <div className="rounded-2xl bg-card p-5 shadow-[var(--shadow-raised)] ring-1 ring-foreground/10 sm:p-7">
+            <div className="rounded-2xl bg-card p-6 shadow-[var(--shadow-raised)] ring-1 ring-foreground/10 sm:p-8">
               <TrackingSearch defaultValue={raw} />
             </div>
           </div>
@@ -235,8 +235,9 @@ export default async function TrackMyOrderPage(props: PageProps<"/track-my-order
         ) : null}
 
         {view.kind === "ERROR" ? (
-          <StatusMessage icon={AlertCircle} tone="warning" title="We couldn't check your order just now">
-            Something went wrong on our side. Please try again in a moment.
+          <StatusMessage icon={AlertCircle} tone="warning" title="We couldn't check your order just now" action={whatsappButton}>
+            Our tracking service did not respond. Your order is not affected — search again in a minute, or
+            message us on WhatsApp with your number and we will check it for you.
           </StatusMessage>
         ) : null}
 
@@ -314,7 +315,7 @@ export default async function TrackMyOrderPage(props: PageProps<"/track-my-order
       {/* ── Not ordered yet ──────────────────────────────────────── */}
       <Section spacing="default">
         <Reveal>
-          <div className="mx-auto flex max-w-6xl flex-col items-start gap-6 rounded-2xl bg-card p-7 ring-1 ring-foreground/10 sm:p-10 md:flex-row md:items-center md:justify-between">
+          <div className="mx-auto flex max-w-6xl flex-col items-start gap-6 rounded-2xl bg-card p-8 ring-1 ring-foreground/10 sm:p-10 md:flex-row md:items-center md:justify-between">
             <div className="flex max-w-2xl flex-col gap-2">
               <h2 className="text-h2">Still haven&apos;t found your vehicle?</h2>
               <p className="text-body text-muted-foreground">
@@ -356,7 +357,7 @@ function StatusMessage({
   return (
     <div
       role="status"
-      className="flex flex-col gap-5 rounded-2xl bg-card p-6 ring-1 ring-foreground/10 sm:flex-row sm:items-center sm:justify-between md:p-8"
+      className="flex flex-col gap-6 rounded-2xl bg-card p-6 ring-1 ring-foreground/10 sm:flex-row sm:items-center sm:justify-between md:p-8"
     >
       <div className="flex gap-4">
         <span
@@ -367,7 +368,7 @@ function StatusMessage({
         >
           <Icon aria-hidden="true" className="size-5" />
         </span>
-        <div className="flex flex-col gap-1.5">
+        <div className="flex flex-col gap-2">
           <h2 className="text-h3">{title}</h2>
           <p className="max-w-2xl text-body text-muted-foreground">{children}</p>
         </div>

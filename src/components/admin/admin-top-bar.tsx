@@ -37,7 +37,7 @@ export function AdminTopBar({ admin, navGroups }: AdminTopBarProps) {
         href="/"
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-md border border-border bg-card px-3 text-small font-medium text-foreground transition-colors duration-fast hover:border-foreground/20 hover:bg-secondary"
+        className="inline-flex h-9 shrink-0 items-center gap-2 rounded-md border border-border bg-card px-3 text-small font-medium text-foreground transition-colors duration-fast hover:border-foreground/20 hover:bg-secondary"
       >
         View site
         <ArrowUpRight aria-hidden="true" className="size-3.5 text-muted-foreground" />

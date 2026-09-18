@@ -3,6 +3,7 @@ import { z } from "zod"
 import {
   FuelType,
   PreferredCountry,
+  QuoteDiscountType,
   QuoteDispatchChannel,
   QuoteSource,
   QuoteStatus,
@@ -502,10 +503,35 @@ export const quoteDetailsSchema = z.object({
   importDuty: optionalMoneyField("Import duty"),
   otherCostsLabel: optionalText("Other costs label", 120),
   otherCostsAmount: optionalMoneyField("Other costs"),
+  /**
+   * The optional discount. All three blank means none. A type needs a value
+   * and a value needs a type; a percentage is at most 100. Whether a fixed
+   * amount fits within the goods it is taken from depends on the priced
+   * lines, so the action checks that once it has them.
+   */
+  discountType: optionalEnum(QuoteDiscountType),
+  discountValue: optionalMoneyField("Discount"),
+  discountLabel: optionalText("Discount label", 120),
   validUntil: validUntilField,
   paymentInstructions: optionalText("Payment instructions", 2000),
   terms: optionalText("Terms", 3000),
   adminNotes: optionalText("Internal notes", 5000),
+}).superRefine((value, ctx) => {
+  if (value.discountType && value.discountValue === undefined) {
+    ctx.addIssue({ code: "custom", path: ["discountValue"], message: "Enter the discount, or choose no discount." })
+  }
+
+  if (value.discountValue !== undefined && !value.discountType) {
+    ctx.addIssue({ code: "custom", path: ["discountType"], message: "Choose whether the discount is an amount or a percentage." })
+  }
+
+  if (value.discountValue !== undefined && value.discountValue <= 0) {
+    ctx.addIssue({ code: "custom", path: ["discountValue"], message: "A discount must be more than zero." })
+  }
+
+  if (value.discountType === QuoteDiscountType.PERCENTAGE && value.discountValue !== undefined && value.discountValue > 100) {
+    ctx.addIssue({ code: "custom", path: ["discountValue"], message: "A percentage discount cannot exceed 100%." })
+  }
 })
 
 export type QuoteDetailsInput = z.infer<typeof quoteDetailsSchema>

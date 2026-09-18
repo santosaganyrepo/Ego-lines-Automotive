@@ -2,7 +2,10 @@
 
 import Image from "next/image"
 import { useState } from "react"
-import { ChevronLeft, ChevronRight, ImageOff } from "lucide-react"
+import { ChevronLeft, ChevronRight, Expand, ImageOff } from "lucide-react"
+
+import { PhotoLightbox } from "@/components/shared/photo-lightbox"
+import { useSwipe } from "@/hooks/use-swipe"
 
 import { cn } from "@/lib/utils"
 import { describeVehiclePhoto, type VehicleNaming } from "@/types/vehicle-photo"
@@ -44,6 +47,12 @@ interface VehicleGalleryProps {
 
 export function VehicleGallery({ photos, vehicle }: VehicleGalleryProps) {
   const [active, setActive] = useState(0)
+  const [lightboxOpen, setLightboxOpen] = useState(false)
+  const swipe = useSwipe({
+    onSwipeLeft: () => setActive((current) => (current + 1) % photos.length),
+    onSwipeRight: () => setActive((current) => (current - 1 + photos.length) % photos.length),
+    enabled: photos.length > 1,
+  })
 
   if (photos.length === 0) {
     return (
@@ -72,7 +81,13 @@ export function VehicleGallery({ photos, vehicle }: VehicleGalleryProps) {
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="media-frame relative aspect-video w-full rounded-xl border border-border bg-muted">
+      {/* Swipeable on touch (vertical movement still scrolls the page), and
+          opens full screen on tap or click — see PhotoLightbox. */}
+      <div
+        className="media-frame group/gallery relative aspect-video w-full rounded-xl border border-border bg-muted"
+        style={swipe.style}
+        {...swipe.handlers}
+      >
         {photos.map((photo, index) => (
           <Image
             key={photo.id}
@@ -92,6 +107,20 @@ export function VehicleGallery({ photos, vehicle }: VehicleGalleryProps) {
             aria-hidden={index === active ? undefined : "true"}
           />
         ))}
+
+        <button
+          type="button"
+          onClick={() => {
+            if (!swipe.consumeClick()) setLightboxOpen(true)
+          }}
+          aria-label={`View ${describe(active)} full screen`}
+          className="absolute inset-0 z-[5] cursor-zoom-in rounded-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+        >
+          <span className="absolute top-3 right-3 inline-flex items-center gap-2 rounded-md bg-foreground/70 px-2 py-1 text-xs font-semibold text-background opacity-0 backdrop-blur-sm transition-opacity duration-fast group-hover/gallery:opacity-100 max-md:opacity-100">
+            <Expand aria-hidden="true" className="size-3.5" />
+            <span className="max-md:sr-only">View full screen</span>
+          </span>
+        </button>
 
         {showControls ? (
           <>
@@ -158,6 +187,15 @@ export function VehicleGallery({ photos, vehicle }: VehicleGalleryProps) {
           ))}
         </ul>
       ) : null}
+
+      <PhotoLightbox
+        photos={photos.map((photo, index) => ({ id: photo.id, url: photo.url, alt: describe(index) }))}
+        index={active}
+        onIndexChange={setActive}
+        open={lightboxOpen}
+        onOpenChange={setLightboxOpen}
+        title={`${[vehicle.year, vehicle.make, vehicle.model].filter(Boolean).join(" ")} photographs`}
+      />
     </div>
   )
 }
@@ -179,7 +217,7 @@ function GalleryArrow({
       onClick={onClick}
       aria-label={`${direction === "previous" ? "Previous" : "Next"} photograph`}
       className={cn(
-        "absolute top-1/2 z-10 inline-flex size-10 -translate-y-1/2 items-center justify-center rounded-lg",
+        "absolute top-1/2 z-10 inline-flex size-11 -translate-y-1/2 items-center justify-center rounded-lg",
         "bg-background/85 text-foreground backdrop-blur-sm",
         "transition-colors duration-fast hover:bg-background",
         "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",

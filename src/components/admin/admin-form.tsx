@@ -55,7 +55,7 @@ export function AdminFormSection({
 
       <div
         className={cn(
-          "min-w-0 rounded-xl border p-5 sm:p-6",
+          "min-w-0 rounded-xl border p-6 sm:p-6",
           variant === "internal"
             ? "border-dashed border-border bg-sunken/70"
             : "border-border bg-card shadow-[var(--shadow-subtle)]",
@@ -83,7 +83,7 @@ export function AdminFormBadge({
   return (
     <span
       className={cn(
-        "inline-flex h-6 items-center gap-1.5 rounded-full border px-2.5 text-xs font-medium [&_svg]:size-3.5",
+        "inline-flex h-6 items-center gap-2 rounded-full border px-3 text-xs font-medium [&_svg]:size-3.5",
         tone === "gold" && "border-gold-ink/25 bg-accent text-gold-ink",
         tone === "warning" && "border-warning/30 bg-warning/10 text-warning",
         tone === "neutral" && "border-border bg-secondary text-muted-foreground"
@@ -143,7 +143,7 @@ export function AdminStepTrail({ steps, current }: { steps: readonly string[]; c
               <span
                 aria-hidden="true"
                 className={cn(
-                  "flex size-5 shrink-0 items-center justify-center rounded-full text-[0.6875rem] tabular-nums",
+                  "flex size-5 shrink-0 items-center justify-center rounded-full text-xs tabular-nums",
                   state === "current" && "bg-foreground text-background ring-2 ring-gold/60 ring-offset-2 ring-offset-background",
                   state === "done" && "bg-gold text-gold-foreground",
                   state === "upcoming" && "border border-border bg-card text-muted-foreground"

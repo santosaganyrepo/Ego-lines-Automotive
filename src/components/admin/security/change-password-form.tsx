@@ -24,7 +24,7 @@ export function ChangePasswordForm() {
   const error = (name: string) => state.fieldErrors?.[name]?.[0]
 
   return (
-    <form action={formAction} noValidate className="flex flex-col gap-5">
+    <form action={formAction} noValidate className="flex flex-col gap-6">
       {state.status === "error" && !state.fieldErrors ? <SettingsFormAlert state={state} /> : null}
 
       <SettingsField label="Current password" htmlFor="currentPassword" error={error("currentPassword")}>

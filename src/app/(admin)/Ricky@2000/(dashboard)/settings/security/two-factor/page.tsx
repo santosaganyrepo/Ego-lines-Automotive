@@ -31,7 +31,7 @@ export default async function TwoFactorSettingsPage(props: PageProps<"/Ricky@200
   return (
     <>
       {!enabled && (required === "1" || security.requireTwoFactor) ? (
-        <div role="alert" className="flex items-start gap-3 rounded-xl border border-warning/40 bg-warning/5 px-5 py-4">
+        <div role="alert" className="flex items-start gap-3 rounded-xl border border-warning/40 bg-warning/5 px-6 py-4">
           <ShieldAlert aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-warning" />
           <div className="flex flex-col gap-0.5">
             <p className="text-small font-semibold">Two-factor authentication is required</p>
@@ -51,8 +51,8 @@ export default async function TwoFactorSettingsPage(props: PageProps<"/Ricky@200
           <span
             className={
               enabled
-                ? "inline-flex items-center gap-1.5 rounded-full bg-success/10 px-3 py-1 text-xs font-semibold text-success"
-                : "inline-flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1 text-xs font-semibold text-muted-foreground"
+                ? "inline-flex items-center gap-2 rounded-full bg-success/10 px-3 py-1 text-xs font-semibold text-success"
+                : "inline-flex items-center gap-2 rounded-full bg-secondary px-3 py-1 text-xs font-semibold text-muted-foreground"
             }
           >
             <ShieldCheck aria-hidden="true" className="size-3.5" />

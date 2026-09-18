@@ -12,7 +12,7 @@ export default async function SecuritySettingsLayout({ children }: LayoutProps<"
   const children_ = settingsNavLinks.find((link) => link.href === SECURITY_SETTINGS_PATH)?.children ?? []
 
   return (
-    <div className="flex min-w-0 flex-col gap-5">
+    <div className="flex min-w-0 flex-col gap-6">
       <SecuritySubNav links={children_} />
       {children}
     </div>

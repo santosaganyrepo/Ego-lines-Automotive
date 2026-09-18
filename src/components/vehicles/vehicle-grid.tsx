@@ -67,7 +67,7 @@ export function VehicleGrid({
       <EmptyState
         icon={<SearchX />}
         title="No vehicles match those filters"
-        description="Nothing in the current inventory matches that combination. Try clearing a filter, or tell us exactly what you are after and we will source it from Japan or Korea."
+        description="Nothing in the current inventory matches that combination. Try clearing a filter, or tell us exactly what you are after and we will source it from Japan, South Korea or China."
         action={
           <div className="flex flex-wrap justify-center gap-3">
             <Button render={<Link href="/cars" />} variant="outline">
@@ -81,7 +81,7 @@ export function VehicleGrid({
       <EmptyState
         icon={<CarFront />}
         title="No vehicles listed yet"
-        description="New arrivals from Japan and Korea are added as they are sourced. Tell us what you are looking for and we will find it for you."
+        description="New arrivals from Japan, South Korea and China are added as they are sourced. Tell us what you are looking for and we will find it for you."
         action={
           <VehicleCatalogueQuoteButton variant="outline" size="default">
             Request a vehicle
@@ -103,7 +103,7 @@ export function VehicleGrid({
       cards keep a usable measure as the screen grows — around 385px each on a
       1920px display, which is about what three columns gave before.
     */
-    <ul className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+    <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {vehicles.map((vehicle, index) => (
         <li key={vehicle.slug} className="flex">
           <Reveal delay={(index % COLUMNS) * 70} className="flex w-full">

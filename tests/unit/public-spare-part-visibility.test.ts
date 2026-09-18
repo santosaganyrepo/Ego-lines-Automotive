@@ -216,7 +216,6 @@ describe("listRelatedSpareParts", () => {
       excludeSlug: "front-brake-pads-clm-sp-2026-000001",
     })
 
-    expect(queries).toHaveLength(1)
     expect(queries[0].where).toMatchObject({
       // The category is found through the open part, which must itself be
       // published — a draft's slug cannot be used to list its category.
@@ -233,6 +232,16 @@ describe("listRelatedSpareParts", () => {
     })
 
     expect(queries[0].where).toMatchObject({ slug: { not: "the-open-listing" } })
+  })
+
+  it("tops the strip up from the rest of the live catalogue, never a draft or itself", async () => {
+    await listRelatedSpareParts({ excludeSlug: "the-open-listing" })
+
+    expect(queries).toHaveLength(2)
+    expect(queries[1].where).toMatchObject({
+      status: SparePartStatus.PUBLISHED,
+      slug: { notIn: ["the-open-listing"] },
+    })
   })
 
   it("caps the strip at a length someone will actually swipe", () => {

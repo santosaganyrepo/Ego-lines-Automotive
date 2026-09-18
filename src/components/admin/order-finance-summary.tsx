@@ -38,7 +38,7 @@ export function OrderFinanceSummaryCard({ finance }: { finance: OrderFinanceSumm
       aria-labelledby="order-finance-heading"
       className="flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-[var(--shadow-subtle)]"
     >
-      <div className="flex flex-col gap-4 p-5 sm:p-6">
+      <div className="flex flex-col gap-4 p-6 sm:p-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 id="order-finance-heading" className="text-h3">
             Payment position
@@ -89,7 +89,7 @@ export function OrderFinanceSummaryCard({ finance }: { finance: OrderFinanceSumm
             key={milestone.id}
             aria-current={finance.currentlyDue?.id === milestone.id ? "step" : undefined}
             className={cn(
-              "flex items-center justify-between gap-3 px-5 py-3 sm:px-6",
+              "flex items-center justify-between gap-3 px-6 py-3 sm:px-6",
               finance.currentlyDue?.id === milestone.id && "bg-accent/40"
             )}
           >

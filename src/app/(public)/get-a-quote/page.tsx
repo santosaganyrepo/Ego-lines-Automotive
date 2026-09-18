@@ -37,7 +37,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return {
     title: "Get a Quote",
-    description: `Tell ${businessName} the vehicle or spare parts you are looking for. We source from Japan and Korea and send you a full quotation — no commitment.`,
+    description: `Tell ${businessName} the vehicle or spare parts you are looking for. We source from Japan, South Korea and China and send you a full quotation — no commitment.`,
     alternates: { canonical: "/get-a-quote" },
   }
 }
@@ -81,8 +81,8 @@ export default async function GetAQuotePage() {
             </span>
           </h1>
           <p className="load-rise max-w-2xl text-body-lg text-white/75" style={delay(HERO_TEXT_AT)}>
-            A particular vehicle, or the spare parts your car needs — describe it, and our team sources it from Japan
-            and Korea and sends you a full quotation.
+            A particular vehicle, or the spare parts your car needs — describe it, and our team sources it from Japan,
+            South Korea or China and sends you a full quotation.
           </p>
           <ul className="flex flex-wrap gap-x-6 gap-y-2 pt-1 text-small text-white/80">
             {["No commitment", "Full price confirmed before you pay", "We reply by WhatsApp or email"].map(
@@ -120,7 +120,7 @@ export default async function GetAQuotePage() {
                 start.
               </QuoteStep>
               <QuoteStep icon={Search} step={2} title="We source it">
-                Our team searches suppliers and auctions in Japan and Korea for the right match.
+                Our team searches suppliers and auctions in Japan, South Korea and China for the right match.
               </QuoteStep>
               <QuoteStep icon={ShieldCheck} step={3} title="You receive a full quotation">
                 The price, shipping and clearing, set out clearly. Nothing is charged until you accept it.
@@ -128,7 +128,7 @@ export default async function GetAQuotePage() {
             </ol>
 
             {whatsappUrl ? (
-              <div className="flex flex-col gap-3 rounded-2xl bg-secondary p-5">
+              <div className="flex flex-col gap-3 rounded-2xl bg-secondary p-6">
                 <p className="flex items-center gap-2 text-small font-medium">
                   <MessageCircle aria-hidden="true" className="size-4 text-gold-ink" />
                   Prefer to talk it through?
@@ -149,9 +149,9 @@ export default async function GetAQuotePage() {
           <Reveal>
             <div
               id="quote-form"
-              className="scroll-mt-28 rounded-2xl bg-card p-5 shadow-[var(--shadow-raised)] ring-1 ring-foreground/10 sm:p-8"
+              className="scroll-mt-28 rounded-2xl bg-card p-6 shadow-[var(--shadow-raised)] ring-1 ring-foreground/10 sm:p-8"
             >
-              <div className="mb-6 flex flex-col gap-1.5 border-b border-border pb-6">
+              <div className="mb-6 flex flex-col gap-2 border-b border-border pb-6">
                 <h2 className="text-h3">Request a quote</h2>
                 <p className="text-small text-muted-foreground">
                   Takes about two minutes. Fields not marked optional are needed so we can reply.
@@ -168,8 +168,8 @@ export default async function GetAQuotePage() {
 
       {/* ── Already know what you want ───────────────────────────── */}
       <Section spacing="compact" className="pb-16 md:pb-24">
-        <div className="mx-auto flex max-w-6xl flex-col items-start gap-5 rounded-2xl bg-card p-7 ring-1 ring-foreground/10 sm:p-9 md:flex-row md:items-center md:justify-between">
-          <div className="flex flex-col gap-1.5">
+        <div className="mx-auto flex max-w-6xl flex-col items-start gap-6 rounded-2xl bg-card p-8 ring-1 ring-foreground/10 sm:p-10 md:flex-row md:items-center md:justify-between">
+          <div className="flex flex-col gap-2">
             <h2 className="text-h3">It might already be here</h2>
             <p className="text-body text-muted-foreground">
               Browse the vehicles and spare parts we have available now before you ask.

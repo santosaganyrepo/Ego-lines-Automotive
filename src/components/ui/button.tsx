@@ -1,3 +1,4 @@
+import * as React from "react"
 import { Button as ButtonPrimitive } from "@base-ui/react/button"
 import { cva, type VariantProps } from "class-variance-authority"
 
@@ -30,7 +31,7 @@ import { cn } from "@/lib/utils"
  * gesture — a shadow that grows while the element stays put reads as a
  * filter effect, whereas moving both together reads as the object
  * physically rising. How far it rises is `--button-lift`, so the staff
- * dashboard can hold its controls still. Both run at --duration-fast (250ms) per the brief's
+ * dashboard can hold its controls still. Both run at --duration-fast (180ms) per the brief's
  * micro-interaction budget, and the global reduced-motion rule collapses
  * them to near-zero for anyone who has asked for less movement.
  *
@@ -42,7 +43,10 @@ import { cn } from "@/lib/utils"
 const buttonVariants = cva(
   [
     "group/button relative inline-flex shrink-0 items-center justify-center gap-2",
-    "rounded-lg border border-transparent bg-clip-padding",
+    // No `bg-clip-padding`: clipping the fill inside a transparent border left
+    // a 1px rim of whatever sat behind the button — read as a dark outline
+    // around every filled button, most visibly in the light dashboard.
+    "rounded-lg border border-transparent",
     "font-semibold whitespace-nowrap select-none",
     // The properties that actually change on hover/active, named explicitly.
     // `transition-all` made the browser watch every animatable property on
@@ -50,8 +54,10 @@ const buttonVariants = cva(
     // exists to smooth — and the reason interactions felt heavy on lower-end
     // phones.
     "outline-none transition-[background-color,border-color,color,box-shadow,transform,opacity] duration-fast ease-crownline",
-    "focus-visible:ring-3 focus-visible:ring-ring/50",
-    "disabled:pointer-events-none disabled:opacity-50",
+    // A solid ring set off from the button by the surface colour, so it is
+    // visible on gold, on white and on black alike.
+    "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+    "disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none",
     "aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20",
     "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   ],
@@ -113,13 +119,15 @@ const buttonVariants = cva(
         ],
       },
       size: {
-        xs: "h-7 gap-1 rounded-md px-2 text-xs [&_svg:not([class*='size-'])]:size-3",
-        sm: "h-8 rounded-md px-3 text-small",
-        default: "h-9 px-4 text-small",
+        // On a touch screen every size reaches 44px, the smallest target a
+        // thumb hits reliably; a mouse keeps the compact desk sizes.
+        xs: "h-7 gap-1 rounded-md px-2 text-xs pointer-coarse:h-11 [&_svg:not([class*='size-'])]:size-3",
+        sm: "h-8 rounded-md px-3 text-small pointer-coarse:h-11",
+        default: "h-9 px-4 text-small pointer-coarse:h-11",
         lg: "h-11 px-6 font-heading text-small font-bold tracking-[0.11em] uppercase",
         xl: "h-13 px-8 font-heading text-body font-bold tracking-[0.12em] uppercase",
-        icon: "size-9",
-        "icon-sm": "size-8 rounded-md",
+        icon: "size-9 pointer-coarse:size-11",
+        "icon-sm": "size-8 rounded-md pointer-coarse:size-11",
         "icon-lg": "size-11",
       },
     },
@@ -156,11 +164,26 @@ function Button({
    */
   const isNativeButton = nativeButton ?? render === undefined
 
+  /**
+   * A link keeps its link role. Base UI stamps `role="button"` on any
+   * non-native element it renders, so without this every CTA built as
+   * `render={<Link href=… />}` was announced as a "button" — telling a
+   * screen-reader user it cannot be opened in a new tab or bookmarked. Base
+   * UI merges the render element's own props last, so a role set on it wins.
+   */
+  const renderElement =
+    React.isValidElement<{ href?: unknown; role?: string }>(render) &&
+    !isNativeButton &&
+    render.props.href !== undefined &&
+    render.props.role === undefined
+      ? React.cloneElement(render, { role: "link" })
+      : render
+
   return (
     <ButtonPrimitive
       data-slot="button"
       data-variant={variant}
-      render={render}
+      render={renderElement}
       nativeButton={isNativeButton}
       className={cn(buttonVariants({ variant, size, className }))}
       {...props}

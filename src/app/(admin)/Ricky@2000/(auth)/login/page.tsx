@@ -68,14 +68,14 @@ export default async function AdminLoginPage(props: PageProps<"/Ricky@2000/login
       footer={
         <Link
           href={`${ADMIN_BASE_PATH}/forgot-password`}
-          className="underline underline-offset-4 transition-colors duration-fast hover:text-gold-ink"
+          className="inline-flex items-center underline underline-offset-4 transition-colors duration-fast hover:text-gold-ink pointer-coarse:min-h-11"
         >
           Forgotten your password?
         </Link>
       }
     >
       {passwordUpdated ? (
-        <Alert className="mb-5">
+        <Alert className="mb-6">
           <CheckCircle2 aria-hidden="true" className="text-success" />
           <AlertDescription>
             Password updated. Sign in with your new password.
@@ -84,14 +84,14 @@ export default async function AdminLoginPage(props: PageProps<"/Ricky@2000/login
       ) : null}
 
       {sessionNotice ? (
-        <Alert className="mb-5">
+        <Alert className="mb-6">
           <CheckCircle2 aria-hidden="true" className="text-success" />
           <AlertDescription>{sessionNotice}</AlertDescription>
         </Alert>
       ) : null}
 
       {linkError ? (
-        <Alert variant="destructive" className="mb-5">
+        <Alert variant="destructive" className="mb-6">
           <AlertCircle aria-hidden="true" />
           <AlertDescription>
             That link is no longer valid. Request a new one below.

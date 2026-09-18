@@ -55,14 +55,14 @@ describe("buildWhatsAppUrl", () => {
 
 describe("buildGeneralWhatsAppMessage", () => {
   it("names the business in the prefilled message", () => {
-    expect(buildGeneralWhatsAppMessage("Crownline Motors")).toBe(
-      "Hello Crownline Motors, I'd like to enquire about a vehicle."
+    expect(buildGeneralWhatsAppMessage("EGO-Lines Automotive")).toBe(
+      "Hello EGO-Lines Automotive, I'd like to enquire about a vehicle."
     )
   })
 })
 
 describe("contextual messages", () => {
-  const siteName = "Crownline Motors"
+  const siteName = "EGO-Lines Automotive"
 
   it("names the vehicle and its listing reference", () => {
     // The reference is what stops a reply having to begin with "which of
@@ -76,7 +76,7 @@ describe("contextual messages", () => {
         referenceNumber: "CLM-V-2026-000123",
       })
     ).toBe(
-      "Hello Crownline Motors, I am interested in the Toyota Harrier 2021, listing reference CLM-V-2026-000123."
+      "Hello EGO-Lines Automotive, I am interested in the Toyota Harrier 2021, listing reference CLM-V-2026-000123."
     )
   })
 
@@ -88,21 +88,21 @@ describe("contextual messages", () => {
         partNumber: "CLM-SP-00012",
       })
     ).toBe(
-      "Hello Crownline Motors, I am interested in the Toyota Harrier brake pads, part number CLM-SP-00012."
+      "Hello EGO-Lines Automotive, I am interested in the Toyota Harrier brake pads, part number CLM-SP-00012."
     )
   })
 
   it("names the order", () => {
     expect(
       buildOrderWhatsAppMessage({ siteName, orderNumber: "CLM-O-2026-000012" })
-    ).toBe("Hello Crownline Motors, I need assistance with order CLM-O-2026-000012.")
+    ).toBe("Hello EGO-Lines Automotive, I need assistance with order CLM-O-2026-000012.")
   })
 
   it("names the tracking number", () => {
     expect(
       buildTrackingWhatsAppMessage({ siteName, trackingNumber: "CLM-2026-000125" })
     ).toBe(
-      "Hello Crownline Motors, I need assistance with tracking number CLM-2026-000125."
+      "Hello EGO-Lines Automotive, I need assistance with tracking number CLM-2026-000125."
     )
   })
 

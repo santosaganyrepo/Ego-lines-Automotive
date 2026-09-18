@@ -1,4 +1,4 @@
-import { LoadingState } from "@/components/shared/loading-state"
+import { CatalogueSkeleton } from "@/components/shared/catalogue-skeleton"
 
 /**
  * Fallback while the catalogue query runs.
@@ -27,9 +27,5 @@ import { LoadingState } from "@/components/shared/loading-state"
  * comes back for every page that can legitimately 404.
  */
 export default function CatalogueLoading() {
-  return (
-    <div className="flex min-h-[60vh] items-center justify-center">
-      <LoadingState />
-    </div>
-  )
+  return <CatalogueSkeleton kind="vehicles" />
 }

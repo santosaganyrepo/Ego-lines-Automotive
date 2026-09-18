@@ -15,12 +15,12 @@ const commerce = {
 }
 
 const business = {
-  businessName: "Crownline Motors",
+  businessName: "EGO-Lines Automotive",
   businessDescription: "Quality vehicles sourced from Japan and Korea.",
   defaultCountry: "SS",
   primaryPhone: "+211 900 000 000",
   whatsappNumber: "+211900000000",
-  businessEmail: "info@crownlinemotors.com",
+  businessEmail: "info@ego-lines.example",
   businessAddress: "Juba, South Sudan",
   publishHours: "on",
   businessHours: JSON.stringify(DEFAULT_BUSINESS_HOURS),
@@ -182,13 +182,13 @@ describe("business information — identity and contact", () => {
 
 describe("social links", () => {
   it("accepts https links on the network's own domain", () => {
-    expect(isAllowedSocialUrl("socialFacebook", "https://www.facebook.com/crownlinemotors")).toBe(true)
-    expect(isAllowedSocialUrl("socialX", "https://x.com/crownline")).toBe(true)
+    expect(isAllowedSocialUrl("socialFacebook", "https://www.facebook.com/egolines")).toBe(true)
+    expect(isAllowedSocialUrl("socialX", "https://x.com/egolines")).toBe(true)
     expect(isAllowedSocialUrl("socialYoutube", "https://youtu.be/abc")).toBe(true)
   })
 
   it("refuses another domain, a lookalike, http and embedded credentials", () => {
-    expect(isAllowedSocialUrl("socialFacebook", "https://instagram.com/crownline")).toBe(false)
+    expect(isAllowedSocialUrl("socialFacebook", "https://instagram.com/egolines")).toBe(false)
     expect(isAllowedSocialUrl("socialFacebook", "https://facebook.com.evil.example/page")).toBe(false)
     expect(isAllowedSocialUrl("socialFacebook", "https://notfacebook.com/page")).toBe(false)
     expect(isAllowedSocialUrl("socialFacebook", "http://facebook.com/page")).toBe(false)
@@ -197,7 +197,7 @@ describe("social links", () => {
   })
 
   it("rejects a bad link through the form schema and accepts an empty one", () => {
-    expect(businessInformationSchema.safeParse({ ...business, socialTiktok: "https://tiktok.com/@crownline" }).success).toBe(true)
+    expect(businessInformationSchema.safeParse({ ...business, socialTiktok: "https://tiktok.com/@egolines" }).success).toBe(true)
     expect(businessInformationSchema.safeParse({ ...business, socialTiktok: "tiktok" }).success).toBe(false)
     expect(businessInformationSchema.parse({ ...business, socialTiktok: "" }).socialTiktok).toBeNull()
   })

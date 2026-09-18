@@ -139,7 +139,7 @@ export default async function AdminDashboardPage() {
             aria-hidden="true"
             className="hidden size-9 shrink-0 items-center justify-center rounded-lg bg-card text-gold-ink ring-1 ring-gold-ink/20 sm:flex"
           >
-            <FileText className="size-4.5" strokeWidth={1.75} />
+            <FileText className="size-4.5" />
           </span>
           <span className="flex min-w-0 flex-1 flex-col">
             <span className="text-body font-medium text-foreground">
@@ -151,7 +151,7 @@ export default async function AdminDashboardPage() {
               The sooner a customer hears back, the likelier the sale.
             </span>
           </span>
-          <span className="hidden shrink-0 items-center gap-1.5 text-small font-medium text-gold-ink sm:inline-flex">
+          <span className="hidden shrink-0 items-center gap-2 text-small font-medium text-gold-ink sm:inline-flex">
             Open queue
             <ArrowRight
               aria-hidden="true"
@@ -232,7 +232,7 @@ export default async function AdminDashboardPage() {
             }
           >
             {orders.orders.length === 0 ? (
-              <div className="px-5 pb-5 sm:px-6 sm:pb-6">
+              <div className="px-6 pb-6 sm:px-6 sm:pb-6">
                 <AdminEmptyState
                   icon={Package}
                   title="No orders yet"
@@ -246,7 +246,7 @@ export default async function AdminDashboardPage() {
                   <li key={order.id}>
                     <Link
                       href={`${ADMIN_BASE_PATH}/orders/${order.id}`}
-                      className="group/row grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-1 px-5 py-3.5 transition-colors duration-fast hover:bg-sunken/60 focus-visible:bg-sunken focus-visible:outline-none sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:px-6"
+                      className="group/row grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-1 px-6 py-4 transition-colors duration-fast hover:bg-sunken/60 focus-visible:bg-sunken focus-visible:outline-none sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:px-6"
                     >
                       <span className="flex min-w-0 flex-col gap-0.5">
                         <span className="truncate text-small font-medium text-foreground transition-colors duration-fast group-hover/row:text-gold-ink">
@@ -291,7 +291,7 @@ export default async function AdminDashboardPage() {
               }
             >
               {newQuotes.quotes.length === 0 ? (
-                <p className="border-t border-border px-5 py-6 text-small text-muted-foreground sm:px-6">
+                <p className="border-t border-border px-6 py-6 text-small text-muted-foreground sm:px-6">
                   All caught up — every enquiry has been picked up.
                 </p>
               ) : (
@@ -300,7 +300,7 @@ export default async function AdminDashboardPage() {
                     <li key={quote.id}>
                       <Link
                         href={`${ADMIN_BASE_PATH}/quotes/${quote.id}`}
-                        className="group/row flex items-center justify-between gap-4 px-5 py-3.5 transition-colors duration-fast hover:bg-sunken/60 focus-visible:bg-sunken focus-visible:outline-none sm:px-6"
+                        className="group/row flex items-center justify-between gap-4 px-6 py-4 transition-colors duration-fast hover:bg-sunken/60 focus-visible:bg-sunken focus-visible:outline-none sm:px-6"
                       >
                         <span className="flex min-w-0 flex-col gap-0.5">
                           <span className="truncate text-small font-medium text-foreground transition-colors duration-fast group-hover/row:text-gold-ink">
@@ -352,7 +352,7 @@ function StatCell({ href, children }: { href: string; children: ReactNode }) {
       href={href}
       // The last cell widens to close the row it ends, so no gap is left
       // showing the divider colour.
-      className="group/stat block bg-card px-5 py-5 transition-colors duration-fast last:col-span-2 hover:bg-sunken focus-visible:bg-sunken focus-visible:outline-none sm:px-6 sm:last:col-span-2 xl:last:col-span-1"
+      className="group/stat block bg-card px-6 py-6 transition-colors duration-fast last:col-span-2 hover:bg-sunken focus-visible:bg-sunken focus-visible:outline-none sm:px-6 sm:last:col-span-2 xl:last:col-span-1"
     >
       {children}
     </Link>
@@ -375,11 +375,11 @@ function Shortcut({
       <Link
         href={href}
         {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-        className="group/shortcut flex h-12 items-center gap-3 px-5 text-small font-medium text-foreground transition-colors duration-fast hover:bg-sunken/60 focus-visible:bg-sunken focus-visible:outline-none sm:px-6"
+        className="group/shortcut flex h-12 items-center gap-3 px-6 text-small font-medium text-foreground transition-colors duration-fast hover:bg-sunken/60 focus-visible:bg-sunken focus-visible:outline-none sm:px-6"
       >
         <Icon
           aria-hidden="true"
-          strokeWidth={1.75}
+         
           className="size-4 text-muted-foreground transition-colors duration-fast group-hover/shortcut:text-gold-ink"
         />
         <span className="flex-1">{label}</span>

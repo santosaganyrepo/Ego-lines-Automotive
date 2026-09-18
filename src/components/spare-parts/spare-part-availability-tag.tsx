@@ -92,9 +92,9 @@ const TONES_WITH_DOT: ReadonlySet<SparePartAvailabilityTone> = new Set([
 ])
 
 const SIZE_STYLES = {
-  overlay: "gap-1.5 px-2 py-1 text-[0.6875rem]",
-  card: "gap-1 px-1.5 py-0.5 text-[0.6875rem]",
-  detail: "gap-1.5 px-2.5 py-1 text-small",
+  overlay: "gap-2 px-2 py-1 text-xs",
+  card: "gap-1 px-2 py-0.5 text-xs",
+  detail: "gap-2 px-3 py-1 text-small",
 } as const
 
 export function SparePartAvailabilityTag({

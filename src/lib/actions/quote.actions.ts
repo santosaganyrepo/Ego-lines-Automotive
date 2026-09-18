@@ -30,8 +30,15 @@ import { renderQuotePdfBuffer } from "@/lib/pdf/render-quote-pdf"
 import { prisma } from "@/lib/prisma"
 import { buildQuoteMessage, defaultQuoteNote, type QuoteMessageInput } from "@/lib/quotes/quote-messages"
 import { UnknownListingReferenceError, resolveQuoteLines } from "@/lib/quotes/quote-line-resolution"
-import { computeQuoteTotals, lineTotalCents, quoteReadinessProblem } from "@/lib/quotes/quote-pricing"
+import {
+  computeQuoteTotals,
+  discountLineLabel,
+  lineTotalCents,
+  quoteReadinessProblem,
+  toQuoteDiscount,
+} from "@/lib/quotes/quote-pricing"
 import { getBusinessSettings, getPublicSiteSettings } from "@/lib/queries/settings.queries"
+import { formatCurrency } from "@/lib/utils/format-currency"
 import { fromCents } from "@/lib/utils/money"
 import { isUniqueConstraintViolation } from "@/lib/utils/prisma-errors"
 import { buildWhatsAppUrl } from "@/lib/utils/whatsapp"
@@ -116,6 +123,9 @@ export async function updateQuoteDetailsAction(
     importDuty: formData.get("importDuty"),
     otherCostsLabel: formData.get("otherCostsLabel"),
     otherCostsAmount: formData.get("otherCostsAmount"),
+    discountType: formData.get("discountType"),
+    discountValue: formData.get("discountValue"),
+    discountLabel: formData.get("discountLabel"),
     validUntil: formData.get("validUntil"),
     paymentInstructions: formData.get("paymentInstructions"),
     terms: formData.get("terms"),
@@ -140,11 +150,38 @@ export async function updateQuoteDetailsAction(
     importDuty,
     otherCostsLabel,
     otherCostsAmount,
+    discountType,
+    discountValue,
+    discountLabel,
     validUntil,
     paymentInstructions,
     terms,
     adminNotes,
   } = parsed.data
+
+  /**
+   * A fixed discount larger than the goods it comes off would be capped
+   * silently by `computeQuoteTotals` — refused here instead, so the operator
+   * sees the number they typed was not the number applied.
+   */
+  if (discountType === "FIXED_AMOUNT" && discountValue !== undefined) {
+    const goods = computeQuoteTotals(
+      lines.map((line) => ({ kind: line.kind, quantity: line.quantity, unitPrice: line.unitPrice ?? null })),
+      { shippingCost: null, clearingCost: null, importDuty: null, otherCosts: null },
+      null
+    )
+    const goodsTotal = goods.itemsSubtotal + goods.accessoriesTotal
+
+    if (discountValue > goodsTotal) {
+      return {
+        status: "error",
+        message: INVALID,
+        fieldErrors: {
+          discountValue: [`The discount cannot be more than the vehicle and parts subtotal (${formatCurrency(goodsTotal)}).`],
+        },
+      }
+    }
+  }
 
   const existing = await prisma.quote.findUnique({
     where: { id: quoteId },
@@ -187,6 +224,11 @@ export async function updateQuoteDetailsAction(
           // way `pricingMode`/`price` are kept in step on SparePart.
           otherCostsLabel: otherCostsAmount !== undefined ? (otherCostsLabel ?? "Other costs") : null,
           otherCostsAmount: otherCostsAmount ?? null,
+          // All three together or none, matching Quote_discount_check; a
+          // label with no discount is cleared rather than left dangling.
+          discountType: discountType && discountValue !== undefined ? discountType : null,
+          discountValue: discountType && discountValue !== undefined ? discountValue : null,
+          discountLabel: discountType && discountValue !== undefined ? (discountLabel ?? null) : null,
           validUntil: validUntil ?? null,
           paymentInstructions: paymentInstructions ?? null,
           terms: terms ?? null,
@@ -464,9 +506,12 @@ export async function sendQuoteDispatchAction(
     unitPrice: item.quotedUnitPrice?.toNumber() ?? null,
   }))
 
+  const discount = toQuoteDiscount(quote.discountType, quote.discountValue?.toNumber() ?? null)
+
   const readinessProblem = quoteReadinessProblem({
     lines: priced,
     fees,
+    discount,
     validUntil: quote.validUntil,
   })
 
@@ -497,7 +542,7 @@ export async function sendQuoteDispatchAction(
   const mintingToken = Boolean(includeLink) && !quote.shareToken
   const shareToken = includeLink ? (quote.shareToken ?? randomBytes(32).toString("base64url")) : quote.shareToken
 
-  const totals = computeQuoteTotals(priced, fees)
+  const totals = computeQuoteTotals(priced, fees, discount)
   const link = includeLink && shareToken ? `${siteConfig.url}/quotation/${shareToken}` : null
 
   const listedItems = quote.items
@@ -527,6 +572,10 @@ export async function sendQuoteDispatchAction(
     importDuty: fees.importDuty,
     otherCostsLabel: quote.otherCostsLabel,
     otherCostsAmount: fees.otherCosts,
+    discount:
+      discount && totals.discountTotal > 0
+        ? { label: discountLineLabel(discount, quote.discountLabel), amount: totals.discountTotal }
+        : null,
     total: totals.total,
     // Guaranteed non-null: quoteReadinessProblem above refuses to proceed
     // without a validity date.
@@ -574,6 +623,9 @@ export async function sendQuoteDispatchAction(
         importDuty: fees.importDuty,
         otherCostsLabel: quote.otherCostsLabel,
         otherCostsAmount: fees.otherCosts,
+        discountType: quote.discountType,
+        discountValue: quote.discountValue?.toNumber() ?? null,
+        discountLabel: quote.discountLabel,
         paymentInstructions: quote.paymentInstructions,
         terms: quote.terms,
         contactName: quote.contactName,
@@ -826,9 +878,12 @@ export async function convertQuoteToOrderAction(
     unitPrice: item.quotedUnitPrice?.toNumber() ?? null,
   }))
 
+  const discount = toQuoteDiscount(quote.discountType, quote.discountValue?.toNumber() ?? null)
+
   const readinessProblem = quoteReadinessProblem({
     lines: priced,
     fees,
+    discount,
     validUntil: quote.validUntil,
     // The customer accepted while the quotation was valid; converting it
     // after the date must not undo their agreement. A quote still only SENT
@@ -862,6 +917,9 @@ export async function convertQuoteToOrderAction(
         clearingCost: fees.clearingCost,
         importDuty: fees.importDuty,
         otherCosts: fees.otherCosts,
+        otherCostsLabel: quote.otherCostsLabel,
+        discount,
+        discountLabel: discount ? discountLineLabel(discount, quote.discountLabel) : null,
         adminNotes: quote.adminNotes,
         milestonePercentages: {
           initial: settings.defaultInitialPercentage,

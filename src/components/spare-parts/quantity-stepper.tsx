@@ -104,7 +104,7 @@ export function QuantityStepper({
           }
         }}
         className={cn(
-          "tabular h-full border-x border-input bg-transparent py-1.5 text-center",
+          "tabular h-full border-x border-input bg-transparent py-2 text-center",
           // 16px on mobile: iOS Safari zooms the page in on focus for
           // anything smaller and never zooms back out.
           "text-base font-semibold text-foreground outline-none md:text-sm",

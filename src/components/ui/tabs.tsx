@@ -18,7 +18,7 @@ import { cn } from "@/lib/utils"
  * still submitted with the form.
  */
 function Tabs({ className, ...props }: TabsPrimitive.Root.Props) {
-  return <TabsPrimitive.Root data-slot="tabs" className={cn("flex flex-col gap-5", className)} {...props} />
+  return <TabsPrimitive.Root data-slot="tabs" className={cn("flex flex-col gap-6", className)} {...props} />
 }
 
 function TabsList({ className, ...props }: TabsPrimitive.List.Props) {
@@ -39,7 +39,7 @@ function TabsTab({ className, ...props }: TabsPrimitive.Tab.Props) {
     <TabsPrimitive.Tab
       data-slot="tabs-tab"
       className={cn(
-        "inline-flex h-8 shrink-0 cursor-pointer items-center gap-1.5 rounded-md px-3 text-small font-medium whitespace-nowrap",
+        "inline-flex h-8 shrink-0 cursor-pointer items-center gap-2 rounded-md px-3 text-small font-medium whitespace-nowrap pointer-coarse:h-11",
         "text-muted-foreground transition-[color,background-color,box-shadow] duration-fast ease-crownline",
         "hover:text-foreground outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
         "data-active:bg-card data-active:text-foreground data-active:shadow-[var(--shadow-subtle)]",

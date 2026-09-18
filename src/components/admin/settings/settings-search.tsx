@@ -92,12 +92,12 @@ export function SettingsSearch({ entries }: { entries: SettingsSearchItem[] }) {
           "group/search inline-flex h-9 shrink-0 items-center gap-2 rounded-lg border border-border bg-card text-small text-muted-foreground",
           "transition-colors duration-fast hover:border-foreground/20 hover:text-foreground",
           "focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none",
-          "w-9 justify-center sm:w-60 sm:justify-start sm:px-2.5"
+          "w-9 justify-center sm:w-60 sm:justify-start sm:px-3"
         )}
       >
         <Search aria-hidden="true" className="size-4 shrink-0" />
         <span className="hidden flex-1 text-left sm:inline">Search settings</span>
-        <kbd className="hidden rounded border border-border bg-muted px-1.5 font-sans text-[0.6875rem] leading-5 text-muted-foreground sm:inline">
+        <kbd className="hidden rounded border border-border bg-muted px-2 font-sans text-xs leading-5 text-muted-foreground sm:inline">
           ⌘K
         </kbd>
       </button>
@@ -109,7 +109,7 @@ export function SettingsSearch({ entries }: { entries: SettingsSearchItem[] }) {
         >
           <DialogTitle className="sr-only">Search settings</DialogTitle>
 
-          <div className="flex items-center gap-2.5 border-b border-border px-3.5">
+          <div className="flex items-center gap-3 border-b border-border px-4">
             <Search aria-hidden="true" className="size-4 shrink-0 text-muted-foreground" />
             <input
               autoFocus
@@ -127,14 +127,14 @@ export function SettingsSearch({ entries }: { entries: SettingsSearchItem[] }) {
               aria-autocomplete="list"
               className="h-12 min-w-0 flex-1 bg-transparent text-base text-foreground outline-none placeholder:text-muted-foreground sm:text-sm"
             />
-            <kbd className="hidden rounded border border-border bg-muted px-1.5 font-sans text-[0.6875rem] leading-5 text-muted-foreground sm:inline">
+            <kbd className="hidden rounded border border-border bg-muted px-2 font-sans text-xs leading-5 text-muted-foreground sm:inline">
               Esc
             </kbd>
           </div>
 
-          <div className="max-h-[min(24rem,60vh)] overflow-y-auto p-1.5">
+          <div className="max-h-[min(24rem,60vh)] overflow-y-auto p-2">
             {query.trim() === "" && results.length > 0 ? (
-              <p className="px-2.5 pt-1.5 pb-1 text-xs font-medium text-muted-foreground">Suggested</p>
+              <p className="px-3 pt-1.5 pb-1 text-xs font-medium text-muted-foreground">Suggested</p>
             ) : null}
 
             {results.length > 0 ? (
@@ -148,7 +148,7 @@ export function SettingsSearch({ entries }: { entries: SettingsSearchItem[] }) {
                     onMouseMove={() => setActive(index)}
                     onClick={() => go(entry)}
                     className={cn(
-                      "flex cursor-pointer items-center gap-3 rounded-lg px-2.5 py-2",
+                      "flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2",
                       index === active ? "bg-muted" : undefined
                     )}
                   >

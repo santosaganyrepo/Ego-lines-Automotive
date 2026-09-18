@@ -3,7 +3,13 @@
 import { createContext, useContext, useMemo, useState, type ReactNode } from "react"
 
 import type { QuoteDetailItem } from "@/lib/queries/quote.queries"
-import { computeQuoteTotals, quoteReadinessProblem, type QuoteTotals } from "@/lib/quotes/quote-pricing"
+import {
+  computeQuoteTotals,
+  quoteReadinessProblem,
+  toQuoteDiscount,
+  type QuoteDiscountTypeValue,
+  type QuoteTotals,
+} from "@/lib/quotes/quote-pricing"
 import { parseMoneyInput } from "@/lib/utils/money"
 
 /**
@@ -92,6 +98,13 @@ interface QuotePricingContextValue {
   setOtherCostsLabel: (value: string) => void
   otherCostsAmount: string
   setOtherCostsAmount: (value: string) => void
+  /** "" for no discount. */
+  discountType: QuoteDiscountTypeValue | ""
+  setDiscountType: (value: QuoteDiscountTypeValue | "") => void
+  discountValue: string
+  setDiscountValue: (value: string) => void
+  discountLabel: string
+  setDiscountLabel: (value: string) => void
   validUntil: string
   setValidUntil: (value: string) => void
   paymentInstructions: string
@@ -124,6 +137,9 @@ interface QuotePricingProviderProps {
   importDuty: number | null
   otherCostsLabel: string | null
   otherCostsAmount: number | null
+  discountType: QuoteDiscountTypeValue | null
+  discountValue: number | null
+  discountLabel: string | null
   validUntil: Date | null
   paymentInstructions: string | null
   terms: string | null
@@ -138,6 +154,9 @@ export function QuotePricingProvider({
   importDuty,
   otherCostsLabel,
   otherCostsAmount,
+  discountType,
+  discountValue,
+  discountLabel,
   validUntil,
   paymentInstructions,
   terms,
@@ -154,6 +173,9 @@ export function QuotePricingProvider({
   const [otherCostsAmountValue, setOtherCostsAmountValueState] = useState(
     otherCostsAmount === null ? "" : String(otherCostsAmount)
   )
+  const [discountTypeValue, setDiscountTypeValueState] = useState<QuoteDiscountTypeValue | "">(discountType ?? "")
+  const [discountValueValue, setDiscountValueValueState] = useState(discountValue === null ? "" : String(discountValue))
+  const [discountLabelValue, setDiscountLabelValueState] = useState(discountLabel ?? "")
   const [validUntilValue, setValidUntilValueState] = useState(toDateInputValue(validUntil))
   const [paymentInstructionsValue, setPaymentInstructionsValueState] = useState(paymentInstructions ?? "")
   const [termsValue, setTermsValueState] = useState(terms ?? "")
@@ -190,6 +212,9 @@ export function QuotePricingProvider({
   const setDuty = dirtySetter(setDutyValue)
   const setOtherCostsLabel = dirtySetter(setOtherCostsLabelValueState)
   const setOtherCostsAmount = dirtySetter(setOtherCostsAmountValueState)
+  const setDiscountType = dirtySetter(setDiscountTypeValueState)
+  const setDiscountValue = dirtySetter(setDiscountValueValueState)
+  const setDiscountLabel = dirtySetter(setDiscountLabelValueState)
   const setValidUntil = dirtySetter(setValidUntilValueState)
   const setPaymentInstructions = dirtySetter(setPaymentInstructionsValueState)
   const setTerms = dirtySetter(setTermsValueState)
@@ -239,16 +264,22 @@ export function QuotePricingProvider({
     [shipping, clearing, duty, otherCostsAmountValue]
   )
 
-  const totals = useMemo(() => computeQuoteTotals(pricedLines, fees), [pricedLines, fees])
+  const discount = useMemo(
+    () => toQuoteDiscount(discountTypeValue || null, parseMoneyInput(discountValueValue)),
+    [discountTypeValue, discountValueValue]
+  )
+
+  const totals = useMemo(() => computeQuoteTotals(pricedLines, fees, discount), [pricedLines, fees, discount])
 
   const readinessProblem = useMemo(
     () =>
       quoteReadinessProblem({
         lines: pricedLines,
         fees,
+        discount,
         validUntil: validUntilValue ? new Date(`${validUntilValue}T00:00:00.000Z`) : null,
       }),
-    [pricedLines, fees, validUntilValue]
+    [pricedLines, fees, discount, validUntilValue]
   )
 
   const value: QuotePricingContextValue = {
@@ -266,6 +297,12 @@ export function QuotePricingProvider({
     setOtherCostsLabel,
     otherCostsAmount: otherCostsAmountValue,
     setOtherCostsAmount,
+    discountType: discountTypeValue,
+    setDiscountType,
+    discountValue: discountValueValue,
+    setDiscountValue,
+    discountLabel: discountLabelValue,
+    setDiscountLabel,
     validUntil: validUntilValue,
     setValidUntil,
     paymentInstructions: paymentInstructionsValue,

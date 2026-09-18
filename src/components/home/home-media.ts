@@ -20,10 +20,13 @@ export const HOME_MEDIA = {
    * The hero photograph.
    *
    * ── Where the file goes ──────────────────────────────────────────────
-   *   public/images/home/hero.jpg
+   *   public/images/home/hero-2.jpg
    *
-   * Replace that one file to change the homepage hero; nothing else needs
-   * editing. What to supply:
+   * The optimiser caches a variant by URL for up to a month (see
+   * `minimumCacheTTL` in next.config.ts), so replacing this file's bytes
+   * under the same name would keep serving the old image to every visitor
+   * and CDN edge already holding it cached. Give the new file its own name
+   * (increment the suffix) and update `src` below to match. What to supply:
    *
    *   • Landscape, at least 2400×1350 (16:9). It is cropped to fill a
    *     full-height panel, so keep the subject away from the extreme edges —
@@ -38,7 +41,7 @@ export const HOME_MEDIA = {
    * own headline — the h1 beside it carries the meaning.
    */
   hero: {
-    src: "/images/home/hero.jpg",
+    src: "/images/home/hero-2.jpg",
     alt: "",
   },
   shipping: {

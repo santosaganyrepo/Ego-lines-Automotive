@@ -116,7 +116,7 @@ export function CommerceSettingsForm({ settings, canEdit }: Props) {
           */}
           <ul className="flex min-w-0 flex-col divide-y divide-border rounded-lg border border-border">
             {STAGES.map((stage) => (
-              <li key={stage.name} className="flex items-center gap-3 px-3 py-2.5 sm:px-4">
+              <li key={stage.name} className="flex items-center gap-3 px-3 py-3 sm:px-4">
                 <div className="flex min-w-0 flex-1 flex-col">
                   <label htmlFor={stage.name} className="text-small font-medium">
                     {stage.label}
@@ -157,7 +157,7 @@ export function CommerceSettingsForm({ settings, canEdit }: Props) {
                 </span>
               </li>
             ))}
-            <li className="flex items-center gap-3 bg-muted/40 px-3 py-2.5 text-small font-semibold sm:px-4">
+            <li className="flex items-center gap-3 bg-muted/40 px-3 py-3 text-small font-semibold sm:px-4">
               <span className="flex-1">Total</span>
               <span
                 aria-live="polite"

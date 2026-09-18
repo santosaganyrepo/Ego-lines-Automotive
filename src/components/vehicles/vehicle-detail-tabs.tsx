@@ -166,7 +166,7 @@ export function VehicleDetailTabs({
             {specifications.map((spec) => (
               <div
                 key={spec.label}
-                className="flex items-baseline justify-between gap-4 border-b border-border py-3.5"
+                className="flex items-baseline justify-between gap-4 border-b border-border py-4"
               >
                 <dt className="text-small text-muted-foreground">{spec.label}</dt>
                 <dd className="tabular text-right text-small font-medium">
@@ -189,7 +189,7 @@ export function VehicleDetailTabs({
               {features.map((feature) => (
                 <li
                   key={feature}
-                  className="flex items-start gap-3 border-b border-border py-3.5 text-small"
+                  className="flex items-start gap-3 border-b border-border py-4 text-small"
                 >
                   {/* A gold tick rather than a list marker: this is the one
                       place on the page where a run of small gold accents

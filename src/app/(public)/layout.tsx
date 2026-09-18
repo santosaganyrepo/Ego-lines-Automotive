@@ -1,8 +1,10 @@
 import type React from "react"
 
 import { CartProvider } from "@/components/cart/cart-provider"
+import { ConnectionStatus } from "@/components/layout/connection-status"
 import { SiteHeader } from "@/components/layout/site-header"
 import { SiteFooter } from "@/components/layout/site-footer"
+import { SiteTopBar, hasTopBarContent } from "@/components/layout/site-top-bar"
 import { SkipLink } from "@/components/layout/skip-link"
 import { WhatsAppFloatButton } from "@/components/layout/whatsapp-float-button"
 import { getPublicSiteSettings } from "@/lib/queries/settings.queries"
@@ -26,6 +28,7 @@ export default async function PublicLayout({
     phoneNumber: settings.contact.whatsappNumber,
     message: buildGeneralWhatsAppMessage(settings.businessName),
   })
+  const showTopBar = hasTopBarContent(settings)
 
   return (
     /**
@@ -41,20 +44,34 @@ export default async function PublicLayout({
      * by the root layout, above this one.
      */
     <CartProvider>
-      <div className="flex flex-1 flex-col">
+      {/*
+        `--header-offset` is the fixed header's full height at the top of the
+        page — the navigation row (h-16 / md:h-20) plus the contact bar (h-11)
+        when there is one. Content is padded by it, and the homepage hero
+        pulls itself up under the header by the same amount, so the two can
+        never disagree.
+      */}
+      <div
+        className={
+          showTopBar
+            ? "flex flex-1 flex-col [--header-offset:6.75rem] md:[--header-offset:7.75rem]"
+            : "flex flex-1 flex-col [--header-offset:4rem] md:[--header-offset:5rem]"
+        }
+      >
         {/* First element in the tab order, so keyboard users can jump the
             eight-item nav on every page rather than tabbing through it. */}
         <SkipLink />
 
-        <SiteHeader whatsappUrl={whatsappUrl} />
+        <SiteHeader whatsappUrl={whatsappUrl} topBar={showTopBar ? <SiteTopBar settings={settings} /> : null} />
 
         {/*
-          The padding reserves space equal to SiteHeader's height (h-16 /
-          md:h-20) so content never renders underneath the fixed header.
+          The padding reserves space equal to SiteHeader's height at the top of
+          the page (`--header-offset`, above) so content never renders
+          underneath the fixed header.
 
           The homepage hero is the one deliberate exception: it sits beneath
           the header's transparent variant by cancelling this padding with a
-          matching negative top margin (`-mt-16 md:-mt-20`) on its own
+          matching negative top margin (`-mt-(--header-offset)`) on its own
           full-bleed section. Every other page renders normally inside this
           padded flow — do not repeat that trick elsewhere, or the header
           will overlap real content.
@@ -63,12 +80,13 @@ export default async function PublicLayout({
           programmatically focusable so the skip actually moves focus rather
           than only moving the scroll position.
         */}
-        <main id="main-content" tabIndex={-1} className="flex-1 pt-16 outline-none md:pt-20">
+        <main id="main-content" tabIndex={-1} className="flex-1 pt-(--header-offset) outline-none">
           {children}
         </main>
 
         <SiteFooter />
         <WhatsAppFloatButton />
+        <ConnectionStatus />
       </div>
     </CartProvider>
   )

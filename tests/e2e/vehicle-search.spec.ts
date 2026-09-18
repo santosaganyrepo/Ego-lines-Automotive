@@ -130,12 +130,14 @@ function ui(page: Page) {
 async function gotoCatalogue(page: Page, url = "/cars") {
   await page.goto(url)
 
+  // Attached, not visible: below `sm` the filters sit inside a collapsed
+  // panel by design, which `openFilters` opens when a test needs them.
   await expect(
     ui(page)
       .getByLabel("Make")
       .or(ui(page).locator('[data-slot="empty-state"]'))
       .first()
-  ).toBeVisible()
+  ).toBeAttached()
 }
 
 async function requireFacets(page: Page, minimumMakes = 1) {
@@ -280,7 +282,8 @@ test.describe("catalogue search", () => {
     // filter bar has a "Clear filters" control of its own.
     const emptyState = ui(page).locator('[data-slot="empty-state"]')
     await expect(
-      emptyState.getByRole("button", { name: /clear filters/i })
+      // A link, and announced as one: it navigates to the unfiltered catalogue.
+      emptyState.getByRole("link", { name: /clear filters/i })
     ).toHaveAttribute("href", "/cars")
 
     // Stated once, not twice: the count line above the grid reports the

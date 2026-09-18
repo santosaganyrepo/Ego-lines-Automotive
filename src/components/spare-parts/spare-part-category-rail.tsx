@@ -94,7 +94,7 @@ export function SparePartCategoryRail({
         labels themselves are the affordance, and on a phone there is no bar
         to show anyway.
       */}
-      <ul className="no-scrollbar -mx-4 flex snap-x items-stretch gap-5 overflow-x-auto px-4 sm:-mx-6 sm:gap-6 sm:px-6 lg:mx-0 lg:justify-center lg:px-0">
+      <ul className="no-scrollbar -mx-4 flex snap-x items-stretch gap-6 overflow-x-auto px-4 sm:-mx-6 sm:gap-6 sm:px-6 lg:mx-0 lg:justify-center lg:px-0">
         <li className="snap-start">
           <CategoryLink
             href={partCatalogueHref({ q: criteria.q, category: undefined })}
@@ -134,11 +134,11 @@ function CategoryLink({
       // page you are on, which is exactly what `page` means.
       aria-current={active ? "page" : undefined}
       className={cn(
-        "relative inline-flex items-center whitespace-nowrap",
+        "relative inline-flex min-w-11 items-center justify-center whitespace-nowrap",
         // The rule is drawn on the border rather than as a pseudo-element so
         // it participates in layout: every label reserves the two pixels,
         // and the row does not shift by that much when the selection moves.
-        "border-b-2 py-2.5 text-small",
+        "border-b-2 py-3 text-small",
         "transition-colors duration-fast ease-crownline",
         "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
         active

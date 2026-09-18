@@ -29,7 +29,7 @@ export async function generateMetadata(props: PageProps<"/Ricky@2000/customers/[
 
 const DATE_FORMAT = new Intl.DateTimeFormat("en-GB", { dateStyle: "medium" })
 const ROW_LINK =
-  "group/row flex items-center justify-between gap-4 px-5 py-3.5 transition-colors duration-fast hover:bg-sunken/60 focus-visible:bg-sunken focus-visible:outline-none sm:px-6"
+  "group/row flex items-center justify-between gap-4 px-6 py-4 transition-colors duration-fast hover:bg-sunken/60 focus-visible:bg-sunken focus-visible:outline-none sm:px-6"
 
 /** One customer: who they are, and every quote, order and payment they have. */
 export default async function AdminCustomerDetailPage(props: PageProps<"/Ricky@2000/customers/[id]">) {
@@ -55,14 +55,14 @@ export default async function AdminCustomerDetailPage(props: PageProps<"/Ricky@2
         title={customer.fullName}
         meta={
           <>
-            <span className="inline-flex items-center gap-1.5">
+            <span className="inline-flex items-center gap-2">
               <CalendarDays aria-hidden="true" className="size-3.5" />
               Customer since {DATE_FORMAT.format(customer.createdAt)}
             </span>
             {location ? (
               <>
                 <AdminMetaDivider />
-                <span className="inline-flex items-center gap-1.5">
+                <span className="inline-flex items-center gap-2">
                   <MapPin aria-hidden="true" className="size-3.5" />
                   {location}
                 </span>
@@ -158,7 +158,7 @@ export default async function AdminCustomerDetailPage(props: PageProps<"/Ricky@2
             ) : (
               <ul className="flex flex-col divide-y divide-border/70 border-t border-border">
                 {customer.payments.map((payment) => (
-                  <li key={payment.id} className="flex items-center justify-between gap-4 px-5 py-3.5 sm:px-6">
+                  <li key={payment.id} className="flex items-center justify-between gap-4 px-6 py-4 sm:px-6">
                     <span className="flex min-w-0 flex-col gap-0.5">
                       <span className="text-small font-medium text-foreground tabular-nums">{formatCurrency(payment.amount)}</span>
                       <span className="text-xs text-muted-foreground">
@@ -221,7 +221,7 @@ export default async function AdminCustomerDetailPage(props: PageProps<"/Ricky@2
             {customer.otherContacts.length > 0 ? (
               <div className="flex flex-col gap-2 border-t border-border pt-4">
                 <h3 className="text-xs font-medium text-muted-foreground">Also used on enquiries</h3>
-                <ul className="flex flex-col gap-1.5 text-small">
+                <ul className="flex flex-col gap-2 text-small">
                   {customer.otherContacts.map((contact) => (
                     <li key={`${contact.label}:${contact.value}`} className="flex justify-between gap-3">
                       <span className="text-muted-foreground">{contact.label}</span>
@@ -269,7 +269,7 @@ function PanelTitle({ title, count }: { title: string; count: number }) {
   return (
     <span className="flex items-center gap-2">
       {title}
-      <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-md bg-secondary px-1.5 text-xs font-medium text-muted-foreground tabular-nums">
+      <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-md bg-secondary px-2 text-xs font-medium text-muted-foreground tabular-nums">
         {count}
       </span>
     </span>
@@ -277,7 +277,7 @@ function PanelTitle({ title, count }: { title: string; count: number }) {
 }
 
 function Empty({ children }: { children: ReactNode }) {
-  return <p className="border-t border-border px-5 py-5 text-small text-muted-foreground sm:px-6">{children}</p>
+  return <p className="border-t border-border px-6 py-6 text-small text-muted-foreground sm:px-6">{children}</p>
 }
 
 function AccountCell({
@@ -292,7 +292,7 @@ function AccountCell({
   attention?: boolean
 }) {
   return (
-    <div className="bg-card px-5 py-4 sm:px-6">
+    <div className="bg-card px-6 py-4 sm:px-6">
       <AdminStat label={label} value={value} hint={hint} tone={attention ? "attention" : "default"} />
     </div>
   )

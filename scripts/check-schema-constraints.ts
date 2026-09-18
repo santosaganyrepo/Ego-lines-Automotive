@@ -486,6 +486,20 @@ async function main() {
       `INSERT INTO "AdminSession" (id,"adminId","authSessionId","endReason") VALUES ('s-bad','chk-admin','chk-session-bad','REVOKED')`
     )
 
+    section("A quotation's discount is all or nothing, and never more than 100%")
+    await mustReject(
+      "a discount type with no value",
+      `UPDATE "Quote" SET "discountType" = 'PERCENTAGE', "discountValue" = NULL WHERE id = 'chk-quote'`
+    )
+    await mustReject(
+      "a percentage over 100",
+      `UPDATE "Quote" SET "discountType" = 'PERCENTAGE', "discountValue" = 120 WHERE id = 'chk-quote'`
+    )
+    await mustReject(
+      "a negative discount",
+      `UPDATE "Quote" SET "discountType" = 'FIXED_AMOUNT', "discountValue" = -1 WHERE id = 'chk-quote'`
+    )
+
     section("The objects the catalogue depends on are installed")
     const expectedConstraints = [
       "AdminSession_end_consistency_check",
@@ -494,11 +508,14 @@ async function main() {
       "BusinessSettings_session_timeout_check",
       "BusinessSettings_tracking_prefix_check",
       "Order_delivery_window_check",
+      "Order_discount_non_negative_check",
       "Order_import_duty_non_negative_check",
+      "Order_other_costs_non_negative_check",
       "OrderItem_exactly_one_product_check",
       "OrderItem_quantity_positive_check",
       "OrderItem_stock_reserved_check",
       "Quote_costs_non_negative_check",
+      "Quote_discount_check",
       "QuoteItem_accessory_no_product_check",
       "QuoteItem_at_most_one_product_check",
       "QuoteItem_price_non_negative_check",

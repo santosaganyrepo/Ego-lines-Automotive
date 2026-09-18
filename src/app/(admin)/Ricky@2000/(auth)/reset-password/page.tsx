@@ -37,7 +37,7 @@ export default async function AdminResetPasswordPage() {
       footer={
         <Link
           href={`${ADMIN_BASE_PATH}/login`}
-          className="underline underline-offset-4 transition-colors duration-fast hover:text-gold-ink"
+          className="inline-flex items-center underline underline-offset-4 transition-colors duration-fast hover:text-gold-ink pointer-coarse:min-h-11"
         >
           Back to sign in
         </Link>

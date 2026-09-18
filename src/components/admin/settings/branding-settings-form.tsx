@@ -79,12 +79,12 @@ export function BrandingSettingsForm({
                   />
                   <span
                     className={cn(
-                      "flex flex-col gap-2 rounded-lg border border-border p-2.5 transition-[border-color,box-shadow] duration-fast",
+                      "flex flex-col gap-2 rounded-lg border border-border p-3 transition-[border-color,box-shadow] duration-fast",
                       "peer-checked:border-gold-ink peer-checked:ring-2 peer-checked:ring-gold/30",
                       "peer-focus-visible:ring-3 peer-focus-visible:ring-ring/50"
                     )}
                   >
-                    <span aria-hidden="true" className={cn("flex h-16 gap-1.5 overflow-hidden rounded-md p-1.5 ring-1 ring-border", theme.preview)}>
+                    <span aria-hidden="true" className={cn("flex h-16 gap-2 overflow-hidden rounded-md p-2 ring-1 ring-border", theme.preview)}>
                       <span className={cn("w-1/4 rounded-sm", theme.bar)} />
                       <span className="flex flex-1 flex-col gap-1">
                         <span className={cn("h-2 w-2/3 rounded-sm opacity-40", theme.bar)} />
@@ -92,7 +92,7 @@ export function BrandingSettingsForm({
                         <span className="mt-auto h-2 w-1/3 rounded-sm bg-[oklch(0.8_0.145_85)]" />
                       </span>
                     </span>
-                    <span className="flex items-center gap-1.5 text-small font-medium">
+                    <span className="flex items-center gap-2 text-small font-medium">
                       <Icon aria-hidden="true" className="size-3.5" />
                       {theme.label}
                     </span>

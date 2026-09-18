@@ -44,7 +44,7 @@ export function AdminPageHeader({
       {back ? <AdminBackLink href={back.href}>{back.label}</AdminBackLink> : null}
 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between sm:gap-8">
-        <div className="flex min-w-0 flex-col gap-1.5">
+        <div className="flex min-w-0 flex-col gap-2">
           <h1 className="text-h2 text-balance text-foreground">{title}</h1>
           {description ? (
             <p className="max-w-2xl text-body text-muted-foreground">{description}</p>
@@ -70,7 +70,7 @@ export function AdminBackLink({ href, children }: { href: string; children: Reac
     <Link
       href={href}
       className={cn(
-        "group/back inline-flex w-fit items-center gap-1.5 rounded-sm text-small font-medium text-muted-foreground",
+        "group/back inline-flex w-fit items-center gap-2 rounded-sm text-small font-medium text-muted-foreground",
         "transition-colors duration-fast hover:text-foreground",
         "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
       )}

@@ -390,7 +390,7 @@ export function VehiclePhotoBoard({
                 type="button"
                 onClick={reset}
                 disabled={busy}
-                className="inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-small text-muted-foreground transition-colors duration-fast hover:text-gold-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:opacity-60"
+                className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-small text-muted-foreground transition-colors duration-fast hover:text-gold-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:opacity-60"
               >
                 <X aria-hidden="true" className="size-3.5" />
                 Clear

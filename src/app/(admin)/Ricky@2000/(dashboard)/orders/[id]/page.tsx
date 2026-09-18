@@ -109,7 +109,7 @@ export default async function AdminOrderDetailPage(props: PageProps<"/Ricky@2000
           <AdminPanel title="Items" description="What was sold, and the costs agreed on the quotation." flush>
             <ul className="flex flex-col divide-y divide-border/70 border-t border-border">
               {order.items.map((item) => (
-                <li key={item.id} className="flex items-center justify-between gap-4 px-5 py-3.5 sm:px-6">
+                <li key={item.id} className="flex items-center justify-between gap-4 px-6 py-4 sm:px-6">
                   <div className="flex min-w-0 flex-col gap-0.5">
                     <span className="text-small font-medium text-foreground">{item.description}</span>
                     <span className="text-xs text-muted-foreground tabular-nums">
@@ -123,12 +123,18 @@ export default async function AdminOrderDetailPage(props: PageProps<"/Ricky@2000
               ))}
             </ul>
 
-            <dl className="flex flex-col gap-2 border-t border-border bg-sunken/50 px-5 py-4 text-small sm:px-6">
+            <dl className="flex flex-col gap-2 border-t border-border bg-sunken/50 px-6 py-4 text-small sm:px-6">
               <CostRow label="Shipping" value={formatCurrencyOrDash(order.shippingCost)} />
               <CostRow label="Clearing" value={formatCurrencyOrDash(order.clearingCost)} />
               <CostRow label="Import duty" value={formatCurrencyOrDash(order.importDuty)} />
               {order.otherCharges ? (
                 <CostRow label="Accessories & extras" value={formatCurrencyOrDash(order.otherCharges)} />
+              ) : null}
+              {order.otherCostsAmount !== null ? (
+                <CostRow label={order.otherCostsLabel ?? "Other costs"} value={formatCurrency(order.otherCostsAmount)} />
+              ) : null}
+              {order.discountAmount > 0 ? (
+                <CostRow label={order.discountLabel ?? "Discount"} value={`−${formatCurrency(order.discountAmount)}`} />
               ) : null}
               <div className="mt-1 flex items-baseline justify-between border-t border-border pt-3">
                 <dt className="font-medium text-foreground">Total</dt>

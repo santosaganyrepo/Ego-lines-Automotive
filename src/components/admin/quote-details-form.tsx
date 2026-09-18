@@ -10,25 +10,34 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { QuotePdfDialog } from "@/components/admin/quote-pdf-dialog"
 import { updateQuoteDetailsAction, type QuoteDetailsFormState } from "@/lib/actions/quote.actions"
+import { PREFERRED_COUNTRY_LABELS } from "@/lib/constants/vehicle-options"
 import { useQuotePricing } from "@/lib/quotes/quote-pricing-context"
+import type { QuoteDiscountTypeValue } from "@/lib/quotes/quote-pricing"
 import { cn } from "@/lib/utils"
 import { formatCurrency, formatCurrencyOrDash } from "@/lib/utils/format-currency"
 import { parseMoneyInput } from "@/lib/utils/money"
 
 const INITIAL_STATE: QuoteDetailsFormState = { status: "idle" }
 
+const DISCOUNT_CHOICES: { value: "" | QuoteDiscountTypeValue; label: string }[] = [
+  { value: "", label: "No discount" },
+  { value: "FIXED_AMOUNT", label: "Amount" },
+  { value: "PERCENTAGE", label: "Percentage" },
+]
+
 /** Compact control sizing for this dense, desktop-oriented form — distinct
  *  from the 44px `Input` default, which exists for the public site's
  *  phone-first forms (see input.tsx). An operator working a quote at a desk
  *  needs density, not a larger tap target. */
-const FIELD = "h-9 rounded-md border-input bg-card px-2.5 text-small placeholder:text-muted-foreground/70"
-const AREA = "min-h-20 rounded-md border-input px-2.5 py-2 text-small leading-relaxed placeholder:text-muted-foreground/70"
+const FIELD = "h-9 rounded-md border-input bg-card px-3 text-small placeholder:text-muted-foreground/70"
+const AREA = "min-h-20 rounded-md border-input px-3 py-2 text-small leading-relaxed placeholder:text-muted-foreground/70"
 
 interface LookingFor {
   requestedMake: string | null
   requestedModel: string | null
   preferredYear: number | null
   maxBudget: number | null
+  preferredCountry: string | null
   requestedPartName: string | null
   requestedPartNumber: string | null
   additionalRequirements: string | null
@@ -58,11 +67,18 @@ export function QuoteDetailsForm({
   requestedModel,
   preferredYear,
   maxBudget,
+  preferredCountry,
   requestedPartName,
   requestedPartNumber,
   additionalRequirements,
 }: QuoteDetailsFormProps) {
   const [state, formAction, isPending] = useActionState(updateQuoteDetailsAction, INITIAL_STATE)
+  const fieldError = (name: string): string | undefined =>
+    state.status === "error" ? state.fieldErrors?.[name]?.[0] : undefined
+  const fieldErrorMessages =
+    state.status === "error" && state.fieldErrors
+      ? [...new Set(Object.values(state.fieldErrors).flatMap((messages) => messages ?? []))]
+      : []
   const {
     lines,
     updateLine,
@@ -78,6 +94,13 @@ export function QuoteDetailsForm({
     setOtherCostsLabel,
     otherCostsAmount,
     setOtherCostsAmount,
+    discountType,
+    setDiscountType,
+    discountValue,
+    setDiscountValue,
+    discountLabel,
+    setDiscountLabel,
+    totals,
     validUntil,
     setValidUntil,
     paymentInstructions,
@@ -103,20 +126,20 @@ export function QuoteDetailsForm({
   }, [state])
 
   const hasLookingFor = Boolean(
-    requestedMake || requestedModel || requestedPartName || additionalRequirements
+    requestedMake || requestedModel || preferredCountry || requestedPartName || additionalRequirements
   )
 
   if (!isEditable) {
     return (
       <section
         id="pricing"
-        className="flex scroll-mt-24 items-start gap-4 rounded-xl border border-border bg-card p-5 shadow-[var(--shadow-subtle)] sm:p-6"
+        className="flex scroll-mt-24 items-start gap-4 rounded-xl border border-border bg-card p-6 shadow-[var(--shadow-subtle)] sm:p-6"
       >
         <span
           aria-hidden="true"
           className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-border bg-sunken text-muted-foreground"
         >
-          <Lock className="size-4" strokeWidth={1.75} />
+          <Lock className="size-4" />
         </span>
         <div className="flex flex-col gap-1">
           <h2 className="text-h3">Quotation locked</h2>
@@ -129,7 +152,7 @@ export function QuoteDetailsForm({
   }
 
   return (
-    <section id="pricing" className="flex scroll-mt-24 flex-col gap-6 rounded-xl border border-border bg-card p-5 shadow-[var(--shadow-subtle)] sm:p-6">
+    <section id="pricing" className="flex scroll-mt-24 flex-col gap-6 rounded-xl border border-border bg-card p-6 shadow-[var(--shadow-subtle)] sm:p-6">
       <div className="flex items-start justify-between gap-3">
         <div className="flex flex-col gap-1">
           <h2 className="text-h3">Quotation</h2>
@@ -150,11 +173,20 @@ export function QuoteDetailsForm({
       {state.status === "error" && state.message ? (
         <Alert variant="destructive">
           <AlertCircle aria-hidden="true" />
-          <AlertDescription>{state.message}</AlertDescription>
+          <AlertDescription>
+            {state.message}
+            {fieldErrorMessages.length > 0 ? (
+              <ul className="mt-2 list-disc pl-4">
+                {fieldErrorMessages.map((message) => (
+                  <li key={message}>{message}</li>
+                ))}
+              </ul>
+            ) : null}
+          </AlertDescription>
         </Alert>
       ) : null}
 
-      <form action={formAction} className="flex flex-col gap-7">
+      <form action={formAction} className="flex flex-col gap-8">
         <input type="hidden" name="quoteId" value={quoteId} />
         <input type="hidden" name="expectedUpdatedAt" value={state.updatedAt ?? updatedAt.toISOString()} />
         <input type="hidden" name="lines" value={linesJson} />
@@ -169,6 +201,12 @@ export function QuoteDetailsForm({
               {preferredYear ? <LookingForRow label="Year" value={String(preferredYear)} /> : null}
               {maxBudget !== null ? (
                 <LookingForRow label="Budget" value={formatCurrencyOrDash(maxBudget)} />
+              ) : null}
+              {preferredCountry ? (
+                <LookingForRow
+                  label="Source from"
+                  value={PREFERRED_COUNTRY_LABELS[preferredCountry as keyof typeof PREFERRED_COUNTRY_LABELS] ?? preferredCountry}
+                />
               ) : null}
               {requestedPartName ? <LookingForRow label="Part" value={requestedPartName} /> : null}
               {requestedPartNumber ? (
@@ -214,7 +252,7 @@ export function QuoteDetailsForm({
                   <div
                     key={line.key}
                     className={cn(
-                      "grid grid-cols-2 gap-x-2 gap-y-2 px-3 py-2.5",
+                      "grid grid-cols-2 gap-x-2 gap-y-2 px-3 py-3",
                       "sm:grid-cols-[1fr_7.5rem_3.25rem_6rem_6rem_1.75rem] sm:items-center sm:gap-2"
                     )}
                   >
@@ -296,7 +334,7 @@ export function QuoteDetailsForm({
         <div className="flex flex-col gap-4 border-t border-border pt-6">
           <SubsectionHeading title="Costs and validity" description="Leave a cost empty if it is not part of this quotation." />
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-2">
               <Label htmlFor="shippingCost" className="text-small font-medium">
                 Shipping estimate
               </Label>
@@ -310,7 +348,7 @@ export function QuoteDetailsForm({
                 className={FIELD}
               />
             </div>
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-2">
               <Label htmlFor="clearingCost" className="text-small font-medium">
                 Clearing estimate
               </Label>
@@ -324,7 +362,7 @@ export function QuoteDetailsForm({
                 className={FIELD}
               />
             </div>
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-2">
               <Label htmlFor="importDuty" className="text-small font-medium">
                 Import duty
               </Label>
@@ -340,7 +378,7 @@ export function QuoteDetailsForm({
             </div>
           </div>
 
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col gap-2">
             <span className="text-small font-medium">Other costs</span>
             <div className="grid grid-cols-[1fr_9rem] gap-2">
               <Input
@@ -363,7 +401,79 @@ export function QuoteDetailsForm({
             </div>
           </div>
 
-          <div className="flex flex-col gap-1.5 sm:w-44">
+          {/* ── Optional discount ─────────────────────────────────────── */}
+          <fieldset className="flex flex-col gap-3">
+            <legend className="mb-2 text-small font-medium">
+              Discount <span className="font-normal text-muted-foreground">(optional)</span>
+            </legend>
+            <input type="hidden" name="discountType" value={discountType} />
+            <div role="radiogroup" aria-label="Discount type" className="flex w-fit rounded-md border border-input p-0.5">
+              {DISCOUNT_CHOICES.map((choice) => (
+                <button
+                  key={choice.value || "none"}
+                  type="button"
+                  role="radio"
+                  aria-checked={discountType === choice.value}
+                  onClick={() => setDiscountType(choice.value)}
+                  className={cn(
+                    "rounded-sm px-3 py-1 text-small transition-colors duration-fast",
+                    discountType === choice.value
+                      ? "bg-foreground text-background"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  {choice.label}
+                </button>
+              ))}
+            </div>
+
+            {discountType ? (
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_9rem]">
+                <Input
+                  name="discountLabel"
+                  aria-label="Discount label"
+                  value={discountLabel}
+                  onChange={(event) => setDiscountLabel(event.target.value)}
+                  placeholder="e.g. Loyal customer discount"
+                  maxLength={120}
+                  className={FIELD}
+                />
+                <div className="relative">
+                  <Input
+                    name="discountValue"
+                    aria-label={discountType === "PERCENTAGE" ? "Discount percentage" : "Discount amount"}
+                    aria-invalid={fieldError("discountValue") ? true : undefined}
+                    inputMode="decimal"
+                    value={discountValue}
+                    onChange={(event) => setDiscountValue(event.target.value)}
+                    placeholder={discountType === "PERCENTAGE" ? "10" : "500.00"}
+                    className={cn(FIELD, "pr-8 text-right tabular-nums")}
+                  />
+                  <span
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-small text-muted-foreground"
+                  >
+                    {discountType === "PERCENTAGE" ? "%" : "$"}
+                  </span>
+                </div>
+              </div>
+            ) : null}
+
+            {discountType && fieldError("discountValue") ? (
+              <p className="text-xs text-destructive">{fieldError("discountValue")}</p>
+            ) : discountType && totals.discountTotal > 0 ? (
+              <p className="text-xs text-muted-foreground">
+                Takes <span className="font-medium text-success tabular-nums">−{formatCurrency(totals.discountTotal)}</span>{" "}
+                off the vehicle and parts. Shipping, clearing, duty and other costs are not discounted.
+              </p>
+            ) : discountType ? (
+              <p className="text-xs text-muted-foreground">
+                Applied to the vehicle and parts only — never to shipping, clearing, duty or other costs.
+              </p>
+            ) : null}
+          </fieldset>
+
+          <div className="flex flex-col gap-2 sm:w-44">
             <Label htmlFor="validUntil" className="text-small font-medium">
               Valid until
             </Label>
@@ -381,7 +491,7 @@ export function QuoteDetailsForm({
         {/* ── Text that reaches the customer ──────────────────────────── */}
         <div className="flex flex-col gap-4 border-t border-border pt-6">
           <SubsectionHeading title="For the customer" description="Printed on the quotation they receive." />
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col gap-2">
             <Label htmlFor="paymentInstructions" className="text-small font-medium">
               Payment instructions
             </Label>
@@ -397,7 +507,7 @@ export function QuoteDetailsForm({
             />
           </div>
 
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col gap-2">
             <Label htmlFor="terms" className="text-small font-medium">
               Terms
             </Label>
@@ -430,7 +540,7 @@ export function QuoteDetailsForm({
           />
         </div>
 
-        <div className="flex items-center justify-end border-t border-border pt-5">
+        <div className="flex items-center justify-end border-t border-border pt-6">
           <Button type="submit" disabled={isPending} className="w-full sm:w-auto sm:min-w-32">
             {isPending ? <Loader2 aria-hidden="true" className="animate-spin" /> : null}
             Save details

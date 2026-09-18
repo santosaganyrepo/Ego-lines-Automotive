@@ -167,7 +167,11 @@ export function CardCarousel({ heading, label, children }: CardCarouselProps) {
          */
         aria-label={label}
         className={cn(
-          "no-scrollbar flex snap-x snap-mandatory gap-5 overflow-x-auto overscroll-x-contain",
+          // `relative`: the list is the containing block for anything absolutely
+          // positioned inside its cards (screen-reader-only labels included),
+          // so off-screen cards stay clipped here instead of stretching the
+          // whole page sideways.
+          "no-scrollbar relative flex snap-x snap-mandatory gap-6 overflow-x-auto overscroll-x-contain",
           "-mx-4 scroll-px-4 px-4 pb-1 sm:mx-0 sm:scroll-px-0 sm:px-0"
         )}
       >

@@ -24,7 +24,7 @@ interface ErrorStateProps extends Omit<React.ComponentProps<"div">, "title"> {
  * server-side, show a person something they can act on.
  */
 function ErrorState({
-  title = "Something went wrong",
+  title = "This could not be loaded",
   description = "We couldn't load this just now. Please try again in a moment.",
   action,
   reference,
@@ -50,7 +50,7 @@ function ErrorState({
         <TriangleAlertIcon className="size-5" />
       </div>
 
-      <div className="flex flex-col gap-1.5">
+      <div className="flex flex-col gap-2">
         <p className="font-heading text-h3 text-foreground">{title}</p>
         <p className="mx-auto max-w-md text-small text-muted-foreground">{description}</p>
       </div>

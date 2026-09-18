@@ -31,7 +31,7 @@ export function NotificationSettingsForm({
       <SettingsFormAlert state={state} />
 
       {!emailConfigured ? (
-        <div className="flex items-start gap-2.5 rounded-lg border border-warning/35 bg-warning/5 px-4 py-3 text-small text-foreground">
+        <div className="flex items-start gap-3 rounded-lg border border-warning/35 bg-warning/5 px-4 py-3 text-small text-foreground">
           <AlertTriangle aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-warning" />
           <p>
             Email sending is not set up on the server yet, so no email goes out whatever is switched on here. The

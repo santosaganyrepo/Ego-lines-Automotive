@@ -82,7 +82,7 @@ export function MobileNav({ open, onOpenChange, whatsappUrl }: MobileNavProps) {
             )}
           >
             {link.label}
-            <span className="rounded-4xl border border-white/20 px-2 py-0.5 text-[0.625rem] font-semibold tracking-[0.08em] text-background/50 uppercase">
+            <span className="rounded-4xl border border-white/20 px-2 py-0.5 text-xs font-semibold tracking-[0.08em] text-background/50 uppercase">
               Soon
             </span>
           </span>
@@ -194,7 +194,7 @@ export function MobileNav({ open, onOpenChange, whatsappUrl }: MobileNavProps) {
             "data-closed:animate-out data-closed:slide-out-to-left-full"
           )}
         >
-          <div className="flex items-center justify-between gap-3 border-b border-white/10 px-5 py-5">
+          <div className="flex items-center justify-between gap-3 border-b border-white/10 px-6 py-6">
             <DialogPrimitive.Title render={<BrandMark size="sm" tone="dark" layout="lockup" className="min-w-0" />} />
             <DialogPrimitive.Description className="sr-only">
               Site navigation
@@ -207,7 +207,7 @@ export function MobileNav({ open, onOpenChange, whatsappUrl }: MobileNavProps) {
             </DialogPrimitive.Close>
           </div>
 
-          <nav aria-label="Mobile" className="flex-1 overflow-y-auto px-5 py-6">
+          <nav aria-label="Mobile" className="flex-1 overflow-y-auto px-6 py-6">
             <ul className="flex flex-col">
               {headerNavItems.map((item, index) => {
                 // Services opens a menu on a desktop; in a drawer there is room
@@ -233,7 +233,7 @@ export function MobileNav({ open, onOpenChange, whatsappUrl }: MobileNavProps) {
             </ul>
           </nav>
 
-          <div className="flex flex-col gap-2.5 border-t border-white/10 px-5 py-5">
+          <div className="flex flex-col gap-3 border-t border-white/10 px-6 py-6">
             {whatsappUrl && (
               <a
                 href={whatsappUrl}

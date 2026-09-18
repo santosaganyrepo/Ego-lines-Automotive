@@ -32,7 +32,7 @@ export function AdminFilterTabs({
       role="group"
       aria-label={label}
       className={cn(
-        "no-scrollbar -mx-4 flex min-w-0 items-end gap-5 overflow-x-auto border-b border-border px-4 sm:mx-0 sm:px-0",
+        "no-scrollbar -mx-4 flex min-w-0 items-end gap-6 overflow-x-auto border-b border-border px-4 sm:mx-0 sm:px-0",
         className
       )}
     >
@@ -78,7 +78,7 @@ export function AdminFilterTab({
       {label}
       <span
         className={cn(
-          "inline-flex h-5 min-w-5 items-center justify-center rounded-md px-1.5 text-[0.6875rem] tabular-nums",
+          "inline-flex h-5 min-w-5 items-center justify-center rounded-md px-2 text-xs tabular-nums",
           "transition-colors duration-fast",
           active
             ? "bg-foreground text-background"
@@ -230,7 +230,7 @@ export function AdminClearFilters({ onClick, children = "Clear filters" }: { onC
       type="button"
       onClick={onClick}
       className={cn(
-        "inline-flex h-8 shrink-0 cursor-pointer items-center gap-1.5 rounded-md px-2 text-small font-medium text-muted-foreground",
+        "inline-flex h-8 shrink-0 cursor-pointer items-center gap-2 rounded-md px-2 text-small font-medium text-muted-foreground",
         "transition-colors duration-fast hover:bg-secondary hover:text-foreground",
         "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
       )}

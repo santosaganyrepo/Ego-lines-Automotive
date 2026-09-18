@@ -5,6 +5,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { Container } from "@/components/layout/container";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
+import { SiteTopBar, hasTopBarContent } from "@/components/layout/site-top-bar";
 import { getPublicSiteSettings } from "@/lib/queries/settings.queries";
 import {
   buildGeneralWhatsAppMessage,
@@ -50,10 +51,19 @@ export default async function NotFound() {
 
   return (
     <CartProvider>
-      <div className="flex flex-1 flex-col">
-        <SiteHeader whatsappUrl={whatsappUrl} />
+      <div
+        className={
+          hasTopBarContent(settings)
+            ? "flex flex-1 flex-col [--header-offset:6.75rem] md:[--header-offset:7.75rem]"
+            : "flex flex-1 flex-col [--header-offset:4rem] md:[--header-offset:5rem]"
+        }
+      >
+        <SiteHeader
+          whatsappUrl={whatsappUrl}
+          topBar={hasTopBarContent(settings) ? <SiteTopBar settings={settings} /> : null}
+        />
 
-        <main className="flex flex-1 items-center pt-16 md:pt-20">
+        <main className="flex flex-1 items-center pt-(--header-offset)">
           <Container className="py-20 md:py-32">
             <div className="flex max-w-2xl flex-col gap-6">
               <span className="eyebrow text-gold-ink">Error 404</span>

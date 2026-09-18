@@ -115,7 +115,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const fits =
     part.fitment.length > 0 ? ` Fits ${part.fitment.slice(0, 2).join(", ")}.` : ""
 
-  const description = `${part.name} for sale in South Sudan.${fits} Imported from Japan and Korea and delivered to Juba. Reference ${part.referenceNumber}.`
+  const description = `${part.name} for sale in South Sudan.${fits} Imported from Japan, South Korea and China and delivered to Juba. Reference ${part.referenceNumber}.`
 
   const cover = part.photos[0]
 
@@ -244,16 +244,16 @@ export default async function SparePartPage({ params }: PageProps) {
                 as one associated pair; three loose spans would be six
                 unrelated fragments.
               */}
-              <dl className="flex flex-wrap items-center gap-x-5 gap-y-1.5 text-small">
+              <dl className="flex flex-wrap items-center gap-x-6 gap-y-2 text-small">
                 {part.brand ? (
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-2">
                     <dt className="text-muted-foreground">By:</dt>
                     <dd className="font-semibold text-foreground">{part.brand}</dd>
                   </div>
                 ) : null}
 
                 {part.categoryName && part.categorySlug ? (
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-2">
                   <dt className="text-muted-foreground">Category:</dt>
                   <dd className="font-medium text-foreground">
                     {/* Linked, because it is the one value here a customer
@@ -262,7 +262,7 @@ export default async function SparePartPage({ params }: PageProps) {
                         out to be the wrong one. */}
                     <Link
                       href={`/spare-parts?category=${part.categorySlug}`}
-                      className="underline-offset-4 transition-colors duration-fast hover:text-gold-ink hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                      className="underline-offset-4 transition-colors duration-fast hover:text-gold-ink hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring pointer-coarse:inline-flex pointer-coarse:min-h-11 pointer-coarse:items-center"
                     >
                       {part.categoryName}
                     </Link>
@@ -277,7 +277,7 @@ export default async function SparePartPage({ params }: PageProps) {
                   (see the page note).
                 */}
                 {part.oemPartNumber ? (
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-2">
                     <dt className="text-muted-foreground">Part no:</dt>
                     <dd className="font-mono font-medium text-foreground">
                       {part.oemPartNumber}
@@ -319,16 +319,16 @@ export default async function SparePartPage({ params }: PageProps) {
             {part.fitment.length > 0 ? (
               <section
                 aria-labelledby="fitment-heading"
-                className="flex flex-col gap-2.5 rounded-[4px] border border-border bg-card p-4 sm:p-5"
+                className="flex flex-col gap-3 rounded-[4px] border border-border bg-card p-4 sm:p-6"
               >
                 <h2 id="fitment-heading" className="eyebrow text-muted-foreground">
                   Fits these vehicles
                 </h2>
-                <ul className="flex flex-wrap gap-1.5">
+                <ul className="flex flex-wrap gap-2">
                   {part.fitment.map((line) => (
                     <li
                       key={line}
-                      className="rounded-[4px] border border-border bg-secondary px-2.5 py-1 text-small text-secondary-foreground"
+                      className="rounded-[4px] border border-border bg-secondary px-3 py-1 text-small text-secondary-foreground"
                     >
                       {line}
                     </li>

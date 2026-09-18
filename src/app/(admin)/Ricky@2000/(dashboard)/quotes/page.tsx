@@ -68,6 +68,7 @@ export default async function AdminQuotesPage(props: PageProps<"/Ricky@2000/quot
     {
       id: "status",
       header: "Status",
+      align: "center",
       render: (quote) => <QuoteStatusBadge status={quote.status} />,
     },
     {

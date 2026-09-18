@@ -64,7 +64,7 @@ export const DEFAULT_SPARE_PART_DELIVERY_STEPS: readonly SparePartDeliveryStep[]
   {
     title: "Sourced and shipped",
     description:
-      "Stocked parts are set aside immediately. Anything we source is bought from our suppliers in Japan and Korea and sent on the next consolidation.",
+      "Stocked parts are set aside immediately. Anything we source is bought from our suppliers in Japan, South Korea and China and sent on the next consolidation.",
   },
   {
     title: "Delivered in South Sudan",

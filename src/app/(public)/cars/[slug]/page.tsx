@@ -280,7 +280,7 @@ export default async function VehiclePage({ params }: PageProps) {
           */}
           <Link
             href="/cars"
-            className="group/back inline-flex w-fit items-center gap-2 text-small font-medium text-muted-foreground transition-colors duration-fast ease-crownline hover:text-foreground"
+            className="group/back inline-flex w-fit items-center gap-2 text-small font-medium text-muted-foreground transition-colors duration-fast ease-crownline hover:text-foreground pointer-coarse:min-h-11"
           >
             <ArrowLeftIcon
               aria-hidden="true"
@@ -437,7 +437,7 @@ export default async function VehiclePage({ params }: PageProps) {
         */}
         <section
           aria-labelledby="description-heading"
-          className="mx-auto flex w-full max-w-6xl flex-col gap-5"
+          className="mx-auto flex w-full max-w-6xl flex-col gap-6"
         >
           <h2 id="description-heading" className="text-h2">
             About this vehicle

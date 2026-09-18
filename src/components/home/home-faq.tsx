@@ -35,7 +35,7 @@ export function buildHomeFaqs({
   return [
     {
       question: "Where do your vehicles come from?",
-      answer: `${businessName} sources vehicles from auction houses and dealers in Japan and South Korea, then ships them to customers in South Sudan through the port of Mombasa.`,
+      answer: `${businessName} sources vehicles from auction houses and dealers in Japan, South Korea and China, then ships them to customers in South Sudan through the port of Mombasa.`,
     },
     {
       question: "Is the price on a listing the final price?",
@@ -54,7 +54,7 @@ export function buildHomeFaqs({
     {
       question: "What if the car I want is not listed?",
       answer:
-        "Send us a quote request with the make, model, year and budget you have in mind. We will look for it in Japan and South Korea and reply with a full quotation — there is no commitment until you accept it.",
+        "Send us a quote request with the make, model, year and budget you have in mind. We will look for it in Japan, South Korea and China and reply with a full quotation — there is no commitment until you accept it.",
     },
     {
       question: "Do you also supply spare parts?",
@@ -100,7 +100,7 @@ export function HomeFaq({ faqs }: { faqs: FaqItem[] }) {
             />
             <Link
               href="/contact"
-              className="rv-up group/faq inline-flex w-fit items-center gap-2 py-2 text-small font-semibold text-gold transition-colors duration-fast hover:text-gold-bright"
+              className="rv-up group/faq inline-flex w-fit items-center gap-2 py-2 text-small font-semibold text-gold pointer-coarse:min-h-11 transition-colors duration-fast hover:text-gold-bright"
               style={delay(500)}
             >
               Ask us a question

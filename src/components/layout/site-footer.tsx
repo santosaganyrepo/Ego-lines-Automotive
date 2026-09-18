@@ -48,7 +48,7 @@ export async function SiteFooter() {
           key: "phone",
           icon: PhoneIcon,
           content: contact.callUsEnabled ? (
-            <a href={toTelHref(contact.phone)} className="tabular transition-colors hover:text-gold-ink">
+            <a href={toTelHref(contact.phone)} className="tabular inline-flex items-center transition-colors hover:text-gold-ink pointer-coarse:min-h-11">
               {contact.phone}
             </a>
           ) : (
@@ -61,7 +61,7 @@ export async function SiteFooter() {
           key: "email",
           icon: MailIcon,
           content: (
-            <a href={`mailto:${contact.email}`} className="transition-colors hover:text-gold-ink">
+            <a href={`mailto:${contact.email}`} className="inline-flex items-center break-all transition-colors hover:text-gold-ink pointer-coarse:min-h-11">
               {contact.email}
             </a>
           ),
@@ -87,10 +87,10 @@ export async function SiteFooter() {
               <BrandMark size="lg" tone="dark" layout="lockup" />
             </Link>
 
-            <p className="mt-5 max-w-sm text-body text-background/65">{settings.businessDescription}</p>
+            <p className="mt-6 max-w-sm text-body text-background/65">{settings.businessDescription}</p>
 
             {contactItems.length > 0 ? (
-              <ul className="mt-7 space-y-3.5 text-small text-background/80">
+              <ul className="mt-8 space-y-3.5 text-small text-background/80">
                 {contactItems.map(({ key, icon: Icon, content }) => (
                   <li key={key} className="flex items-start gap-3">
                     <Icon className="mt-0.5 size-4 shrink-0 text-gold-ink" aria-hidden="true" />
@@ -105,20 +105,20 @@ export async function SiteFooter() {
           {footerLinkGroups.map((group) => (
             <div key={group.title} className="lg:col-span-2">
               <h2 className="eyebrow text-gold-ink">{group.title}</h2>
-              <ul className="mt-5 space-y-3">
+              <ul className="mt-6 space-y-3 pointer-coarse:space-y-0">
                 {group.links.map((link) => (
                   <li key={link.href}>
                     {isNavLinkAvailable(link) ? (
                       <Link
                         href={link.href}
-                        className="text-small text-background/70 transition-colors duration-fast hover:text-background"
+                        className="inline-flex items-center text-small text-background/70 transition-colors duration-fast hover:text-background pointer-coarse:min-h-11 pointer-coarse:min-w-11"
                       >
                         {link.label}
                       </Link>
                     ) : (
                       <span className="flex items-center gap-2 text-small text-background/35">
                         {link.label}
-                        <span className="rounded-4xl border border-white/15 px-1.5 py-px text-[0.625rem] font-semibold tracking-[0.08em] uppercase">
+                        <span className="rounded-4xl border border-white/15 px-2 py-px text-xs font-semibold tracking-[0.08em] uppercase">
                           Soon
                         </span>
                       </span>
@@ -132,7 +132,7 @@ export async function SiteFooter() {
           {/* Direct contact */}
           <div className="lg:col-span-3">
             <h2 className="eyebrow text-gold-ink">Talk to us</h2>
-            <p className="mt-5 text-small text-background/65">
+            <p className="mt-6 text-small text-background/65">
               Questions about a vehicle, a quote, or an order already on its way? We reply fast.
             </p>
 
@@ -142,7 +142,7 @@ export async function SiteFooter() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className={cn(
-                  "mt-5 inline-flex items-center gap-2 rounded-lg border border-white/20 px-4 py-2.5",
+                  "mt-6 inline-flex items-center gap-2 rounded-lg border border-white/20 px-4 py-3",
                   "text-small font-medium text-background",
                   "transition-colors duration-fast",
                   "hover:border-gold/60 hover:bg-white/5 hover:text-gold-ink"
@@ -154,7 +154,7 @@ export async function SiteFooter() {
             )}
 
             {settings.social.length > 0 ? (
-              <div className="mt-7 flex flex-wrap items-center gap-2.5">
+              <div className="mt-8 flex flex-wrap items-center gap-3">
                 {settings.social.map(({ network, label, url }) => (
                   <a
                     key={network}
@@ -162,7 +162,7 @@ export async function SiteFooter() {
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label={label}
-                    className="flex size-9 items-center justify-center rounded-full border border-white/15 text-background/70 transition-colors duration-fast hover:border-gold/60 hover:text-gold-ink"
+                    className="flex size-11 items-center justify-center rounded-full border border-white/15 text-background/70 transition-colors duration-fast hover:border-gold/60 hover:text-gold-ink"
                   >
                     <SocialIcon network={network} />
                   </a>
@@ -177,7 +177,7 @@ export async function SiteFooter() {
             © {new Date().getFullYear()} {settings.businessName}. All rights reserved.
           </p>
           <p className="text-small text-background/50">
-            Vehicles sourced from Japan &amp; South Korea · Delivered across South Sudan
+            Vehicles sourced from Japan, South Korea &amp; China · Delivered across South Sudan
           </p>
         </div>
       </Container>

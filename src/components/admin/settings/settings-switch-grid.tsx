@@ -40,7 +40,7 @@ export function SettingsSwitchTile({
     <li className="-mr-px -mb-px flex min-w-0 border-r border-b border-border">
       <label
         htmlFor={id}
-        className="flex w-full cursor-pointer items-center justify-between gap-3 px-3 py-2.5 transition-colors duration-fast hover:bg-muted/50 sm:px-3.5"
+        className="flex w-full cursor-pointer items-center justify-between gap-3 px-3 py-3 transition-colors duration-fast hover:bg-muted/50 sm:px-4"
       >
         <span className="flex min-w-0 flex-col">
           <span className="text-small font-medium text-foreground">{label}</span>

@@ -43,7 +43,7 @@ const STEPS: ImportStep[] = [
     icon: ClipboardCheck,
     title: "Inspection and verification",
     body: "We check the vehicle's information, condition and documentation before it leaves.",
-    place: "Japan or South Korea",
+    place: "Japan, South Korea or China",
   },
   {
     icon: FileCheck2,

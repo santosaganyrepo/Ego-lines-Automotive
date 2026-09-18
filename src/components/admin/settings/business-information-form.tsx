@@ -109,7 +109,7 @@ export function BusinessInformationForm({ settings, canEdit }: Props) {
           title="WhatsApp & contact"
           description="How customers reach the dealership. Published on the website; leave a field empty to hide it."
         >
-          <div data-settings-field="" className="flex min-w-0 flex-col gap-1.5">
+          <div data-settings-field="" className="flex min-w-0 flex-col gap-2">
             <div className="flex items-center justify-between gap-3">
               <label htmlFor="whatsappNumber" className="flex items-center gap-2 text-small font-medium text-foreground">
                 <WhatsAppGlyph className="size-4 text-[#25D366]" />
@@ -267,7 +267,7 @@ export function BusinessInformationForm({ settings, canEdit }: Props) {
               note="Every amount is recorded in US dollars; other currencies arrive with multi-currency support."
             />
 
-            <div className="flex min-w-0 flex-col gap-1.5">
+            <div className="flex min-w-0 flex-col gap-2">
               <span className="text-small font-medium text-foreground">Logo</span>
               <Link
                 href={adminPath("/settings/branding")}
@@ -287,7 +287,7 @@ export function BusinessInformationForm({ settings, canEdit }: Props) {
           title="Business hours"
           description="When customers can reach the dealership."
           action={
-            <label className="flex cursor-pointer items-center gap-2.5 text-small font-medium">
+            <label className="flex cursor-pointer items-center gap-3 text-small font-medium">
               Publish hours
               <Switch
                 name="publishHours"

@@ -59,7 +59,7 @@ export function SparePartDeliverySteps({
     <section
       aria-labelledby="delivery-steps-heading"
       className={cn(
-        "flex flex-col gap-4 rounded-[4px] border border-border bg-secondary/50 p-4 sm:p-5",
+        "flex flex-col gap-4 rounded-[4px] border border-border bg-secondary/50 p-4 sm:p-6",
         className
       )}
     >
@@ -76,7 +76,7 @@ export function SparePartDeliverySteps({
         precisely what a sequence needs and what a set of `<div>`s would throw
         away.
       */}
-      <ol className="flex list-none flex-col gap-3.5">
+      <ol className="flex list-none flex-col gap-4">
         {steps.map((step, index) => (
           <li key={step.title} className="flex gap-3">
             <span

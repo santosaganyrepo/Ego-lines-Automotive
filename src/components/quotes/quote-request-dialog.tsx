@@ -90,9 +90,9 @@ export function QuoteRequestPanel({
   header?: React.ReactNode
 }) {
   return (
-    <div className="flex flex-col gap-5 p-5 sm:p-7">
+    <div className="flex flex-col gap-6 p-6 sm:p-8">
       {header}
-      <div className="flex flex-col gap-1.5">
+      <div className="flex flex-col gap-2">
         {/* Padded on the right so a long title does not run under the
             dialog's own close button. */}
         <DialogTitle className="pr-8 font-heading text-title font-semibold">{title}</DialogTitle>

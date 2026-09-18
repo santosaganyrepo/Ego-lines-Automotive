@@ -132,7 +132,7 @@ function StageList({
                 !stage.enabled && "opacity-60"
               )}
             >
-              <div className="flex min-w-0 items-center gap-2.5">
+              <div className="flex min-w-0 items-center gap-3">
                 <span
                   aria-hidden="true"
                   className={cn(
@@ -175,7 +175,7 @@ function StageList({
 
                 <div className="flex min-w-0 items-center justify-between gap-2">
                   {anchor ? (
-                    <p className="flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground">
+                    <p className="flex min-w-0 items-center gap-2 text-xs text-muted-foreground">
                       <Lock aria-hidden="true" className="size-3 shrink-0" />
                       <span>Fixed stage — {TRACKING_ANCHOR_REASONS[stage.status]?.toLowerCase()}</span>
                     </p>

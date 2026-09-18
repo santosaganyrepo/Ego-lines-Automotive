@@ -131,7 +131,7 @@ export function BrandingAssetCard({
         </div>
 
         {canEdit ? (
-          <div className="flex flex-wrap items-center gap-1.5">
+          <div className="flex flex-wrap items-center gap-2">
             <form ref={formRef} action={uploadAction}>
               <input type="hidden" name="kind" value={kind} />
               <input
@@ -157,7 +157,7 @@ export function BrandingAssetCard({
 
             {url ? (
               confirmingRemove ? (
-                <form action={removeAction} className="flex items-center gap-1.5">
+                <form action={removeAction} className="flex items-center gap-2">
                   <input type="hidden" name="kind" value={kind} />
                   <Button type="submit" variant="destructive" size="sm" disabled={busy}>
                     Remove

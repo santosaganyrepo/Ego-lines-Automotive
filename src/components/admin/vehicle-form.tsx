@@ -610,7 +610,7 @@ function FormSection({
       title={title}
       description={description}
       bodyClassName={cn(
-        "grid gap-x-4 gap-y-5",
+        "grid gap-x-4 gap-y-6",
         columns === 2 ? "sm:grid-cols-2 xl:grid-cols-4" : "grid-cols-1"
       )}
     >

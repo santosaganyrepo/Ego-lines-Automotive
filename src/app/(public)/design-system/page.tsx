@@ -83,8 +83,8 @@ const typeSteps = [
   { name: "h2", cls: "text-h2", sample: "Featured Vehicles" },
   { name: "h3", cls: "text-h3", sample: "Key Specifications" },
   { name: "title", cls: "text-title", sample: "Toyota Harrier" },
-  { name: "body-lg", cls: "text-body-lg", sample: "Quality vehicles sourced from Japan and Korea." },
-  { name: "body", cls: "text-body", sample: "Quality vehicles sourced from Japan and Korea." },
+  { name: "body-lg", cls: "text-body-lg", sample: "Quality vehicles sourced from Japan, South Korea and China." },
+  { name: "body", cls: "text-body", sample: "Quality vehicles sourced from Japan, South Korea and China." },
   { name: "small", cls: "text-small", sample: "42,000 km · Automatic · Petrol" },
   { name: "meta", cls: "eyebrow", sample: "CLM-V-2026-000123" },
 ]
@@ -94,7 +94,7 @@ export default function DesignSystemPage() {
     <>
       <PageHeader
         eyebrow="Internal reference"
-        title="Crownline Design System"
+        title="Brand Design System"
         description="The locked visual language: palette, type scale, elevation, components, and motion. Pages compose from these — they don't invent alongside them."
         breadcrumbs={[{ label: "Design System" }]}
       />
@@ -192,7 +192,7 @@ export default function DesignSystemPage() {
                 </li>
               ))}
             </ul>
-            <div data-tone="dark" className="rounded-xl bg-foreground px-6 py-5">
+            <div data-tone="dark" className="rounded-xl bg-foreground px-6 py-6">
               <ul className="flex flex-wrap items-center gap-6">
                 {navDemo.map((item) => (
                   <li key={item.label}>
@@ -230,7 +230,7 @@ export default function DesignSystemPage() {
                   <div className="size-full bg-gradient-to-br from-charcoal via-muted-foreground/40 to-muted transition-transform duration-cinematic ease-crownline-soft group-hover/card:scale-[1.08]" />
                 </div>
 
-                <div className="@container flex flex-1 flex-col p-4 sm:p-5">
+                <div className="@container flex flex-1 flex-col p-4 sm:p-6">
                   <div className="flex items-baseline justify-between gap-3 font-sans">
                     <div className="flex min-w-0 flex-wrap items-baseline gap-x-2">
                       <h3 className="truncate font-sans text-title font-semibold text-foreground">
@@ -245,8 +245,8 @@ export default function DesignSystemPage() {
                     </span>
                   </div>
 
-                  <div className="mt-auto flex items-end justify-between gap-4 border-t border-border pt-5 @max-[322px]:gap-2 @max-[288px]:flex-col @max-[288px]:items-stretch @max-[288px]:gap-4">
-                    <div className="grid min-w-0 flex-1 grid-cols-[auto_auto] justify-start gap-x-6 gap-y-3 @max-[322px]:gap-x-2 @max-[322px]:gap-y-2.5">
+                  <div className="mt-auto flex items-end justify-between gap-4 border-t border-border pt-6 @max-[322px]:gap-2 @max-[288px]:flex-col @max-[288px]:items-stretch @max-[288px]:gap-4">
+                    <div className="grid min-w-0 flex-1 grid-cols-[auto_auto] justify-start gap-x-6 gap-y-3 @max-[322px]:gap-x-2 @max-[322px]:gap-y-3">
                       {[
                         { icon: CogIcon, value: "Automatic" },
                         { icon: FuelIcon, value: "Petrol" },
@@ -255,11 +255,11 @@ export default function DesignSystemPage() {
                       ].map(({ icon: Icon, value }) => (
                         <div
                           key={value}
-                          className="flex min-w-0 items-center gap-2 font-sans text-small text-muted-foreground @max-[322px]:gap-1.5"
+                          className="flex min-w-0 items-center gap-2 font-sans text-small text-muted-foreground @max-[322px]:gap-2"
                         >
                           <Icon
                             aria-hidden="true"
-                            strokeWidth={1.5}
+                           
                             className="size-3 shrink-0 text-muted-foreground/40"
                           />
                           <span className="tabular truncate">{value}</span>
@@ -267,7 +267,7 @@ export default function DesignSystemPage() {
                       ))}
                     </div>
 
-                    <span className="eyebrow inline-flex shrink-0 items-center justify-center gap-1.5 rounded-lg bg-gold-bright px-3 py-2.5 text-gold-bright-foreground @max-[322px]:px-2 shadow-[var(--shadow-gold)] transition-[box-shadow,transform,translate,scale] duration-slow ease-crownline-soft group-hover/card:shadow-[var(--shadow-gold-strong)]">
+                    <span className="eyebrow inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-gold-bright px-3 py-3 text-gold-bright-foreground @max-[322px]:px-2 shadow-[var(--shadow-gold)] transition-[box-shadow,transform,translate,scale] duration-slow ease-crownline-soft group-hover/card:shadow-[var(--shadow-gold-strong)]">
                       Explore
                       <ArrowRightIcon className="size-3.5 transition-transform duration-slow ease-crownline-soft group-hover/card:translate-x-1" />
                     </span>
@@ -283,7 +283,7 @@ export default function DesignSystemPage() {
       {/* ── Forms ─────────────────────────────────────────────── */}
       <Section reveal>
         <SectionHeading eyebrow="05 — Inputs" title="Form controls" />
-        <div className="mt-10 grid max-w-2xl grid-cols-1 gap-5 sm:grid-cols-2">
+        <div className="mt-10 grid max-w-2xl grid-cols-1 gap-6 sm:grid-cols-2">
           <div className="flex flex-col gap-2">
             <Label htmlFor="ds-name">Full name</Label>
             <Input id="ds-name" placeholder="e.g. John Deng" />
@@ -344,7 +344,7 @@ export default function DesignSystemPage() {
           <Card>
             <CardHeader>
               <CardTitle>Card primitive</CardTitle>
-              <CardDescription>Base shadcn card on the Crownline palette.</CardDescription>
+              <CardDescription>Base shadcn card on the brand palette.</CardDescription>
             </CardHeader>
             <CardContent className="text-muted-foreground">
               Used for admin panels and dense content. Marketing surfaces compose their own.
@@ -410,7 +410,7 @@ export default function DesignSystemPage() {
       {/* ── Motion ────────────────────────────────────────────── */}
       <Section variant="dark" className="gold-ambient" reveal>
         <Container>
-          <div className="flex max-w-2xl flex-col gap-5">
+          <div className="flex max-w-2xl flex-col gap-6">
             <span className="eyebrow text-gold-ink">08 — Motion</span>
             <h2 className="text-h2">Four speeds, two curves</h2>
             <p className="text-body-lg text-background/70">

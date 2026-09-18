@@ -1,6 +1,8 @@
 import type { Metadata } from "next"
 import { connection } from "next/server"
 
+import { AboutTeaser } from "@/components/home/about-teaser"
+import { BrandsSection } from "@/components/home/brands-section"
 import { FeaturedVehicles } from "@/components/home/featured-vehicles"
 import { FinalCta } from "@/components/home/final-cta"
 import { HomeHero } from "@/components/home/home-hero"
@@ -29,7 +31,8 @@ export const metadata: Metadata = {
  *
  * Built around three things a visitor comes to do — browse vehicles, ask for
  * a quote, understand how importing works — in the order the brief sets out:
- * who Crownline is, the vehicles the dealership has chosen to feature, why
+ * who the dealership is, the vehicles it has chosen to feature, the makes it
+ * supplies, a short introduction linking to About Us, why
  * buy here, how importing works, spare parts, the questions buyers ask, and a
  * last invitation to ask for the car they did not find.
  *
@@ -77,6 +80,8 @@ export default async function HomePage() {
 
       <HomeHero businessName={settings.businessName} showQuote={showQuote} />
       <FeaturedVehicles vehicles={vehicles} totalVehicles={inventory.vehicleCount} />
+      <BrandsSection showQuote={showQuote} />
+      <AboutTeaser businessName={settings.businessName} />
       <WhyCrownline businessName={settings.businessName} />
       <JourneyOverview />
       <SparePartsTeaser parts={parts} categories={partCategories} />

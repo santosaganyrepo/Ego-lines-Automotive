@@ -54,7 +54,7 @@ export function AdminForgotPasswordForm() {
   }
 
   return (
-    <form action={formAction} className="flex flex-col gap-5" noValidate>
+    <form action={formAction} className="flex flex-col gap-6" noValidate>
       {state.error ? (
         <Alert variant="destructive">
           <AlertCircle aria-hidden="true" />

@@ -2,8 +2,10 @@
 
 import * as React from "react"
 import Image from "next/image"
-import { ImageOff } from "lucide-react"
+import { Expand, ImageOff } from "lucide-react"
 
+import { PhotoLightbox } from "@/components/shared/photo-lightbox"
+import { useSwipe } from "@/hooks/use-swipe"
 import { cn } from "@/lib/utils"
 import {
   describeSparePartPhoto,
@@ -56,6 +58,12 @@ interface SparePartGalleryProps {
 
 export function SparePartGallery({ photos, partName }: SparePartGalleryProps) {
   const [active, setActive] = React.useState(0)
+  const [lightboxOpen, setLightboxOpen] = React.useState(false)
+  const swipe = useSwipe({
+    onSwipeLeft: () => setActive((current) => (current + 1) % photos.length),
+    onSwipeRight: () => setActive((current) => (current - 1 + photos.length) % photos.length),
+    enabled: photos.length > 1,
+  })
 
   if (photos.length === 0) {
     return (
@@ -78,7 +86,24 @@ export function SparePartGallery({ photos, partName }: SparePartGalleryProps) {
       {/* The plinth. Its padding cannot inset the images directly — a `fill`
           image is positioned against the *padding box*, which includes the
           padding — so the frame that measures them is the element inside. */}
-      <div className="aspect-square w-full overflow-hidden rounded-[4px] border border-border bg-card p-4 sm:p-6">
+      <div
+        className="group/gallery relative aspect-square w-full overflow-hidden rounded-[4px] border border-border bg-card p-4 sm:p-6"
+        style={swipe.style}
+        {...swipe.handlers}
+      >
+        {/* Tap or click for the full-screen viewer; swipe to move on. */}
+        <button
+          type="button"
+          onClick={() => {
+            if (!swipe.consumeClick()) setLightboxOpen(true)
+          }}
+          aria-label={`View ${describe(active)} full screen`}
+          className="absolute inset-0 z-[5] cursor-zoom-in focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring"
+        >
+          <span className="absolute top-3 right-3 grid size-8 place-items-center rounded-md bg-foreground/70 text-background opacity-0 transition-opacity duration-fast group-hover/gallery:opacity-100 max-md:opacity-100">
+            <Expand aria-hidden="true" className="size-4" />
+          </span>
+        </button>
         <div className="relative size-full overflow-hidden">
           {photos.map((photo, index) => (
             <Image
@@ -144,6 +169,15 @@ export function SparePartGallery({ photos, partName }: SparePartGalleryProps) {
           ))}
         </ul>
       ) : null}
+
+      <PhotoLightbox
+        photos={photos.map((photo, index) => ({ id: photo.id, url: photo.url, alt: describe(index) }))}
+        index={active}
+        onIndexChange={setActive}
+        open={lightboxOpen}
+        onOpenChange={setLightboxOpen}
+        title={`${partName} photographs`}
+      />
     </div>
   )
 }

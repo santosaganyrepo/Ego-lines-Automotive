@@ -58,7 +58,7 @@ export async function AdminAuthShell({
           <BrandMark size="lg" tone="dark" />
         </div>
 
-        <div className="relative flex max-w-md flex-col gap-5">
+        <div className="relative flex max-w-md flex-col gap-6">
           <span aria-hidden="true" className="h-px w-12 bg-gold" />
           <p className="text-[2.25rem] leading-[1.1] font-semibold tracking-[-0.03em] text-balance text-rail-foreground">
             The {businessName} staff dashboard.
@@ -77,7 +77,7 @@ export async function AdminAuthShell({
           <div className="mb-8 flex flex-col gap-6">
             <Link
               href="/"
-              className="w-fit rounded-sm transition-opacity duration-fast hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-gold lg:hidden"
+              className="inline-flex min-h-11 w-fit items-center rounded-sm transition-opacity duration-fast hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-gold lg:hidden"
             >
               <BrandMark size="default" tone="dark" />
               <span className="sr-only">Return to the {businessName} website</span>

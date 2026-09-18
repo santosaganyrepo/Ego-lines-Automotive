@@ -73,7 +73,7 @@ const {
 
 const EMAIL_KEY = {
   scope: RATE_LIMIT_SCOPES.adminLoginEmail,
-  identifier: "operator@crownlinemotors.com",
+  identifier: "operator@ego-lines.example",
 } as const
 
 const IP_KEY = {

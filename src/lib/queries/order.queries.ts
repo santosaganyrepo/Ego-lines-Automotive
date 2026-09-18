@@ -180,6 +180,11 @@ export interface OrderDetail {
   clearingCost: number | null
   importDuty: number | null
   otherCharges: number | null
+  otherCostsLabel: string | null
+  otherCostsAmount: number | null
+  /** Zero when the quotation carried no discount. */
+  discountAmount: number
+  discountLabel: string | null
   notes: string | null
   estimatedDeliveryDate: Date | null
   /** The end of the expected delivery window, or null for a single day. */
@@ -276,6 +281,10 @@ export async function getOrderById(id: string): Promise<OrderDetail | null> {
     clearingCost: order.clearingCost?.toNumber() ?? null,
     importDuty: order.importDuty?.toNumber() ?? null,
     otherCharges: order.otherCharges?.toNumber() ?? null,
+    otherCostsLabel: order.otherCostsLabel,
+    otherCostsAmount: order.otherCostsAmount?.toNumber() ?? null,
+    discountAmount: order.discountAmount.toNumber(),
+    discountLabel: order.discountLabel,
     notes: order.notes,
     estimatedDeliveryDate: order.estimatedDeliveryDate,
     estimatedDeliveryLatest: order.estimatedDeliveryLatest,

@@ -106,7 +106,7 @@ export function PhotoTile({
       />
 
       {isMain ? (
-        <span className="pointer-events-none absolute top-2 left-2 inline-flex h-6 items-center gap-1 rounded-full bg-black/60 px-2.5 text-xs font-medium text-white backdrop-blur-sm">
+        <span className="pointer-events-none absolute top-2 left-2 inline-flex h-6 items-center gap-1 rounded-full bg-black/60 px-3 text-xs font-medium text-white backdrop-blur-sm">
           <Star aria-hidden="true" className="size-3 fill-gold text-gold" />
           Main image
         </span>
@@ -233,7 +233,7 @@ export function PhotoDropTile({
       )}
     >
       <span className="flex size-10 items-center justify-center rounded-full border border-border bg-card shadow-[var(--shadow-subtle)] transition-colors duration-fast group-hover/drop:text-gold-ink">
-        <ImagePlus aria-hidden="true" className="size-4.5" strokeWidth={1.75} />
+        <ImagePlus aria-hidden="true" className="size-4.5" />
       </span>
       <span className="text-small font-medium">{label}</span>
       {hint ? <span className="text-xs">{hint}</span> : null}

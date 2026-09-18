@@ -7,6 +7,7 @@ import type { VehicleBodyType, VehicleCondition } from "@/generated/prisma/enums
 import { VehicleStatus } from "@/generated/prisma/enums"
 import { VEHICLE_YEAR_MIN, vehicleYearMax } from "@/lib/constants/vehicle-options"
 import { prisma } from "@/lib/prisma"
+import { shuffled } from "@/lib/utils/shuffle"
 import { getPublicSiteSettings } from "@/lib/queries/settings.queries"
 import { escapeLikePattern } from "@/lib/utils/like-pattern"
 import { vehiclePhotoPublicUrl } from "@/lib/storage/vehicle-media"
@@ -327,8 +328,16 @@ export async function listPublishedVehicles(options?: {
    * fragment — everything here has been through `vehicleSearchSchema` first.
    */
   criteria?: VehicleSearchCriteria
+  /**
+   * Every listing from the first page through `page`, rather than `page`
+   * alone. The catalogue's "Load more" is a link to the next page number in
+   * this mode, so the grid grows in place while the address stays shareable,
+   * bookmarkable and crawlable.
+   */
+  through?: boolean
 }): Promise<PublicVehicleListResult> {
   const page = Math.max(1, options?.page ?? 1)
+  const through = options?.through ?? false
   const siteWide = await siteWideVisibility()
 
   /**
@@ -353,13 +362,18 @@ export async function listPublishedVehicles(options?: {
     prisma.vehicle.findMany({
       where,
       orderBy: CARD_ORDER_BY,
-      skip: (page - 1) * PUBLIC_VEHICLES_PER_PAGE,
-      take: PUBLIC_VEHICLES_PER_PAGE,
+      skip: through ? 0 : (page - 1) * PUBLIC_VEHICLES_PER_PAGE,
+      take: through ? page * PUBLIC_VEHICLES_PER_PAGE : PUBLIC_VEHICLES_PER_PAGE,
       select: CARD_SELECT,
     }),
   ])
 
   const pageCount = Math.max(1, Math.ceil(total / PUBLIC_VEHICLES_PER_PAGE))
+
+  // A cumulative read past the end already holds every listing.
+  if (through) {
+    return { vehicles: rows.map((row) => toCard(row, siteWide)), total, page: Math.min(page, pageCount), pageCount }
+  }
 
   /**
    * A page past the end of the result set returns the last real page.
@@ -420,6 +434,9 @@ export async function listPublishedVehicles(options?: {
  */
 export const RELATED_VEHICLES_LIMIT = 8
 
+/** How many of the newest other listings a related strip's random top-up is drawn from. */
+const RELATED_TOP_UP_POOL = 32
+
 /**
  * Other live listings a customer looking at this one may also want.
  *
@@ -437,6 +454,12 @@ export const RELATED_VEHICLES_LIMIT = 8
  * draft or a sold vehicle as a catalogue page is, and it would be leaking
  * it onto a page the customer is already reading.
  *
+ * ── Never an empty strip ───────────────────────────────────────────────
+ * Same-make listings come first. Whatever room is left — all of it, when the
+ * make is a one-off — is filled with a random selection from the rest of the
+ * live inventory (drawn from the newest `RELATED_TOP_UP_POOL`), so the strip
+ * always has something to offer when there is anything else to show.
+ *
  * `excludeSlug` keeps the vehicle out of its own suggestions. Both
  * arguments come from the already-loaded vehicle row rather than from a
  * URL, so neither is customer-controlled — but they are still passed
@@ -452,17 +475,31 @@ export async function listRelatedVehicles({
   excludeSlug: string
   limit?: number
 }): Promise<PublicVehicleCard[]> {
+  const take = Math.max(0, limit)
   const [rows, siteWide] = await Promise.all([
     prisma.vehicle.findMany({
       where: publicVehicleWhere({ make, slug: { not: excludeSlug } }),
       orderBy: CARD_ORDER_BY,
-      take: Math.max(0, limit),
+      take,
       select: CARD_SELECT,
     }),
     siteWideVisibility(),
   ])
 
-  return rows.map((row) => toCard(row, siteWide))
+  const remaining = take - rows.length
+  const topUp =
+    remaining > 0
+      ? shuffled(
+          await prisma.vehicle.findMany({
+            where: publicVehicleWhere({ slug: { notIn: [excludeSlug, ...rows.map((row) => row.slug)] } }),
+            orderBy: CARD_ORDER_BY,
+            take: RELATED_TOP_UP_POOL,
+            select: CARD_SELECT,
+          })
+        ).slice(0, remaining)
+      : []
+
+  return [...rows, ...topUp].map((row) => toCard(row, siteWide))
 }
 
 /** A live listing by its public slug, or null. */

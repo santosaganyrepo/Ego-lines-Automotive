@@ -64,7 +64,7 @@ export function AdminLoginForm({ next }: AdminLoginFormProps) {
   const errorId = useId()
 
   return (
-    <form action={formAction} className="flex flex-col gap-5" noValidate>
+    <form action={formAction} className="flex flex-col gap-6" noValidate>
       {next ? <input type="hidden" name="next" value={next} /> : null}
 
       {state.error ? (

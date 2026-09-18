@@ -261,6 +261,10 @@ export default function nextConfig(phase: string): NextConfig {
   const allowedOrigins = developmentServerActionOrigins(phase);
 
   return {
+    // No `X-Powered-By: Next.js`: it tells a scanner which framework (and so
+    // which advisories) to try, and tells a customer nothing.
+    poweredByHeader: false,
+
     experimental: {
       serverActions: {
         bodySizeLimit: SERVER_ACTION_BODY_LIMIT,
@@ -281,6 +285,9 @@ export default function nextConfig(phase: string): NextConfig {
       // 2000px even at 2× density. Capping at 2048 removes that variant
       // without softening anything a screen can actually display.
       deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048],
+      // 75 everywhere; 90 only where a photograph carries the brand (the
+      // homepage hero). Next 16 serves only qualities listed here.
+      qualities: [75, 90],
       // An optimised variant is re-encoded at most once a month instead of
       // every four hours. Safe because nothing served through the optimiser
       // changes under the same URL: every uploaded photograph and logo is

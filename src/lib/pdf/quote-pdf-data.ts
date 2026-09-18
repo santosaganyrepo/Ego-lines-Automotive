@@ -1,5 +1,12 @@
 import { QuoteType } from "@/generated/prisma/enums"
-import { computeQuoteTotals, type PricedQuoteLine, type QuoteFees } from "@/lib/quotes/quote-pricing"
+import {
+  computeQuoteTotals,
+  discountLineLabel,
+  toQuoteDiscount,
+  type PricedQuoteLine,
+  type QuoteDiscountTypeValue,
+  type QuoteFees,
+} from "@/lib/quotes/quote-pricing"
 
 /**
  * Maps a quotation's stored fields to what the PDF actually renders.
@@ -30,6 +37,9 @@ export interface QuotePdfSource {
   importDuty: number | null
   otherCostsLabel: string | null
   otherCostsAmount: number | null
+  discountType: QuoteDiscountTypeValue | null
+  discountValue: number | null
+  discountLabel: string | null
   paymentInstructions: string | null
   terms: string | null
   contactName: string | null
@@ -64,6 +74,8 @@ export interface QuotePdfData {
   importDuty: number | null
   otherCostsLabel: string | null
   otherCostsAmount: number | null
+  /** Null when the quotation carries no discount. */
+  discount: { label: string; amount: number } | null
   total: number
   paymentInstructions: string | null
   terms: string | null
@@ -103,7 +115,8 @@ export function buildQuotePdfData(source: QuotePdfSource, siteName: string): Quo
     importDuty: source.importDuty,
     otherCosts: source.otherCostsAmount,
   }
-  const totals = computeQuoteTotals(priced, fees)
+  const discount = toQuoteDiscount(source.discountType, source.discountValue)
+  const totals = computeQuoteTotals(priced, fees, discount)
 
   return {
     siteName,
@@ -129,6 +142,10 @@ export function buildQuotePdfData(source: QuotePdfSource, siteName: string): Quo
     importDuty: source.importDuty,
     otherCostsLabel: source.otherCostsLabel,
     otherCostsAmount: source.otherCostsAmount,
+    discount:
+      discount && totals.discountTotal > 0
+        ? { label: discountLineLabel(discount, source.discountLabel), amount: totals.discountTotal }
+        : null,
     total: totals.total,
     paymentInstructions: source.paymentInstructions,
     terms: source.terms,

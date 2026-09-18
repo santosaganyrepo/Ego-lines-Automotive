@@ -6,6 +6,11 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  /* No pure white or pure black anywhere: `text-white`, `bg-white/10`,
+     `bg-black/60` and friends resolve to a soft warm white and a deep
+     warm charcoal, which read as premium where #fff/#000 read as glare. */
+  --color-white: oklch(0.985 0.004 90);
+  --color-black: oklch(0.13 0.004 90);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   /* Manrope for headings, Inter for body/UI. `font-heading` is a real,
@@ -74,6 +79,7 @@
      which stays dark in both dashboard themes. Values live in :root and are
      tuned for the dashboard under "Admin console" at the end of this file. */
   --color-sunken: var(--sunken);
+  --color-canvas: var(--canvas);
   --color-rail: var(--rail);
   --color-rail-raised: var(--rail-raised);
   --color-rail-border: var(--rail-border);
@@ -92,10 +98,11 @@
   /* Motion — four speeds, each with a job. Don't add a fifth without
      one.
 
-     --duration-fast       250ms  micro-interactions: buttons, links, arrows.
-     --duration-base       400ms  section reveals, gallery and modal changes.
-     --duration-slow       480ms  the card hover gesture — lift, shadow, CTA.
-     --duration-cinematic  720ms  an image scaling inside its fixed crop.
+     --duration-fast       180ms  micro-interactions: buttons, links, arrows,
+                                  dropdowns. Snappy, never floaty.
+     --duration-base       320ms  section reveals, gallery and modal changes.
+     --duration-slow       360ms  the card hover gesture — lift, shadow, CTA.
+     --duration-cinematic  540ms  an image scaling inside its fixed crop.
 
      The two slow steps exist because of the curve, not the clock. Paired
      with the expo ease below, a 250ms hover has already travelled ~93% of
@@ -122,9 +129,10 @@
      card itself has settled, which is what makes the two read as one
      gesture with depth rather than as two properties animating in
      lockstep — so change both together and keep that ratio rather than
-     tuning one in isolation. Currently 480ms/720ms, 40% faster than this
+     tuning one in isolation. Currently 360ms/540ms — tightened from 480ms/720ms
+     in the professional-polish pass, which was itself 40% faster than this
      design system's original 800ms/1200ms tuning (noted below) per
-     stakeholder request; go lower than roughly 350ms/525ms and the lift
+     stakeholder request. Go lower than roughly 350ms/525ms and the lift
      starts reading as a snap rather than a movement, the exact failure
      the paragraph below describes at 600ms/900ms.
 
@@ -143,10 +151,10 @@
                             for the expo). Use it wherever a long duration
                             is the point — a curve that front-loads the
                             movement makes the extra milliseconds invisible. */
-  --duration-fast: 250ms;
-  --duration-base: 400ms;
-  --duration-slow: 480ms;
-  --duration-cinematic: 720ms;
+  --duration-fast: 180ms;
+  --duration-base: 320ms;
+  --duration-slow: 360ms;
+  --duration-cinematic: 540ms;
   --ease-crownline: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-crownline-soft: cubic-bezier(0.4, 0.15, 0.3, 1);
 
@@ -230,18 +238,17 @@
      Each is two layers — a tight contact shadow plus a wide ambient one —
      which is what makes the lift look like light rather than a filter. */
   --shadow-subtle:
-    0 1px 2px oklch(0.16 0.004 90 / 0.04), 0 2px 8px oklch(0.16 0.004 90 / 0.04);
+    0 1px 3px oklch(0.2 0.01 90 / 0.04), 0 4px 16px oklch(0.2 0.01 90 / 0.04);
   --shadow-raised:
-    0 2px 4px oklch(0.16 0.004 90 / 0.05), 0 12px 28px oklch(0.16 0.004 90 / 0.1);
+    0 2px 8px oklch(0.2 0.01 90 / 0.05), 0 16px 40px oklch(0.2 0.01 90 / 0.08);
   --shadow-header: 0 1px 0 oklch(0.16 0.004 90 / 0.06), 0 4px 16px oklch(0.16 0.004 90 / 0.04);
-  /* Gold-tinted elevation for the primary CTA. Two layers again: a tight
-     neutral contact shadow so the button still sits on the page, plus a
-     wide gold bloom that reads as the button's own colour spilling onto
-     the surface. `-strong` is the hover step. */
+  /* Gold-tinted elevation for the primary CTA: two soft, gold-toned layers
+     and no dark contact layer — a dark line hugging a gold button read as
+     a black outline around its edge. `-strong` is the hover step. */
   --shadow-gold:
-    0 1px 2px oklch(0.16 0.004 90 / 0.12), 0 6px 18px oklch(0.8 0.145 85 / 0.34);
+    0 2px 6px oklch(0.78 0.15 85 / 0.18), 0 8px 24px oklch(0.82 0.155 87 / 0.22);
   --shadow-gold-strong:
-    0 2px 4px oklch(0.16 0.004 90 / 0.14), 0 12px 30px oklch(0.8 0.145 85 / 0.46);
+    0 4px 10px oklch(0.78 0.15 85 / 0.22), 0 14px 36px oklch(0.82 0.155 87 / 0.3);
 }
 
 :root {
@@ -249,7 +256,7 @@
   --background: oklch(0.99 0.004 90);
   --foreground: oklch(0.16 0.004 90);
 
-  --card: oklch(1 0 0);
+  --card: oklch(0.997 0.002 90);
   --card-foreground: oklch(0.16 0.004 90);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.16 0.004 90);
@@ -280,7 +287,9 @@
   --accent: oklch(0.955 0.03 88);
   --accent-foreground: oklch(0.18 0.01 88);
 
-  --destructive: oklch(0.577 0.245 27.325);
+  /* 5.6:1 or better on white, its own 10% tint and the canvas — AA for the
+     12px bold text of a status badge, not only for large text. */
+  --destructive: oklch(0.51 0.2 27);
 
   /* Semantic state colours, deliberately separate from the brand accent.
      Gold means "Crownline" everywhere in this application; if it also meant
@@ -328,7 +337,7 @@
      *ink*. On dark surfaces that distinction collapses, so the rule in the
      base layer below re-points --gold-ink at --gold there and every
      `text-gold-ink` in the app adapts without a per-surface class. */
-  --gold: oklch(0.8 0.145 85);
+  --gold: oklch(0.83 0.155 87);
   --gold-ink: oklch(0.52 0.11 72);
   --gold-foreground: oklch(0.16 0.01 88);
 
@@ -361,16 +370,14 @@
      next to black type and gold rather than as the loudest thing on a card
      whose job is to sell the photograph.
 
-     ⚠ 4.2:1 on --card, which clears WCAG AA for *large* text (3:1) but not
-     for normal text (4.5:1). That is fine where it is used — the price is
-     set at --text-title in bold, comfortably past the 18.66px-bold
-     threshold — and it is the reason this token must not be reached for as
-     a general body colour. Anything smaller than that needs the darker end
-     of this hue. */
-  --price: oklch(0.56 0.13 152);
+     5.6:1 on --card, 5.2:1 on its own 10% tint (the price pill) and 5.0:1
+     on the grey catalogue canvas — AA for body-size text on every surface
+     it is used on, so a price is legible at any size. (It was 0.56 L, which
+     only cleared AA for large bold text.) */
+  --price: oklch(0.5 0.12 152);
 
   --charcoal: oklch(0.22 0.004 90);
-  --night: oklch(0.085 0.003 90);
+  --night: oklch(0.125 0.004 90);
 
   /* ── Families and type scale ───────────────────────────────────
      The values behind `font-sans`/`font-heading`/`font-mono` and the
@@ -381,16 +388,16 @@
   --app-font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --app-font-heading: var(--font-manrope), var(--font-inter), ui-sans-serif, sans-serif;
   --app-font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
-  --type-display: clamp(2.75rem, 1.6rem + 5.2vw, 5.25rem);
+  --type-display: clamp(2.5rem, 1.5rem + 4.4vw, 4.5rem);
   --type-display-line-height: 0.95;
   --type-display-letter-spacing: -0.035em;
   --type-display-font-weight: 700;
-  --type-hero: clamp(2.25rem, 0.9rem + 4vw, 4.75rem);
-  --type-h1: clamp(2.125rem, 1.4rem + 3.2vw, 3.5rem);
+  --type-hero: clamp(2.25rem, 1rem + 3.6vw, 4.25rem);
+  --type-h1: clamp(2rem, 1.35rem + 2.6vw, 3rem);
   --type-h1-line-height: 1.05;
   --type-h1-letter-spacing: -0.03em;
   --type-h1-font-weight: 700;
-  --type-h2: clamp(1.625rem, 1.2rem + 1.9vw, 2.5rem);
+  --type-h2: clamp(1.5rem, 1.15rem + 1.6vw, 2.25rem);
   --type-h2-line-height: 1.15;
   --type-h2-letter-spacing: -0.022em;
   --type-h2-font-weight: 600;
@@ -402,13 +409,15 @@
   --type-title-line-height: 1.35;
   --type-title-letter-spacing: -0.012em;
   --type-title-font-weight: 600;
-  --type-body-lg: 1.0625rem;
+  --type-body-lg: 1.125rem;
   --type-body-lg-line-height: 1.65;
-  --type-body: 0.9375rem;
+  /* 16px: the floor for running copy on a phone, and the size iOS will not
+     zoom a focused field past. */
+  --type-body: 1rem;
   --type-body-line-height: 1.65;
-  --type-small: 0.8125rem;
+  --type-small: 0.875rem;
   --type-small-line-height: 1.55;
-  --type-meta: 0.6875rem;
+  --type-meta: 0.75rem;
   --type-meta-line-height: 1.4;
   --type-meta-letter-spacing: 0.14em;
   --type-meta-font-weight: 600;
@@ -436,6 +445,10 @@
   --select-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238b8880' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
 
   --sunken: oklch(0.965 0.003 90);
+  /* The catalogue ground: a soft warm grey behind the white product cards,
+     so each card reads as an object on a surface rather than a white box on
+     a white page. Light theme only — the catalogues are light pages. */
+  --canvas: oklch(0.955 0.004 85);
   --rail: oklch(0.17 0.004 85);
   --rail-raised: oklch(0.225 0.005 85);
   --rail-border: oklch(1 0 0 / 0.07);
@@ -452,13 +465,13 @@
 
 .dark {
   /* Deep black — main dark section background (hero, footer) */
-  --background: oklch(0.11 0.003 90);
-  --foreground: oklch(0.98 0.004 90);
+  --background: oklch(0.145 0.004 90);
+  --foreground: oklch(0.975 0.004 90);
 
   /* Elevated surface black — cards/blocks sitting on the deep black */
-  --card: oklch(0.16 0.004 90);
-  --card-foreground: oklch(0.98 0.004 90);
-  --popover: oklch(0.16 0.004 90);
+  --card: oklch(0.19 0.005 90);
+  --card-foreground: oklch(0.975 0.004 90);
+  --popover: oklch(0.19 0.005 90);
   --popover-foreground: oklch(0.98 0.004 90);
 
   /* Gold reads slightly brighter/more saturated on dark backgrounds
@@ -466,11 +479,11 @@
   --primary: var(--gold);
   --primary-foreground: var(--gold-foreground);
 
-  --secondary: oklch(0.22 0.004 90);
+  --secondary: oklch(0.245 0.005 90);
   --secondary-foreground: oklch(0.96 0.004 90);
 
-  --muted: oklch(0.22 0.004 90);
-  --muted-foreground: oklch(0.68 0.004 90);
+  --muted: oklch(0.245 0.005 90);
+  --muted-foreground: oklch(0.72 0.004 90);
 
   --accent: oklch(0.245 0.035 88);
   --accent-foreground: oklch(0.96 0.02 88);
@@ -492,8 +505,8 @@
   --chart-4: oklch(0.36 0.01 90);
   --chart-5: oklch(0.24 0 0);
 
-  --sidebar: oklch(0.16 0.004 90);
-  --sidebar-foreground: oklch(0.98 0.004 90);
+  --sidebar: oklch(0.19 0.005 90);
+  --sidebar-foreground: oklch(0.975 0.004 90);
   --sidebar-primary: var(--gold);
   --sidebar-primary-foreground: var(--gold-foreground);
   --sidebar-accent: oklch(0.245 0.035 88);
@@ -505,9 +518,9 @@
      dark sections. Defined here as well as in :root because `Input` paints
      itself `dark:bg-sunken`: without a dark value the token fell through to
      the light one and every field on a dark page came out white. */
-  --sunken: oklch(0.135 0.003 90);
+  --sunken: oklch(0.165 0.004 90);
 
-  --gold: oklch(0.82 0.15 88);
+  --gold: oklch(0.83 0.155 87);
   /* On a dark surface the fill gold is already the most legible gold
      available (10.9:1), so ink and fill converge — same reasoning as the
      [data-tone="dark"] rule in the base layer. */
@@ -586,6 +599,23 @@
     outline: 2px solid var(--ring);
     outline-offset: 2px;
     border-radius: 2px;
+  }
+
+  /* One icon voice. Every Lucide glyph on the site and in the dashboard is
+     drawn at the same stroke, whatever its size, so outlines never mix
+     weights side by side. Set here rather than per icon: a CSS declaration
+     outranks the SVG's own stroke-width attribute. */
+  svg.lucide {
+    stroke-width: 1.75;
+  }
+
+  /* Long unbroken strings — an email address, a pasted URL, a long part
+     number — wrap instead of pushing the page sideways. `anywhere` (not
+     `break-word`) because it also lowers the min-content width, which is
+     what lets a flex or grid item holding such a string shrink. Prose only:
+     table cells keep their words whole and scroll inside their container. */
+  :where(p, h1, h2, h3, h4, h5, h6, li, dt, dd, blockquote, figcaption, label, legend) {
+    overflow-wrap: anywhere;
   }
 
   /* ── Scroll reveal ────────────────────────────────────────────
@@ -738,19 +768,19 @@
 [data-tone="dark"] [data-slot="button"][data-variant="outline"] {
   border-color: oklch(1 0 0 / 0.28);
   background-color: transparent;
-  color: oklch(0.98 0.004 90);
+  color: oklch(0.975 0.004 90);
   box-shadow: none;
 }
 
 [data-tone="dark"] [data-slot="button"][data-variant="outline"]:hover {
   border-color: oklch(1 0 0 / 0.55);
   background-color: oklch(1 0 0 / 0.1);
-  color: oklch(1 0 0);
+  color: oklch(0.985 0.004 90);
 }
 
 [data-tone="dark"] [data-slot="button"][data-variant="ghost"]:hover {
   background-color: oklch(1 0 0 / 0.1);
-  color: oklch(1 0 0);
+  color: oklch(0.985 0.004 90);
 }
 
 /* ── Utilities ──────────────────────────────────────────────────
@@ -1161,33 +1191,33 @@
 
 @media (prefers-reduced-motion: no-preference) {
   .load-rise {
-    animation: home-rise 900ms var(--ease-crownline) var(--d, 0ms) both;
+    animation: home-rise 600ms var(--ease-crownline) var(--d, 0ms) both;
   }
 
   .load-word {
-    animation: home-word 1000ms var(--ease-crownline) var(--d, 0ms) both;
+    animation: home-word 640ms var(--ease-crownline) var(--d, 0ms) both;
   }
 
   .load-slide-left {
-    animation: home-slide-left 1100ms var(--ease-crownline) var(--d, 0ms) both;
+    animation: home-slide-left 700ms var(--ease-crownline) var(--d, 0ms) both;
   }
 
   .load-settle {
-    animation: home-settle 2600ms var(--ease-crownline) both;
+    animation: home-settle 1800ms var(--ease-crownline) both;
   }
 
   .load-count {
-    animation: home-count 1800ms var(--ease-crownline) var(--d, 0ms) both;
+    animation: home-count 1200ms var(--ease-crownline) var(--d, 0ms) both;
   }
 
   .text-gold-sheen.load-word {
     animation:
-      home-word 1000ms var(--ease-crownline) var(--d, 0ms) both,
-      home-sheen 1600ms var(--ease-crownline-soft) calc(var(--d, 0ms) + 700ms) both;
+      home-word 640ms var(--ease-crownline) var(--d, 0ms) both,
+      home-sheen 1000ms var(--ease-crownline-soft) calc(var(--d, 0ms) + 700ms) both;
   }
 
   .scroll-cue-dot {
-    animation: home-scroll-cue 1800ms var(--ease-crownline-soft) infinite;
+    animation: home-scroll-cue 1800ms var(--ease-crownline-soft) 3;
   }
 
   .pulse-ring {
@@ -1200,13 +1230,13 @@
     opacity: 0;
     transform: translateY(32px);
     transition:
-      opacity 800ms var(--ease-crownline) var(--d, 0ms),
-      transform 800ms var(--ease-crownline) var(--d, 0ms);
+      opacity 560ms var(--ease-crownline) var(--d, 0ms),
+      transform 560ms var(--ease-crownline) var(--d, 0ms);
   }
 
   [data-inview] .rv-word {
     transform: translateY(110%) rotate(4deg);
-    transition: transform 900ms var(--ease-crownline) var(--d, 0ms);
+    transition: transform 600ms var(--ease-crownline) var(--d, 0ms);
   }
 
   /* Icons arrive with a slight overshoot — the one spring on the page, kept
@@ -1215,13 +1245,13 @@
     opacity: 0;
     transform: scale(0.4) rotate(-18deg);
     transition:
-      opacity 500ms var(--ease-crownline) var(--d, 0ms),
+      opacity 360ms var(--ease-crownline) var(--d, 0ms),
       transform 700ms cubic-bezier(0.34, 1.56, 0.64, 1) var(--d, 0ms);
   }
 
   [data-inview] .rv-draw-x,
   [data-inview] .rv-draw-y {
-    transition: transform 1800ms var(--ease-crownline-soft) var(--d, 0ms);
+    transition: transform 1200ms var(--ease-crownline-soft) var(--d, 0ms);
   }
 
   [data-inview] .rv-draw-x {
@@ -1246,12 +1276,12 @@
      slight zoom — the frame opens, then the picture comes to rest in it. */
   [data-inview] .rv-unveil {
     clip-path: inset(100% 0 0 0);
-    transition: clip-path 1200ms var(--ease-crownline) var(--d, 0ms);
+    transition: clip-path 800ms var(--ease-crownline) var(--d, 0ms);
   }
 
   [data-inview] .rv-unveil img {
     scale: 1.2;
-    transition: scale 1800ms var(--ease-crownline) var(--d, 0ms);
+    transition: scale 1200ms var(--ease-crownline) var(--d, 0ms);
   }
 
   /* Counts from zero when revealed. Transitioning a registered property is
@@ -1259,7 +1289,7 @@
      have finished by the time the figure scrolls into view. */
   [data-inview] .rv-count {
     --count: 0;
-    transition: --count 1600ms var(--ease-crownline) var(--d, 0ms);
+    transition: --count 1200ms var(--ease-crownline) var(--d, 0ms);
   }
 
   [data-inview="true"] .rv-count {
@@ -1360,6 +1390,9 @@
   [data-admin] {
     --control-height: 2.75rem;
     --type-h2: 1.375rem;
+    /* A phone gets readable running copy even in the dense dashboard. */
+    --type-body: 1rem;
+    --type-body-lg: 1rem;
   }
 }
 
@@ -1384,13 +1417,14 @@
   --input: oklch(0.872 0.005 85);
   --sunken: oklch(0.963 0.003 85);
 
-  --shadow-subtle: 0 1px 2px oklch(0.2 0.01 85 / 0.05);
-  --shadow-raised: 0 1px 2px oklch(0.2 0.01 85 / 0.05), 0 8px 24px -6px oklch(0.2 0.01 85 / 0.12);
+  --shadow-subtle: 0 1px 3px oklch(0.2 0.01 85 / 0.04), 0 2px 8px oklch(0.2 0.01 85 / 0.03);
+  --shadow-raised: 0 2px 6px oklch(0.2 0.01 85 / 0.04), 0 12px 28px -6px oklch(0.2 0.01 85 / 0.1);
   --shadow-overlay: 0 1px 2px oklch(0.2 0.01 85 / 0.06), 0 24px 56px -12px oklch(0.2 0.01 85 / 0.28);
-  /* The gold button as a crisp object rather than a glow: a contact
-     shadow and a hairline of light along the top edge. */
-  --shadow-gold: 0 1px 2px oklch(0.3 0.06 80 / 0.24), inset 0 1px 0 oklch(1 0 0 / 0.28);
-  --shadow-gold-strong: 0 2px 6px oklch(0.3 0.06 80 / 0.28), inset 0 1px 0 oklch(1 0 0 / 0.32);
+  /* The gold button as a crisp object rather than a glow: a soft, warm
+     lift and a hairline of light along the top edge. No tight dark
+     contact layer — at 1px/2px it drew a dark line under every button. */
+  --shadow-gold: 0 1px 4px oklch(0.6 0.12 80 / 0.14), 0 4px 12px oklch(0.7 0.13 85 / 0.12), inset 0 1px 0 oklch(1 0 0 / 0.3);
+  --shadow-gold-strong: 0 2px 8px oklch(0.6 0.12 80 / 0.18), 0 8px 20px oklch(0.7 0.13 85 / 0.16), inset 0 1px 0 oklch(1 0 0 / 0.34);
 }
 
 [data-admin] .dark,
@@ -1415,9 +1449,9 @@
   --rail-raised: oklch(0.19 0.004 85);
   --rail-border: oklch(1 0 0 / 0.06);
 
-  --shadow-subtle: 0 1px 2px oklch(0 0 0 / 0.3);
-  --shadow-raised: 0 1px 2px oklch(0 0 0 / 0.3), 0 12px 32px -8px oklch(0 0 0 / 0.5);
+  --shadow-subtle: 0 2px 8px oklch(0 0 0 / 0.18);
+  --shadow-raised: 0 4px 12px oklch(0 0 0 / 0.16), 0 16px 36px -8px oklch(0 0 0 / 0.32);
   --shadow-overlay: 0 0 0 1px oklch(1 0 0 / 0.06), 0 28px 64px -12px oklch(0 0 0 / 0.7);
-  --shadow-gold: 0 1px 2px oklch(0 0 0 / 0.4), inset 0 1px 0 oklch(1 0 0 / 0.3);
-  --shadow-gold-strong: 0 2px 8px oklch(0 0 0 / 0.45), inset 0 1px 0 oklch(1 0 0 / 0.34);
+  --shadow-gold: 0 4px 14px oklch(0 0 0 / 0.22), inset 0 1px 0 oklch(1 0 0 / 0.3);
+  --shadow-gold-strong: 0 8px 22px oklch(0 0 0 / 0.28), inset 0 1px 0 oklch(1 0 0 / 0.34);
 }

@@ -69,7 +69,7 @@ export function RecentlyViewedList() {
   }
 
   return (
-    <div className="flex w-full flex-col gap-5">
+    <div className="flex w-full flex-col gap-6">
       <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
         <p className="text-small text-muted-foreground">
           {entries.length === 1
@@ -80,7 +80,7 @@ export function RecentlyViewedList() {
         <button
           type="button"
           onClick={clearRecentlyViewed}
-          className="text-small font-medium text-muted-foreground underline-offset-4 transition-colors duration-fast hover:text-destructive hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+          className="inline-flex items-center text-small font-medium text-muted-foreground underline-offset-4 pointer-coarse:min-h-11 transition-colors duration-fast hover:text-destructive hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
         >
           Clear history
         </button>

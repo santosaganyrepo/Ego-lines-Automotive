@@ -46,7 +46,7 @@ export function FeaturedVehicles({
             {totalVehicles > 0 ? (
               <Link
                 href="/cars"
-                className="rv-up group/inv inline-flex w-fit shrink-0 items-center gap-2.5 rounded-full py-2 text-small font-semibold text-gold transition-colors duration-fast hover:text-gold-bright"
+                className="rv-up group/inv inline-flex w-fit shrink-0 items-center gap-3 rounded-full py-2 text-small font-semibold text-gold pointer-coarse:min-h-11 transition-colors duration-fast hover:text-gold-bright"
                 style={delay(500)}
               >
                 View inventory
@@ -61,7 +61,7 @@ export function FeaturedVehicles({
             ) : null}
           </div>
 
-          <ul className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {vehicles.map((vehicle, index) => (
               <li key={vehicle.slug} className="rv-up flex" style={delay(300 + index * ITEM_STEP_MS)}>
                 <VehicleCard vehicle={vehicle} sizes={CARD_SIZES} />

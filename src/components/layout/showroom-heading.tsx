@@ -38,13 +38,13 @@ export function ShowroomHeading({
   return (
     <div
       className={cn(
-        "flex flex-col gap-5",
+        "flex flex-col gap-6",
         align === "center" && "items-center text-center",
         className
       )}
     >
       <p
-        className="rv-up inline-flex w-fit items-center gap-2 rounded-full border border-gold/25 bg-gold/10 py-1.5 pr-4 pl-3 text-small font-medium text-gold"
+        className="rv-up inline-flex w-fit items-center gap-2 rounded-full border border-gold/25 bg-gold/10 py-2 pr-4 pl-3 text-small font-medium text-gold"
         style={delay(0)}
       >
         <Icon aria-hidden="true" className="rv-icon size-4" style={delay(150)} />

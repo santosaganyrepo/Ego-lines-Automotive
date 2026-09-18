@@ -50,6 +50,11 @@ interface CatalogueHeroProps {
    * Defaults to the centre.
    */
   imagePosition?: string
+  /**
+   * The visible Home › page trail. Off on a page that already opens with its
+   * own way back (the spare-parts bar), where a second trail repeats it.
+   */
+  showTrail?: boolean
   className?: string
 }
 
@@ -63,6 +68,7 @@ export function CatalogueHero({
   phrases,
   supporting,
   imagePosition = "center",
+  showTrail = true,
   className,
 }: CatalogueHeroProps) {
   const afterPhrases = 160 + phrases.length * PHRASE_STAGGER_MS * 3
@@ -94,7 +100,7 @@ export function CatalogueHero({
         <div className="absolute inset-0 bg-gradient-to-t from-night via-night/45 to-night/25" />
       </div>
 
-      <Container className="flex flex-col items-center gap-4 py-10 text-center sm:py-12 md:gap-5 md:py-16">
+      <Container className="flex flex-col items-center gap-4 py-10 text-center sm:py-12 md:gap-6 md:py-16">
         {/*
           Hidden below `sm`, where the vertical budget is the whole point of
           this band. The class sits on the trail itself rather than on a
@@ -102,10 +108,13 @@ export function CatalogueHero({
           a sibling of the nav, so the SEO value survives the nav being
           hidden.
         */}
-        <Breadcrumbs
-          items={[{ label: breadcrumbLabel }]}
-          className="hidden sm:block [&>ol]:justify-center"
-        />
+        {showTrail ? (
+          <Breadcrumbs
+            items={[{ label: breadcrumbLabel }]}
+            // On the dark photograph the light-page trail colours vanish; re-ink it.
+            className="hidden sm:block [&>ol]:justify-center [&_ol]:text-white/70 [&_[aria-current=page]]:text-white [&_a:hover]:text-gold"
+          />
+        ) : null}
 
         <p className="load-rise eyebrow text-gold" style={delay(80)}>
           {eyebrow}

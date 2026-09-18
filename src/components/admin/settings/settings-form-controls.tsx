@@ -67,7 +67,7 @@ export function SettingsFormAlert({ state }: { state: SettingsFormState }) {
   return (
     <div
       role="alert"
-      className="flex items-start gap-2.5 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-small text-destructive"
+      className="flex items-start gap-3 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-small text-destructive"
     >
       <AlertCircle aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
       <span>{state.message}</span>
@@ -113,7 +113,7 @@ export function SettingsSaveBar({
             )
       )}
     >
-      <p aria-live="polite" className="flex min-h-5 items-center gap-1.5 text-small text-muted-foreground">
+      <p aria-live="polite" className="flex min-h-5 items-center gap-2 text-small text-muted-foreground">
         {pending ? (
           "Saving…"
         ) : dirty ? (
@@ -171,7 +171,7 @@ export function SettingsSwitchRow({
   const id = React.useId()
 
   return (
-    <div className={cn("flex items-start justify-between gap-4 py-3.5 first:pt-0 last:pb-0", className)}>
+    <div className={cn("flex items-start justify-between gap-4 py-4 first:pt-0 last:pb-0", className)}>
       <label htmlFor={id} className={cn("flex min-w-0 flex-col gap-0.5", disabled ? "cursor-not-allowed" : "cursor-pointer")}>
         <span className="text-small font-medium text-foreground">{label}</span>
         {description ? <span className="text-xs text-muted-foreground">{description}</span> : null}

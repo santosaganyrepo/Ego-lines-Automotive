@@ -15,6 +15,7 @@ import { InView } from "@/components/motion/in-view"
 import { ShowroomHeading } from "@/components/layout/showroom-heading"
 import { ITEM_STEP_MS, delay } from "@/components/motion/motion"
 import { HOME_MEDIA } from "@/components/home/home-media"
+import { SOURCING_MARKETS } from "@/config/company"
 
 interface Benefit {
   icon: LucideIcon
@@ -80,7 +81,7 @@ export function WhyCrownline({ businessName }: { businessName: string }) {
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4 lg:grid-rows-2">
             {/* The lead tile: international sourcing. */}
             <article
-              className="rv-up group/tile relative isolate flex min-h-96 flex-col justify-end overflow-hidden rounded-2xl border border-white/10 p-7 md:col-span-2 lg:row-span-2 lg:p-9"
+              className="rv-up group/tile relative isolate flex min-h-96 flex-col justify-end overflow-hidden rounded-2xl border border-white/10 p-8 md:col-span-2 lg:row-span-2 lg:p-10"
               style={delay(250)}
             >
               <div aria-hidden="true" className="media-frame absolute inset-0 -z-10 bg-night">
@@ -100,16 +101,16 @@ export function WhyCrownline({ businessName }: { businessName: string }) {
               >
                 <Globe2 aria-hidden="true" className="size-6" />
               </span>
-              <h3 className="max-w-md text-h2 text-white">Sourced from Japan and South Korea</h3>
+              <h3 className="max-w-md text-h2 text-white">Sourced from Japan, South Korea and China</h3>
               <p className="mt-3 max-w-md text-body-lg text-white/75">
-                We buy from auction houses and dealers in Japan and South Korea on your behalf,
+                We buy from auction houses and dealers in Japan, South Korea and China on your behalf,
                 then handle the shipping all the way to South Sudan.
               </p>
               <ul className="mt-6 flex flex-wrap gap-2" aria-label="Sourcing countries">
-                {["Japan", "South Korea"].map((country) => (
+                {SOURCING_MARKETS.map((country) => (
                   <li
                     key={country}
-                    className="rounded-full border border-white/20 bg-white/10 px-3.5 py-1 text-small font-medium text-white backdrop-blur-sm"
+                    className="rounded-full border border-white/20 bg-white/10 px-4 py-1 text-small font-medium text-white backdrop-blur-sm"
                   >
                     {country}
                   </li>
@@ -134,7 +135,7 @@ function BenefitTile({ benefit, delayMs }: { benefit: Benefit; delayMs: number }
     <div className="rv-up" style={delay(delayMs)}>
       <article
         className={cn(
-          "group/tile flex h-full flex-col gap-5 rounded-2xl border border-white/8 bg-card/70 p-7 backdrop-blur-sm",
+          "group/tile flex h-full flex-col gap-6 rounded-2xl border border-white/8 bg-card/70 p-8 backdrop-blur-sm",
           "transition-[border-color,background-color,translate] duration-slow ease-crownline-soft",
           "hover:-translate-y-1 hover:border-gold/35 hover:bg-card"
         )}

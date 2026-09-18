@@ -66,7 +66,7 @@ export function TrackingResult({
               </p>
             </div>
 
-            <div className="flex flex-col gap-3 rounded-xl bg-secondary/70 p-4 sm:p-5">
+            <div className="flex flex-col gap-3 rounded-xl bg-secondary/70 p-4 sm:p-6">
               <span className="text-meta font-medium text-muted-foreground uppercase">
                 {finished ? "Journey complete" : "Current stage"}
               </span>
@@ -84,14 +84,14 @@ export function TrackingResult({
                   </span>
                 ) : null}
               </div>
-              <div className="flex flex-wrap gap-x-5 gap-y-1.5 text-small text-muted-foreground">
+              <div className="flex flex-wrap gap-x-6 gap-y-2 text-small text-muted-foreground">
                 {result.currentLocation ? (
-                  <span className="flex items-center gap-1.5">
+                  <span className="flex items-center gap-2">
                     <MapPin aria-hidden="true" className="size-4 text-gold-ink" />
                     {result.currentLocation}
                   </span>
                 ) : null}
-                <span className="flex items-center gap-1.5">
+                <span className="flex items-center gap-2">
                   <Clock3 aria-hidden="true" className="size-4 text-gold-ink" />
                   Updated {formatCalendarDate(result.lastUpdated)}
                 </span>
@@ -136,7 +136,7 @@ export function TrackingResult({
       <section
         aria-labelledby="whats-next-heading"
         data-tone="dark"
-        className="gold-ambient flex flex-col gap-5 overflow-hidden rounded-2xl bg-foreground p-6 text-background md:flex-row md:items-center md:justify-between md:p-8"
+        className="gold-ambient flex flex-col gap-6 overflow-hidden rounded-2xl bg-foreground p-6 text-background md:flex-row md:items-center md:justify-between md:p-8"
       >
         <div className="flex max-w-2xl flex-col gap-2">
           <span className="eyebrow text-gold">{finished ? "All done" : "What happens next"}</span>
@@ -186,7 +186,7 @@ function PhaseStep({ phase, last }: { phase: CustomerJourneyPhase; last: boolean
   return (
     <li
       aria-current={phase.state === "current" ? "step" : undefined}
-      className="relative flex flex-1 gap-4 pb-7 last:pb-0 md:flex-col md:gap-3 md:pr-4 md:pb-0"
+      className="relative flex flex-1 gap-4 pb-8 last:pb-0 md:flex-col md:gap-3 md:pr-4 md:pb-0"
     >
       {/* The connecting line: down on a phone, across from `md`. Gold as far
           as the journey has gone. */}
@@ -209,7 +209,7 @@ function PhaseStep({ phase, last }: { phase: CustomerJourneyPhase; last: boolean
           phase.state === "upcoming" && "bg-secondary text-muted-foreground ring-1 ring-border"
         )}
       >
-        {phase.state === "complete" ? <Check className="size-5" strokeWidth={2.5} /> : <Icon className="size-5" strokeWidth={1.75} />}
+        {phase.state === "complete" ? <Check className="size-5" /> : <Icon className="size-5" />}
       </span>
 
       <div className="flex min-w-0 flex-col gap-0.5 pt-1 md:pt-0">

@@ -69,7 +69,7 @@ export default async function SecurityActivityPage(props: PageProps<"/Ricky@2000
         action={SECURITY_ACTIVITY_PATH}
         className="grid grid-cols-2 items-end gap-2 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]"
       >
-        <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+        <div className="flex min-w-0 flex-1 flex-col gap-2">
           <label htmlFor="category" className="text-xs font-medium text-muted-foreground">
             Activity
           </label>
@@ -82,7 +82,7 @@ export default async function SecurityActivityPage(props: PageProps<"/Ricky@2000
             ))}
           </select>
         </div>
-        <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+        <div className="flex min-w-0 flex-1 flex-col gap-2">
           <label htmlFor="admin" className="text-xs font-medium text-muted-foreground">
             Administrator
           </label>
@@ -110,7 +110,7 @@ export default async function SecurityActivityPage(props: PageProps<"/Ricky@2000
           {log.entries.map((entry) => {
             const path = ENTITY_PATHS[entry.entityType]
             return (
-              <li key={entry.id} className="flex flex-col gap-2 py-3.5 first:pt-0 last:pb-0">
+              <li key={entry.id} className="flex flex-col gap-2 py-4 first:pt-0 last:pb-0">
                 <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
                   <span className="text-small font-semibold">{entry.actionLabel}</span>
                   <time dateTime={entry.createdAt.toISOString()} className="text-xs text-muted-foreground tabular-nums">

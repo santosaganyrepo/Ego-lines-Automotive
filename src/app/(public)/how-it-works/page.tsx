@@ -1,3 +1,4 @@
+import type * as React from "react"
 import type { Metadata } from "next"
 import Image from "next/image"
 import Link from "next/link"
@@ -23,7 +24,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return {
     title: "How It Works",
-    description: `How ${businessName} imports your vehicle from Japan or South Korea to South Sudan: choosing, reserving, inspection, shipping to Mombasa, clearing, transport and delivery — with staged payments and tracking at every step.`,
+    description: `How ${businessName} imports your vehicle from Japan, South Korea or China to South Sudan: choosing, reserving, inspection, shipping to Mombasa, clearing, transport and delivery — with staged payments and tracking at every step.`,
     alternates: { canonical: "/how-it-works" },
   }
 }
@@ -104,7 +105,7 @@ export default async function HowItWorksPage() {
             </span>
           </h1>
           <p className="load-rise max-w-2xl text-body-lg text-white/75" style={delay(HERO_TEXT_AT)}>
-            {settings.businessName} sources your vehicle in Japan or South Korea, ships it through Mombasa and
+            {settings.businessName} sources your vehicle in Japan, South Korea or China, ships it through Mombasa and
             delivers it in South Sudan. Here is every step, and what happens at each.
           </p>
           <div className="load-rise flex flex-wrap gap-3 pt-2" style={delay(HERO_TEXT_AT + 120)}>
@@ -157,35 +158,56 @@ export default async function HowItWorksPage() {
               description="Vehicle orders are paid in three parts of the agreed price. Your quotation shows the exact amount of each, and every payment is checked and confirmed by our team."
             />
 
-            <ol className="grid grid-cols-1 gap-4 md:grid-cols-3">
-              {payments.map((payment, index) => {
-                const figure = wholeOrExact(payment.percent)
-                return (
-                  <li
+            {/*
+              The schedule drawn to scale: one bar split at the real
+              proportions, each stage's figure and wording directly beneath
+              its own segment. The shape answers "how much, when" before a
+              word is read — three equal cards could not.
+            */}
+            <div className="flex flex-col gap-8">
+              <div
+                aria-hidden="true"
+                className="rv-up flex h-3 gap-1 overflow-hidden rounded-full"
+                style={delay(350)}
+              >
+                {payments.map((payment, index) => (
+                  <span
                     key={payment.label}
-                    className="rv-up relative flex flex-col gap-4 overflow-hidden rounded-2xl border border-white/10 bg-card/70 p-7"
-                    style={delay(400 + index * ITEM_STEP_MS)}
-                  >
-                    <span aria-hidden="true" className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-gold/60 to-transparent" />
-                    <span className="tabular text-small font-semibold text-gold">
-                      {String(index + 1).padStart(2, "0")}
-                    </span>
-                    <p className="font-heading text-display leading-none font-bold text-foreground">
-                      {figure.whole ? (
-                        <CountUp value={Number(figure.text)} trigger="view" startDelay={500 + index * 150} />
-                      ) : (
-                        <span className="tabular">{figure.text}</span>
-                      )}
-                      <span className="text-gold">%</span>
-                    </p>
-                    <div className="flex flex-col gap-1.5">
-                      <h3 className="font-heading text-title text-foreground">{payment.label}</h3>
-                      <p className="text-body text-muted-foreground">{payment.due}</p>
-                    </div>
-                  </li>
-                )
-              })}
-            </ol>
+                    className={index === 0 ? "bg-gold" : index === 1 ? "bg-gold/65" : "bg-gold/35"}
+                    style={{ flexGrow: payment.percent, flexBasis: 0 }}
+                  />
+                ))}
+              </div>
+
+              <ol
+                className="grid grid-cols-1 gap-8 md:[grid-template-columns:var(--payment-columns)] md:gap-6"
+                style={{ "--payment-columns": payments.map((payment) => `${payment.percent}fr`).join(" ") } as React.CSSProperties}
+              >
+                {payments.map((payment, index) => {
+                  const figure = wholeOrExact(payment.percent)
+                  return (
+                    <li
+                      key={payment.label}
+                      className="rv-up flex flex-col gap-3 border-l border-gold/30 pl-6"
+                      style={delay(400 + index * ITEM_STEP_MS)}
+                    >
+                      <span className="tabular text-meta text-gold uppercase">
+                        {String(index + 1).padStart(2, "0")} · {payment.label}
+                      </span>
+                      <p className="font-heading text-display leading-none font-bold text-foreground">
+                        {figure.whole ? (
+                          <CountUp value={Number(figure.text)} trigger="view" startDelay={500 + index * 150} />
+                        ) : (
+                          <span className="tabular">{figure.text}</span>
+                        )}
+                        <span className="text-gold">%</span>
+                      </p>
+                      <p className="max-w-xs text-body text-muted-foreground">{payment.due}</p>
+                    </li>
+                  )
+                })}
+              </ol>
+            </div>
 
             <p className="rv-up text-small text-muted-foreground" style={delay(700)}>
               The full agreed price is paid before handover. Payments are made by bank transfer or mobile money.
@@ -238,7 +260,7 @@ export default async function HowItWorksPage() {
                       aria-hidden="true"
                       className="relative z-10 grid size-6 shrink-0 place-items-center rounded-full border border-gold/50 bg-night text-gold"
                     >
-                      <Check className="size-3" strokeWidth={3} />
+                      <Check className="size-3" />
                     </span>
                     <div className="flex flex-col gap-0.5">
                       <span className="text-body font-medium text-foreground">{stage.label}</span>
@@ -270,7 +292,7 @@ export default async function HowItWorksPage() {
                 />
                 <Link
                   href="/spare-parts"
-                  className="rv-up group/parts inline-flex w-fit shrink-0 items-center gap-2 py-2 text-small font-semibold text-gold transition-colors duration-fast hover:text-gold-bright"
+                  className="rv-up group/parts inline-flex w-fit shrink-0 items-center gap-2 py-2 text-small font-semibold text-gold pointer-coarse:min-h-11 transition-colors duration-fast hover:text-gold-bright"
                   style={delay(500)}
                 >
                   Browse spare parts
@@ -281,14 +303,20 @@ export default async function HowItWorksPage() {
                 </Link>
               </div>
 
-              <ol className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {/* A sequence joined by one line, not a row of boxes: the parts
+                  journey is short and linear, and the line says so. */}
+              <ol className="relative grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8">
+                <span
+                  aria-hidden="true"
+                  className="absolute top-5 right-0 left-5 hidden h-px bg-gradient-to-r from-gold/60 via-gold/25 to-transparent lg:block"
+                />
                 {partSteps.map((step, index) => (
                   <li
                     key={step.title}
-                    className="rv-up flex flex-col gap-3 rounded-2xl border border-white/10 bg-card/70 p-6"
+                    className="rv-up relative flex flex-col gap-3"
                     style={delay(400 + index * ITEM_STEP_MS)}
                   >
-                    <span className="tabular text-small font-semibold text-gold">
+                    <span className="tabular relative grid size-10 place-items-center rounded-full border border-gold/50 bg-night font-heading text-small font-semibold text-gold">
                       {String(index + 1).padStart(2, "0")}
                     </span>
                     <h3 className="font-heading text-title text-foreground">{step.title}</h3>

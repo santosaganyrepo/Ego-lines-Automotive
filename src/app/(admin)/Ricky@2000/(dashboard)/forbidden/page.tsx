@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { requireAdmin } from "@/lib/auth/admin-guard"
 import { ADMIN_ROLE_LABELS } from "@/lib/auth/permissions"
 import { ADMIN_BASE_PATH } from "@/lib/constants/admin-routes"
+import { getPublicSiteSettings } from "@/lib/queries/settings.queries"
 
 export const metadata: Metadata = {
   title: "Access Denied",
@@ -36,6 +37,7 @@ export const metadata: Metadata = {
  */
 export default async function AdminForbiddenPage() {
   const admin = await requireAdmin()
+  const { businessName } = await getPublicSiteSettings()
 
   return (
     <div className="flex min-h-[60vh] flex-col items-center justify-center">
@@ -44,7 +46,7 @@ export default async function AdminForbiddenPage() {
           aria-hidden="true"
           className="flex size-12 items-center justify-center rounded-xl border border-destructive/25 bg-destructive/10 text-destructive"
         >
-          <ShieldAlert className="size-5" strokeWidth={1.75} />
+          <ShieldAlert className="size-5" />
         </span>
 
         <div className="flex flex-col gap-2">
@@ -54,7 +56,7 @@ export default async function AdminForbiddenPage() {
             <span className="font-medium text-foreground">{admin.displayName}</span> ({ADMIN_ROLE_LABELS[admin.role]}).
           </p>
           <p className="text-small text-muted-foreground">
-            If you need access, ask a Crownline Motors administrator to review your role.
+            If you need access, ask a {businessName} administrator to review your role.
           </p>
         </div>
 

@@ -65,7 +65,7 @@ export function AdminNav({ groups, onNavigate }: AdminNavProps) {
   const pathname = usePathname()
 
   return (
-    <nav aria-label="Dashboard" className="flex flex-col gap-7">
+    <nav aria-label="Dashboard" className="flex flex-col gap-8">
       {groups.map((group, groupIndex) => (
         <div key={group.title ?? `group-${groupIndex}`} className="flex flex-col gap-1">
           {group.title ? (
@@ -87,9 +87,9 @@ export function AdminNav({ groups, onNavigate }: AdminNavProps) {
                       className="flex h-9 items-center gap-3 rounded-md px-3 text-small text-rail-subtle"
                       aria-disabled="true"
                     >
-                      <Icon aria-hidden="true" className="size-4 shrink-0" strokeWidth={1.75} />
+                      <Icon aria-hidden="true" className="size-4 shrink-0" />
                       <span className="flex-1">{link.label}</span>
-                      <span className="rounded-full border border-rail-border px-1.5 text-[0.625rem] font-medium text-rail-subtle">
+                      <span className="rounded-full border border-rail-border px-2 text-xs font-medium text-rail-subtle">
                         Soon
                       </span>
                     </span>
@@ -125,7 +125,7 @@ export function AdminNav({ groups, onNavigate }: AdminNavProps) {
                     />
                     <Icon
                       aria-hidden="true"
-                      strokeWidth={1.75}
+                     
                       className={cn(
                         "size-4 shrink-0 transition-colors duration-fast",
                         active ? "text-gold" : "text-rail-subtle group-hover/nav:text-rail-foreground"

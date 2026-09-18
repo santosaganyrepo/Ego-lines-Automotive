@@ -173,7 +173,7 @@ export function CartSummary({ tone = "light", labelled = false, className }: Car
             aria-hidden="true"
             className={cn(
               "tabular absolute -top-1.5 -right-1.5 inline-flex h-4.5 min-w-4.5 items-center justify-center rounded-full px-1",
-              "bg-gold-bright text-[0.625rem] font-bold text-gold-bright-foreground",
+              "bg-gold-bright text-xs font-bold text-gold-bright-foreground",
               "ring-2",
               tone === "dark" ? "ring-transparent" : "ring-background"
             )}
@@ -205,7 +205,7 @@ export function CartSummary({ tone = "light", labelled = false, className }: Car
                     <button
                       type="button"
                       onClick={() => setView("list")}
-                      className="group/back inline-flex w-fit items-center gap-1.5 text-small font-medium text-muted-foreground transition-colors duration-fast hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                      className="group/back inline-flex w-fit items-center gap-2 text-small font-medium text-muted-foreground transition-colors duration-fast hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
                     >
                       <ArrowLeft
                         aria-hidden="true"
@@ -255,7 +255,7 @@ function CartList({
   onRequest: () => void
 }) {
   return (
-    <div className="flex flex-col gap-4 p-5 sm:p-6">
+    <div className="flex flex-col gap-4 p-6 sm:p-6">
       <div className="flex flex-col gap-1">
         <DialogTitle className="pr-8 text-title">Your parts list</DialogTitle>
         <DialogDescription className="text-small">

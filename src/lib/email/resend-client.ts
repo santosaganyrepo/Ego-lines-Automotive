@@ -36,8 +36,20 @@ export function isEmailSendingConfigured(): boolean {
  * domain yet. Once a domain is verified in the Resend dashboard, setting
  * `EMAIL_FROM_ADDRESS` is the only change needed; nothing here or in the
  * calling code changes.
+ *
+ * The display name is the business name from Settings, so renaming the
+ * business renames the sender too. Only an `EMAIL_FROM_ADDRESS` that already
+ * carries its own display name ("Name <address>") overrides it.
  */
-export function getEmailFromAddress(): string {
-  const value = process.env.EMAIL_FROM_ADDRESS
-  return value && value.trim().length > 0 ? value.trim() : "Crownline Motors <onboarding@resend.dev>"
+export function getEmailFromAddress(businessName: string): string {
+  const configured = process.env.EMAIL_FROM_ADDRESS?.trim() ?? ""
+
+  if (configured.includes("<")) return configured
+
+  const address = configured.length > 0 ? configured : "onboarding@resend.dev"
+  // A display name is part of a header: quotes, angle brackets, backslashes
+  // and line breaks would let a name rewrite it.
+  const name = businessName.replace(/["<>\\\r\n]/g, "").trim()
+
+  return name.length > 0 ? `"${name}" <${address}>` : address
 }

@@ -53,18 +53,18 @@ export default async function AdministratorAccountPage() {
   return (
     <>
       <SettingsPanel id="account-overview" title="Administrator account" description="Your own sign-in details.">
-        <dl className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <dl className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           <Detail label="Name">{admin.displayName}</Detail>
           <Detail label="Email">{authUser.user?.email ?? admin.email}</Detail>
           <Detail label="Role">{ADMIN_ROLE_LABELS[admin.role]}</Detail>
           <Detail label="Account status">
-            <span className="inline-flex items-center gap-1.5">
+            <span className="inline-flex items-center gap-2">
               <span aria-hidden="true" className="size-2 rounded-full bg-success" />
               {details?.isActive ? "Active" : "Inactive"}
             </span>
           </Detail>
           <Detail label="Two-factor authentication">
-            <span className="inline-flex items-center gap-1.5">
+            <span className="inline-flex items-center gap-2">
               {admin.twoFactorEnabled ? (
                 <ShieldCheck aria-hidden="true" className="size-4 text-success" />
               ) : (

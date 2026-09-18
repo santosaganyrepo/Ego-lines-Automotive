@@ -43,7 +43,7 @@ export function TrackingSearch({ defaultValue = "" }: { defaultValue?: string })
             className="h-14 w-full rounded-xl border border-input bg-card pr-4 pl-11 font-mono text-base tracking-wider text-foreground uppercase outline-none transition-[border-color,box-shadow] duration-fast placeholder:text-muted-foreground/60 placeholder:normal-case focus-visible:border-gold-ink focus-visible:ring-4 focus-visible:ring-gold/20"
           />
         </div>
-        <Button type="submit" size="xl" className="h-14 sm:px-9">
+        <Button type="submit" size="xl" className="h-14 sm:px-10">
           Track order
         </Button>
       </div>

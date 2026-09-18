@@ -1,4 +1,4 @@
-import { LoadingState } from "@/components/shared/loading-state"
+import { CatalogueSkeleton } from "@/components/shared/catalogue-skeleton"
 
 /**
  * Fallback while the catalogue query runs.
@@ -20,9 +20,5 @@ import { LoadingState } from "@/components/shared/loading-state"
  * This mirrors the vehicle catalogue exactly; see the longer note there.
  */
 export default function SparePartsCatalogueLoading() {
-  return (
-    <div className="flex min-h-[60vh] items-center justify-center">
-      <LoadingState />
-    </div>
-  )
+  return <CatalogueSkeleton kind="parts" />
 }

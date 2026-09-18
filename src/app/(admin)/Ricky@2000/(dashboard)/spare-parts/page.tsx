@@ -93,6 +93,7 @@ export default async function AdminSparePartsPage(
     {
       id: "status",
       header: "Status",
+      align: "center",
       render: (part) => <SparePartStatusBadge status={part.status} />,
     },
     {
@@ -136,6 +137,7 @@ export default async function AdminSparePartsPage(
     {
       id: "availability",
       header: "Availability",
+      align: "center",
       hideBelow: "lg",
       render: (part) => (
         /**

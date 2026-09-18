@@ -107,7 +107,7 @@ export const VEHICLE_INFO_COPY: Record<VehicleInfoField, InfoFieldCopy> = {
   driveType: { label: "Drive type", description: "2WD, 4WD or AWD." },
   exteriorColor: { label: "Exterior colour", description: "The body colour." },
   interiorColor: { label: "Interior colour", description: "The cabin colour." },
-  countryOfOrigin: { label: "Country of origin", description: "Japan or Korea." },
+  countryOfOrigin: { label: "Country of origin", description: "Japan, South Korea or China." },
   location: { label: "Current location", description: "Where the vehicle is now." },
   condition: { label: "Condition", description: "New, used and so on." },
   availability: { label: "Availability tag", description: "The “Available” label." },

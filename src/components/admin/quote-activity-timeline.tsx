@@ -52,7 +52,7 @@ export function QuoteActivityTimeline({ createdAt, sentAt, lastSentVia, order }:
   events.sort((a, b) => a.date.getTime() - b.date.getTime())
 
   return (
-    <section className="flex flex-col gap-4 rounded-xl border border-border bg-card p-5 shadow-[var(--shadow-subtle)]">
+    <section className="flex flex-col gap-4 rounded-xl border border-border bg-card p-6 shadow-[var(--shadow-subtle)]">
       <h2 className="text-small font-medium text-foreground">Activity</h2>
 
       <ol className="flex flex-col">

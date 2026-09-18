@@ -40,7 +40,7 @@ function Avatar({ name, className }: { name: string; className?: string }) {
   )
 }
 
-const ITEM = "h-9 gap-2.5 rounded-md px-2.5 text-small"
+const ITEM = "h-9 gap-3 rounded-md px-3 text-small"
 
 /**
  * The administrator's menu, opened from their avatar in the top bar.
@@ -82,20 +82,20 @@ export function AdminProfileMenu({
           "hover:ring-gold/35 focus-visible:ring-gold data-popup-open:ring-gold/60"
         )}
       >
-        <Avatar name={name} className="size-8 text-[0.6875rem]" />
+        <Avatar name={name} className="size-8 text-xs" />
       </DropdownMenuTrigger>
 
       <DropdownMenuContent
         align="end"
         sideOffset={8}
-        className="w-72 rounded-xl p-1.5 shadow-[var(--shadow-overlay)] ring-foreground/8"
+        className="w-72 rounded-xl p-2 shadow-[var(--shadow-overlay)] ring-foreground/8"
       >
-        <div className="flex items-center gap-3 px-2.5 pt-2.5 pb-3">
+        <div className="flex items-center gap-3 px-3 pt-2.5 pb-3">
           <Avatar name={name} className="size-10 text-small" />
           <div className="flex min-w-0 flex-col gap-0.5">
             <span className="flex min-w-0 items-center gap-2">
               <span className="truncate text-small font-semibold text-foreground">{name}</span>
-              <span className="shrink-0 rounded-full border border-gold-ink/25 bg-accent px-1.5 text-[0.6875rem] leading-5 font-medium text-gold-ink">
+              <span className="shrink-0 rounded-full border border-gold-ink/25 bg-accent px-2 text-xs leading-5 font-medium text-gold-ink">
                 {roleLabel}
               </span>
             </span>
@@ -115,7 +115,7 @@ export function AdminProfileMenu({
           closeOnClick={false}
           onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
         >
-          <span className="flex items-center gap-2.5">
+          <span className="flex items-center gap-3">
             <Moon aria-hidden="true" className="text-muted-foreground" />
             Dark mode
           </span>

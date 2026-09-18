@@ -135,6 +135,7 @@ export async function cancelOrderAction(
     orderId: formData.get("orderId"),
     reason: formData.get("reason"),
     refundPayments: formData.get("refundPayments"),
+    confirmOrderNumber: formData.get("confirmOrderNumber"),
   })
 
   if (!parsed.success) {
@@ -147,9 +148,9 @@ export async function cancelOrderAction(
     return { status: "error", message: auth.message }
   }
 
-  const { orderId, reason, refundPayments } = parsed.data
+  const { orderId, reason, refundPayments, confirmOrderNumber } = parsed.data
 
-  const existing = await prisma.order.findUnique({ where: { id: orderId }, select: { id: true } })
+  const existing = await prisma.order.findUnique({ where: { id: orderId }, select: { id: true, orderNumber: true } })
   if (!existing) {
     return { status: "error", message: "That order no longer exists." }
   }
@@ -186,6 +187,15 @@ export async function cancelOrderAction(
        */
       const heldCents = ledger.confirmed.reduce((sum, payment) => sum + toCents(payment.amount), 0)
       let refundedCents = 0
+
+      // Checked here, under the lock, against the money actually held — not
+      // against what the dialog believed when it opened. A payment confirmed
+      // in another tab a moment ago still triggers the second step.
+      if (heldCents > 0 && confirmOrderNumber?.toUpperCase() !== existing.orderNumber.toUpperCase()) {
+        throw new CancellationRefusal(
+          `The customer has paid ${formatCurrency(fromCents(heldCents))} on this order. Type the order number ${existing.orderNumber} to confirm the cancellation.`
+        )
+      }
 
       if (heldCents > 0 && refundPayments) {
         const note = `Refunded by ${auth.admin.displayName} on ${new Date().toISOString().slice(0, 10)}: order cancelled — ${reason}`

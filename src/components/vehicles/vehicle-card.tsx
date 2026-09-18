@@ -75,8 +75,8 @@ import type { PublicVehicleCard } from "@/lib/queries/public-vehicle.queries"
  * icons are `aria-hidden` so they are never read as a fifth thing.
  *
  * Country of origin sits on the photograph rather than in that matrix. For
- * this business it is a differentiator rather than a detail — Japan and
- * Korea are the two sources the company is built around.
+ * this business it is a differentiator rather than a detail — Japan, South
+ * Korea and China are the sources the company is built around.
  *
  * Availability is not shown. Every vehicle reachable from this grid is
  * PUBLISHED, because `publicVehicleWhere` admits nothing else, so an
@@ -224,7 +224,7 @@ export function VehicleCard({
              */
             <div className="flex size-full flex-col items-center justify-center gap-2 bg-muted text-muted-foreground">
               <ImageOff aria-hidden="true" className="size-6" />
-              <span className="text-small">Photographs coming soon</span>
+              <span className="text-small">Photographs on request</span>
             </div>
           )}
 
@@ -240,7 +240,7 @@ export function VehicleCard({
           {/* Every vehicle in this grid is published, so this is reassurance
               rather than information; Settings can switch it off. */}
           {vehicle.showAvailability ? (
-            <span className="absolute top-3 right-3 inline-flex items-center gap-1.5 rounded-full bg-background/85 px-2.5 py-1 text-xs font-medium text-foreground backdrop-blur-sm">
+            <span className="absolute top-3 right-3 inline-flex items-center gap-2 rounded-full bg-background/85 px-3 py-1 text-xs font-medium text-foreground backdrop-blur-sm">
               <span aria-hidden="true" className="size-1.5 rounded-full bg-success" />
               Available
             </span>
@@ -248,7 +248,7 @@ export function VehicleCard({
         </div>
 
         {/*
-          `p-4 sm:p-5` — generous without pushing the photograph below the
+          `p-4 sm:p-6` — generous without pushing the photograph below the
           60% share it is meant to hold. `gap-0` on the Card, so the two
           bands' own spacing is the only spacing here.
 
@@ -262,7 +262,7 @@ export function VehicleCard({
           card is dropped into a narrower column somewhere else on the
           site.
         */}
-        <div className="@container flex flex-1 flex-col p-4 sm:p-5">
+        <div className="@container flex flex-1 flex-col p-4 sm:p-6">
           {/* ── Identity ─────────────────────────────────────────────
               Inter, not the Manrope the base layer gives an `<h3>`. Two
               reasons, and the second is the load-bearing one:
@@ -318,7 +318,7 @@ export function VehicleCard({
               block's own top border rather than a separate element —
               same reading, one node less, and it can never drift away
               from the content it separates. */}
-          <div className="mt-auto flex items-end justify-between gap-4 border-t border-border pt-5 @max-[322px]:gap-2 @max-[288px]:flex-col @max-[288px]:items-stretch @max-[288px]:gap-4">
+          <div className="mt-auto flex items-end justify-between gap-4 border-t border-border pt-6 @max-[322px]:gap-2 @max-[288px]:flex-col @max-[288px]:items-stretch @max-[288px]:gap-4">
             {/*
               Content-sized columns, not `grid-cols-2`.
 
@@ -362,7 +362,7 @@ export function VehicleCard({
               than the text they have to hold.
             */}
             {specs.length > 0 ? (
-              <dl className="grid min-w-0 flex-1 grid-cols-[auto_auto] justify-start gap-x-6 gap-y-3 @max-[322px]:gap-x-2 @max-[322px]:gap-y-2.5">
+              <dl className="grid min-w-0 flex-1 grid-cols-[auto_auto] justify-start gap-x-6 gap-y-3 @max-[322px]:gap-x-2 @max-[322px]:gap-y-3">
                 {specs.map((spec) => (
                   <Spec key={spec.label} icon={spec.icon} label={spec.label} value={spec.value} />
                 ))}
@@ -404,7 +404,7 @@ function ExploreCue({ className }: { className?: string }) {
       aria-hidden="true"
       className={cn(
         className,
-        "eyebrow inline-flex shrink-0 items-center justify-center gap-1.5 rounded-lg px-3 py-2.5",
+        "eyebrow inline-flex shrink-0 items-center justify-center gap-2 rounded-lg px-3 py-3",
         "@max-[322px]:px-2",
         "bg-gold-bright text-gold-bright-foreground shadow-[var(--shadow-gold)]",
         "transition-[box-shadow,transform,translate,scale] duration-slow ease-crownline-soft",
@@ -453,10 +453,10 @@ function Spec({
     // child would be invalid markup.
     <div className="flex min-w-0 items-center">
       <dt className="sr-only">{label}</dt>
-      <dd className="flex min-w-0 items-center gap-2 font-sans text-small text-muted-foreground @max-[322px]:gap-1.5">
+      <dd className="flex min-w-0 items-center gap-2 font-sans text-small text-muted-foreground @max-[322px]:gap-2">
         <Icon
           aria-hidden="true"
-          strokeWidth={1.5}
+         
           className="size-3 shrink-0 text-muted-foreground/40"
         />
         <span className="tabular truncate">{value}</span>

@@ -112,7 +112,7 @@ export function QuoteConvertDialog({ quoteId, total, disabled = false, disabledR
               <input type="hidden" name="quoteId" value={quoteId} />
               <input type="hidden" name="confirmAccepted" value={confirmed ? "true" : ""} />
 
-              <label htmlFor={confirmId} className="flex items-start gap-2.5 text-small">
+              <label htmlFor={confirmId} className="flex items-start gap-3 text-small">
                 <input
                   id={confirmId}
                   type="checkbox"

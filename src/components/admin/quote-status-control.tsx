@@ -43,7 +43,7 @@ export function QuoteStatusControl({ quoteId, status }: QuoteStatusControlProps)
   const transitions = MANUAL_QUOTE_TRANSITIONS[status]
 
   return (
-    <section className="flex flex-col gap-3 rounded-xl border border-border bg-card p-5 shadow-[var(--shadow-subtle)]">
+    <section className="flex flex-col gap-3 rounded-xl border border-border bg-card p-6 shadow-[var(--shadow-subtle)]">
       <div className="flex flex-col gap-0.5">
         <h2 className="text-small font-medium text-foreground">Status</h2>
         <p className="text-xs text-muted-foreground">

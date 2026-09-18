@@ -3,10 +3,16 @@ import "server-only"
 import { cache } from "react"
 
 import type { Prisma } from "@/generated/prisma/client"
-import { QuoteStatus, QuoteType, type QuoteDispatchChannel, type QuoteSource } from "@/generated/prisma/enums"
+import {
+  QuoteStatus,
+  QuoteType,
+  type QuoteDiscountType,
+  type QuoteDispatchChannel,
+  type QuoteSource,
+} from "@/generated/prisma/enums"
 import { prisma } from "@/lib/prisma"
 import { summarizeOrderFinance, type OrderFinanceSummary } from "@/lib/orders/order-finance"
-import { computeQuoteTotals, type QuoteTotals } from "@/lib/quotes/quote-pricing"
+import { computeQuoteTotals, toQuoteDiscount, type QuoteTotals } from "@/lib/quotes/quote-pricing"
 import type { QuoteListFilters } from "@/lib/validations/quote.schema"
 
 /**
@@ -33,6 +39,8 @@ function toItemTotals(
     clearingCost: Prisma.Decimal | null
     importDuty: Prisma.Decimal | null
     otherCostsAmount: Prisma.Decimal | null
+    discountType: QuoteDiscountType | null
+    discountValue: Prisma.Decimal | null
   }
 ): QuoteTotals {
   return computeQuoteTotals(
@@ -46,7 +54,8 @@ function toItemTotals(
       clearingCost: fees.clearingCost?.toNumber() ?? null,
       importDuty: fees.importDuty?.toNumber() ?? null,
       otherCosts: fees.otherCostsAmount?.toNumber() ?? null,
-    }
+    },
+    toQuoteDiscount(fees.discountType, fees.discountValue?.toNumber() ?? null)
   )
 }
 
@@ -119,6 +128,8 @@ const LIST_SELECT = {
   clearingCost: true,
   importDuty: true,
   otherCostsAmount: true,
+  discountType: true,
+  discountValue: true,
   customer: { select: { fullName: true } },
   items: { select: ITEM_SELECT },
 } satisfies Prisma.QuoteSelect
@@ -257,6 +268,9 @@ export interface QuoteDetail {
   importDuty: number | null
   otherCostsLabel: string | null
   otherCostsAmount: number | null
+  discountType: QuoteDiscountType | null
+  discountValue: number | null
+  discountLabel: string | null
   validUntil: Date | null
   paymentInstructions: string | null
   terms: string | null
@@ -370,6 +384,9 @@ export async function getQuoteById(id: string): Promise<QuoteDetail | null> {
     importDuty: quote.importDuty?.toNumber() ?? null,
     otherCostsLabel: quote.otherCostsLabel,
     otherCostsAmount: quote.otherCostsAmount?.toNumber() ?? null,
+    discountType: quote.discountType,
+    discountValue: quote.discountValue?.toNumber() ?? null,
+    discountLabel: quote.discountLabel,
     validUntil: quote.validUntil,
     paymentInstructions: quote.paymentInstructions,
     terms: quote.terms,
@@ -429,6 +446,9 @@ export interface QuotePdfSourceRow {
   importDuty: number | null
   otherCostsLabel: string | null
   otherCostsAmount: number | null
+  discountType: QuoteDiscountType | null
+  discountValue: number | null
+  discountLabel: string | null
   paymentInstructions: string | null
   terms: string | null
   contactName: string | null
@@ -448,6 +468,9 @@ const QUOTE_PDF_SOURCE_SELECT = {
   importDuty: true,
   otherCostsLabel: true,
   otherCostsAmount: true,
+  discountType: true,
+  discountValue: true,
+  discountLabel: true,
   paymentInstructions: true,
   terms: true,
   contactName: true,
@@ -469,6 +492,7 @@ function toQuotePdfSourceRow(
     clearingCost: quote.clearingCost?.toNumber() ?? null,
     importDuty: quote.importDuty?.toNumber() ?? null,
     otherCostsAmount: quote.otherCostsAmount?.toNumber() ?? null,
+    discountValue: quote.discountValue?.toNumber() ?? null,
     items: quote.items.map((item) => ({
       kind: item.kind,
       description: item.description,

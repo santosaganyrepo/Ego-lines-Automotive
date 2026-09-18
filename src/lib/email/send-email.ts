@@ -1,6 +1,7 @@
 import "server-only"
 
 import { getEmailFromAddress, getResendClient } from "@/lib/email/resend-client"
+import { getPublicSiteSettings } from "@/lib/queries/settings.queries"
 
 /**
  * The one function that hands an email to Resend. Quotation dispatch and
@@ -39,9 +40,10 @@ export async function sendEmail(input: SendEmailInput): Promise<SendEmailResult>
   }
 
   try {
+    const { businessName } = await getPublicSiteSettings()
     const { error } = await resend.emails.send(
       {
-        from: getEmailFromAddress(),
+        from: getEmailFromAddress(businessName),
         to: typeof input.to === "string" ? input.to : [...input.to],
         // A subject is a header; a line break in one is header injection.
         subject: input.subject.replace(/[\r\n]+/g, " ").trim(),

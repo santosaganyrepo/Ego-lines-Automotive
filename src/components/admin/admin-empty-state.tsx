@@ -27,7 +27,7 @@ export function AdminEmptyState({
   return (
     <div
       className={cn(
-        "flex flex-col items-center gap-5 rounded-xl border border-dashed border-border bg-card/60 px-6 py-14 text-center sm:py-16",
+        "flex flex-col items-center gap-6 rounded-xl border border-dashed border-border bg-card/60 px-6 py-14 text-center sm:py-16",
         className
       )}
     >
@@ -35,11 +35,11 @@ export function AdminEmptyState({
         aria-hidden="true"
         className="relative flex size-12 items-center justify-center rounded-xl border border-border bg-card text-muted-foreground shadow-[var(--shadow-subtle)]"
       >
-        <Icon className="size-5" strokeWidth={1.75} />
+        <Icon className="size-5" />
         <span className="absolute -bottom-px left-1/2 h-px w-5 -translate-x-1/2 bg-gold" />
       </span>
 
-      <div className="flex max-w-sm flex-col gap-1.5">
+      <div className="flex max-w-sm flex-col gap-2">
         <h2 className="text-h3 text-foreground">{title}</h2>
         {description ? <p className="text-small text-muted-foreground">{description}</p> : null}
       </div>

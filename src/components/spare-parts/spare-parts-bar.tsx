@@ -47,6 +47,11 @@ interface SparePartsBarProps {
    * own name further down.
    */
   title?: string
+  /**
+   * `p` when the page already has its own `h1` (the catalogue, whose hero
+   * carries it) — one page, one `h1`.
+   */
+  titleAs?: "h1" | "p"
   className?: string
 }
 
@@ -54,8 +59,10 @@ export function SparePartsBar({
   backHref,
   backLabel,
   title,
+  titleAs = "h1",
   className,
 }: SparePartsBarProps) {
+  const Title = titleAs
   return (
     <div className={cn("border-b border-border bg-background", className)}>
       <Container>
@@ -69,7 +76,7 @@ export function SparePartsBar({
             <Link
               href={backHref}
               className={cn(
-                "group/back inline-flex shrink-0 items-center gap-1.5",
+                "group/back inline-flex shrink-0 items-center gap-2 pointer-coarse:min-h-11",
                 "text-small font-medium text-muted-foreground",
                 "transition-colors duration-fast ease-crownline hover:text-foreground",
                 "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
@@ -90,7 +97,7 @@ export function SparePartsBar({
                   aria-hidden="true"
                   className="h-4 w-px shrink-0 bg-border"
                 />
-                <h1 className="truncate text-title">{title}</h1>
+                <Title className="truncate text-title">{title}</Title>
               </>
             ) : null}
           </div>

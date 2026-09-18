@@ -2,6 +2,7 @@ import {
   CountryOfOrigin,
   DriveType,
   FuelType,
+  PreferredCountry,
   TransmissionType,
   VehicleBodyType,
   VehicleCondition,
@@ -87,6 +88,18 @@ export function bodyTypeToParam(bodyType: VehicleBodyType): string {
 export const COUNTRY_LABELS: Record<CountryOfOrigin, string> = {
   JAPAN: "Japan",
   KOREA: "South Korea",
+  CHINA: "China",
+}
+
+/**
+ * A quote request's sourcing preference. `EITHER` predates China and means
+ * "no preference", so it reads as any market rather than one of two.
+ */
+export const PREFERRED_COUNTRY_LABELS: Record<PreferredCountry, string> = {
+  JAPAN: "Japan",
+  KOREA: "South Korea",
+  CHINA: "China",
+  EITHER: "Any market",
 }
 
 /**

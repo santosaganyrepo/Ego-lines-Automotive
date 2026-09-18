@@ -25,7 +25,7 @@ export function AccountNameForm({ displayName }: { displayName: string }) {
   const { state, pending, dirty, fieldError, formProps } = useSettingsForm(updateAdminProfileAction)
 
   return (
-    <form {...formProps} className="flex flex-col gap-5">
+    <form {...formProps} className="flex flex-col gap-6">
       <SettingsFormAlert state={state} />
       <SettingsField
         label="Name"
@@ -71,7 +71,7 @@ export function EmailChangeForm({ currentEmail }: { currentEmail: string }) {
   }
 
   return (
-    <form onSubmit={onSubmit} noValidate className="flex flex-col gap-5">
+    <form onSubmit={onSubmit} noValidate className="flex flex-col gap-6">
       {state.status === "error" && !state.fieldErrors ? <SettingsFormAlert state={state} /> : null}
       {state.status === "success" ? (
         <p role="status" className="flex items-start gap-2 rounded-lg bg-success/10 px-4 py-3 text-small text-foreground">

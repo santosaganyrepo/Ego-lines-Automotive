@@ -32,7 +32,7 @@ import { formatCurrency } from "@/lib/utils/format-currency"
 
 const IDLE: PaymentActionState = { status: "idle" }
 
-const FIELD = "h-9 rounded-md border-input bg-card px-2.5 text-small placeholder:text-muted-foreground/70"
+const FIELD = "h-9 rounded-md border-input bg-card px-3 text-small placeholder:text-muted-foreground/70"
 const SELECT = cn(NATIVE_SELECT_CLASS, "h-9 rounded-md text-small md:text-small")
 const DATE_FORMAT = new Intl.DateTimeFormat("en-GB", { dateStyle: "medium", timeZone: "UTC" })
 const METHODS = Object.values(PaymentMethod)
@@ -73,9 +73,9 @@ export function OrderPaymentsPanel({
   const openStages = milestones.filter((milestone) => milestone.balance > 0)
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-6">
       {state.status === "success" && state.message ? (
-        <p role="status" className="flex items-start gap-2 rounded-lg border border-success/25 bg-success/8 px-3 py-2.5 text-small text-foreground">
+        <p role="status" className="flex items-start gap-2 rounded-lg border border-success/25 bg-success/8 px-3 py-3 text-small text-foreground">
           <CheckCircle2 aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-success" />
           {state.message}
         </p>
@@ -121,7 +121,7 @@ function Field({
   children: ReactNode
 }) {
   return (
-    <div className={cn("flex flex-col gap-1.5", className)}>
+    <div className={cn("flex flex-col gap-2", className)}>
       <Label htmlFor={id} className="text-xs font-medium text-muted-foreground">
         {label}
       </Label>
@@ -176,13 +176,13 @@ function RecordPaymentForm({
       <h3 className="text-small font-medium text-foreground">Record a payment</h3>
 
       {state.status === "error" && state.message ? (
-        <p role="alert" className="flex items-center gap-1.5 text-xs text-destructive">
+        <p role="alert" className="flex items-center gap-2 text-xs text-destructive">
           <AlertCircle aria-hidden="true" className="size-3.5 shrink-0" />
           {state.message}
         </p>
       ) : null}
 
-      <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <Field id={stageFieldId} label="Payment for" error={errors.milestoneId?.[0]}>
           <select
             id={stageFieldId}
@@ -275,7 +275,7 @@ function RecordPaymentForm({
           placeholder="Internal"
           value={notes}
           onChange={(event) => setNotes(event.target.value)}
-          className="min-h-16 rounded-md border-input bg-card px-2.5 py-2 text-small placeholder:text-muted-foreground/70"
+          className="min-h-16 rounded-md border-input bg-card px-3 py-2 text-small placeholder:text-muted-foreground/70"
         />
       </Field>
 
@@ -388,7 +388,7 @@ function ReversePaymentDialog({ payment }: { payment: OrderPaymentRecord }) {
             </label>
           </fieldset>
 
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col gap-2">
             <Label htmlFor={reasonId} className="text-xs font-medium text-muted-foreground">
               Reason
             </Label>
@@ -400,7 +400,7 @@ function ReversePaymentDialog({ payment }: { payment: OrderPaymentRecord }) {
               maxLength={500}
               required
               placeholder="Duplicate entry"
-              className="min-h-16 rounded-md border-input px-2.5 py-2 text-small"
+              className="min-h-16 rounded-md border-input px-3 py-2 text-small"
             />
           </div>
 

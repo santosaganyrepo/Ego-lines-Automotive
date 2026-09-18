@@ -252,7 +252,7 @@ export function VehicleSearch({ facets, bodyTypes, criteria }: VehicleSearchProp
             event.preventDefault()
             apply({ q: currentQuery() })
           }}
-          className="flex flex-col gap-4 rounded-xl border border-border bg-card p-4 sm:p-5"
+          className="flex flex-col gap-4 rounded-xl border border-border bg-card p-4 sm:p-6"
         >
           <SearchField
             // Remounted whenever the applied search changes, which is how an
@@ -383,7 +383,7 @@ function SearchField({
   const [isFocused, setIsFocused] = React.useState(false)
 
   return (
-    <div className="flex flex-col gap-1.5">
+    <div className="flex flex-col gap-2">
       <Label htmlFor={id} className="text-xs text-muted-foreground">
         Search
       </Label>
@@ -588,7 +588,7 @@ function FilterPanel({
         <span className="font-heading tracking-tight">Filters</span>
 
         {activeCount > 0 ? (
-          <span className="tabular inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-accent px-1.5 text-xs font-semibold text-accent-foreground">
+          <span className="tabular inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-accent px-2 text-xs font-semibold text-accent-foreground">
             {activeCount}
           </span>
         ) : null}
@@ -621,7 +621,7 @@ function FilterPanel({
               type="button"
               onClick={onClear}
               className={cn(
-                "inline-flex items-center gap-1.5 rounded-md px-2 py-1.5",
+                "inline-flex items-center gap-2 rounded-md px-2 py-2 pointer-coarse:min-h-11",
                 "text-small text-muted-foreground",
                 "transition-colors duration-fast hover:text-gold-ink",
                 "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
@@ -662,7 +662,7 @@ function FilterSelect({
   onChange: (value: string) => void
 }) {
   return (
-    <div className="flex flex-col gap-1.5">
+    <div className="flex flex-col gap-2">
       <Label htmlFor={id} className="text-xs text-muted-foreground">
         {label}
       </Label>

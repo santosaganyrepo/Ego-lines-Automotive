@@ -70,26 +70,32 @@ export function HomeHero({ businessName, showQuote }: HomeHeroProps) {
       aria-labelledby="home-hero-heading"
       // Pulled up under the fixed header, which is clear over it until the
       // visitor scrolls — see the note on <main> in the public layout.
-      className="relative isolate -mt-16 flex min-h-svh flex-col overflow-hidden bg-night text-white md:-mt-20"
+      className="relative isolate -mt-(--header-offset) flex flex-col overflow-hidden bg-night text-white md:min-h-svh"
     >
-      <div aria-hidden="true" className="absolute inset-0 -z-10">
+      {/*
+        The photograph, framed per device from one image (one preload, one
+        download):
+
+          phone      a full-width 4:3 frame above the words, sharp and shown
+                     whole — a landscape photograph cropped to a tall phone
+                     screen kept a third of its width and lost the car;
+          md and up  the full-bleed background behind the words, with the
+                     frosted pane that clears towards the right.
+      */}
+      <div
+        aria-hidden="true"
+        className="relative aspect-[4/3] w-full overflow-hidden md:absolute md:inset-0 md:-z-10 md:aspect-auto"
+      >
         {/* The surface beneath the photograph: what shows while it decodes,
             and in its place if the file is ever missing. */}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_75%_45%,oklch(0.8_0.145_85/0.14),transparent_70%)]" />
         <div className="bg-dot-grid absolute inset-0" />
 
         {/*
-          The hero photograph, and the page's LCP element.
-
-          `preload` puts a <link rel="preload"> in the head so the browser
-          starts it before it has parsed this far, and `fetchPriority="high"`
-          moves it ahead of everything else in the queue — together they are
-          the difference between the hero painting with the page and painting
-          a second later on a slow connection.
-
-          `sizes="100vw"` because it fills the viewport at every width; the
-          optimiser picks the variant from `deviceSizes` accordingly rather
-          than sending a desktop-width file to a phone.
+          The page's LCP element. `preload` and `fetchPriority="high"` start it
+          before the parser reaches it; quality 90 (allowed in next.config.ts)
+          because this is the one image the whole brand is judged by, and the
+          optimiser still serves it as AVIF/WebP at the width the device needs.
         */}
         <Image
           src={HOME_MEDIA.hero.src}
@@ -97,35 +103,28 @@ export function HomeHero({ businessName, showQuote }: HomeHeroProps) {
           fill
           preload
           fetchPriority="high"
+          quality={90}
           sizes="100vw"
           className="load-settle object-cover object-[65%_center]"
         />
 
+        {/* Phone: a shade under the header, and a fade into the words below. */}
+        <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-night/75 to-transparent md:hidden" />
+        <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-night to-transparent md:hidden" />
+
         {/*
-          The glass: a light frost across the whole photograph, then a deeper
-          pane behind the words that clears towards the right — so the copy is
-          legible and the picture stays alive where there is none.
-
-          ── Why the blur starts at `md` ──────────────────────────────────
-          A `backdrop-filter` covering the whole viewport is one of the most
-          expensive things a page can carry: the compositor re-samples
-          everything behind it on every frame, and on the mid-range Android
-          phones this audience is on that is what made the homepage feel
-          heavy and its hovers lag behind the pointer. Below `md` the pane is
-          a plain wash instead — slightly darker, to buy back the legibility
-          the blur was providing — and the same words sit on the same
-          photograph with nothing to composite.
+          md and up: the glass — a deeper pane behind the words that clears
+          towards the right, so the copy is legible and the photograph stays
+          crisp where there is none. No blur across the whole picture: it
+          softened the car itself.
         */}
-        <div className="absolute inset-0 bg-night/20 md:backdrop-blur-[2px]" />
-        <div className="hero-glass absolute inset-0 bg-night/70 md:bg-night/55 md:backdrop-blur-xl md:backdrop-saturate-125" />
-        <div className="absolute inset-0 bg-gradient-to-t from-night/90 via-night/40 to-transparent lg:bg-gradient-to-r lg:from-night/85 lg:via-night/45 lg:via-45% lg:to-transparent lg:to-75%" />
-
-        {/* Under the header, and into the section below. */}
-        <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-night/70 to-transparent" />
-        <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-background to-transparent" />
+        <div className="hero-glass absolute inset-0 hidden bg-night/55 backdrop-blur-xl backdrop-saturate-125 md:block" />
+        <div className="absolute inset-0 hidden bg-gradient-to-t from-night/90 via-night/40 to-transparent md:block lg:bg-gradient-to-r lg:from-night/85 lg:via-night/45 lg:via-45% lg:to-transparent lg:to-75%" />
+        <div className="absolute inset-x-0 top-0 hidden h-32 bg-gradient-to-b from-night/70 to-transparent md:block" />
+        <div className="absolute inset-x-0 bottom-0 hidden h-40 bg-gradient-to-t from-background to-transparent md:block" />
       </div>
 
-      <Container size="wide" className="flex flex-1 flex-col justify-center pt-28 pb-20 md:pt-36 md:pb-24">
+      <Container size="wide" className="flex flex-1 flex-col justify-center pt-2 pb-4 md:pt-[calc(var(--header-offset)+4rem)] md:pb-24">
         {/* The name, then the statement it introduces, then the two actions. */}
         <div className="flex flex-col gap-6 sm:gap-8 lg:max-w-3xl">
           {/* Hidden from assistive technology: the heading below carries the
@@ -134,7 +133,7 @@ export function HomeHero({ businessName, showQuote }: HomeHeroProps) {
               has to hold the whole business name. */}
           <p
             aria-hidden="true"
-            className="load-rise flex items-center gap-2.5 font-heading text-small font-semibold tracking-[0.28em] uppercase sm:gap-3 sm:tracking-[0.32em]"
+            className="load-rise flex items-center gap-3 font-heading text-small font-semibold tracking-[0.28em] uppercase sm:gap-3 sm:tracking-[0.32em]"
             style={delay(120)}
           >
             <span aria-hidden="true" className="h-px w-6 shrink-0 bg-gold sm:w-10" />

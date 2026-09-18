@@ -161,9 +161,9 @@ export function SparePartCard({
              * is emphatic that generic imagery is what makes a dealership look
              * invented.
              */
-            <div className="flex size-full flex-col items-center justify-center gap-1.5 text-muted-foreground">
+            <div className="flex size-full flex-col items-center justify-center gap-2 text-muted-foreground">
               <ImageOff aria-hidden="true" className="size-5" />
-              <span className="px-2 text-center text-xs">Photo coming soon</span>
+              <span className="px-2 text-center text-xs">Photograph on request</span>
             </div>
           )}
 
@@ -184,7 +184,7 @@ export function SparePartCard({
             then the price and the way to add it. Every row but the name and
             the price is optional, and an absent one takes no space rather
             than leaving a gap. */}
-        <div className="flex flex-1 flex-col gap-1 p-2.5 sm:p-3">
+        <div className="flex flex-1 flex-col gap-1 p-3 sm:p-3">
           {/* h3: the page supplies the h1 and the grid sits under an h2, so a
               card must not restart the outline. */}
           <h3 className="text-body leading-snug font-semibold text-foreground">
@@ -338,7 +338,7 @@ function AddButton({
       className={cn(
         // Raised above the stretched link's overlay, or the card would
         // swallow every press of it.
-        "relative z-10 inline-flex size-8 shrink-0 items-center justify-center rounded-[6px]",
+        "relative z-10 inline-flex size-8 shrink-0 items-center justify-center rounded-[6px] pointer-coarse:size-11",
         "bg-gold-bright text-gold-bright-foreground shadow-[var(--shadow-gold)]",
         "transition-[opacity,box-shadow,transform] duration-base ease-crownline",
         "hover:-translate-y-0.5 hover:shadow-[var(--shadow-gold-strong)]",

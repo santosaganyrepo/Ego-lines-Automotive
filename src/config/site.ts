@@ -1,4 +1,5 @@
 // Static site configuration and the fallbacks behind BusinessSettings
+import { DEFAULT_BUSINESS_NAME } from "@/lib/constants/branding-options"
 import { mainNavLinks, type NavLink } from "@/lib/constants/nav-links"
 
 /**
@@ -30,10 +31,9 @@ function readSiteUrl(): string {
 }
 
 export const siteConfig = {
-  name: "Crownline Motors",
-  shortName: "Crownline",
+  name: DEFAULT_BUSINESS_NAME,
   tagline: "Quality Cars. Global Standards. Local Commitment.",
-  description: "Quality vehicles sourced from Japan and Korea and delivered to South Sudan.",
+  description: "Quality vehicles sourced from Japan, South Korea and China and delivered to South Sudan.",
   url: readSiteUrl(),
   whatsappNumber: readWhatsAppNumber(),
   nav: mainNavLinks,

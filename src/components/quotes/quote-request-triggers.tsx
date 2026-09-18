@@ -33,7 +33,7 @@ export const QUOTE_REQUEST_COPY = {
   vehicleCatalogue: {
     title: "Haven't found your vehicle?",
     description:
-      "Tell us what you are looking for and we will source it from auction houses and dealers in Japan and Korea.",
+      "Tell us what you are looking for and we will source it from auction houses and dealers in Japan, South Korea and China.",
     submitLabel: "Submit request",
   },
   partsCatalogue: {

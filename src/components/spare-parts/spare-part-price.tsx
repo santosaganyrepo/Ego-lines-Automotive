@@ -68,7 +68,7 @@ export function SparePartPrice({
   }
 
   return (
-    <span className={cn("inline-flex items-baseline gap-1.5", className)}>
+    <span className={cn("inline-flex items-baseline gap-2", className)}>
       {/*
         Inter rather than the heading face, matching the vehicle card: Manrope
         draws a display dollar sign that stops reading as currency beside four

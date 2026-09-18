@@ -100,7 +100,7 @@ export function SparePartFitmentBoard({
           {fitment.length === 1 ? "rule" : "rules"}
         </AdminFormBadge>
       }
-      bodyClassName="flex flex-col gap-5"
+      bodyClassName="flex flex-col gap-6"
     >
 
       {state.status === "success" && state.message ? (
@@ -336,7 +336,7 @@ function FitmentField({
   children: React.ReactNode
 }) {
   return (
-    <div className="flex min-w-0 flex-col gap-1.5">
+    <div className="flex min-w-0 flex-col gap-2">
       <Label htmlFor={id} className="text-xs font-medium text-muted-foreground">
         {label}
       </Label>

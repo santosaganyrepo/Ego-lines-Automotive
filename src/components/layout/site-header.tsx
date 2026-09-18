@@ -125,9 +125,15 @@ interface SiteHeaderProps {
    * note on MobileNavProps.
    */
   whatsappUrl: string | null
+  /**
+   * The contact strip above the navigation, rendered on the server from
+   * Settings. Shown while the page sits at the top and folded away once the
+   * visitor scrolls, so it never costs screen space while they browse.
+   */
+  topBar?: React.ReactNode
 }
 
-export function SiteHeader({ whatsappUrl }: SiteHeaderProps) {
+export function SiteHeader({ whatsappUrl, topBar }: SiteHeaderProps) {
   const pathname = usePathname()
   const headerRef = React.useRef<HTMLElement>(null)
   const hasHeroBehind = useHeroBehindHeader(headerRef)
@@ -171,6 +177,20 @@ export function SiteHeader({ whatsappUrl }: SiteHeaderProps) {
             )
       )}
     >
+      {topBar ? (
+        <div
+          // `inert` while folded: the links inside are off screen, and must
+          // not be reachable by Tab or announced by a screen reader.
+          inert={isScrolled}
+          className={cn(
+            "grid transition-[grid-template-rows,opacity] duration-base ease-crownline",
+            isScrolled ? "grid-rows-[0fr] opacity-0" : "grid-rows-[1fr] opacity-100"
+          )}
+        >
+          <div className="min-h-0 overflow-hidden">{topBar}</div>
+        </div>
+      ) : null}
+
       <Container size="wide">
         <nav
           aria-label="Main"
@@ -180,7 +200,7 @@ export function SiteHeader({ whatsappUrl }: SiteHeaderProps) {
           <Link
             href="/"
             aria-label={`${businessName} — home`}
-            className="min-w-0 shrink transition-opacity duration-fast hover:opacity-80"
+            className="flex min-h-11 min-w-0 shrink items-center transition-opacity duration-fast hover:opacity-80"
           >
             <BrandMark tone={tone} layout="lockup" />
           </Link>
@@ -188,8 +208,8 @@ export function SiteHeader({ whatsappUrl }: SiteHeaderProps) {
           {/* Inline nav starts at xl, not lg: eight items plus a CTA
               measure past 1100px, so at lg they would crush together.
               Below xl the hamburger takes over. */}
-          <div className="hidden items-center gap-9 xl:flex 2xl:gap-11">
-          <ul className="flex items-center gap-6 2xl:gap-7">
+          <div className="hidden items-center gap-10 xl:flex 2xl:gap-12">
+          <ul className="flex items-center gap-6 2xl:gap-8">
             {headerNavItems.map((item) =>
               isNavGroup(item) ? (
                 <li key={item.label}>
@@ -217,7 +237,7 @@ export function SiteHeader({ whatsappUrl }: SiteHeaderProps) {
           <div className="flex shrink-0 items-center">
             <Link
               href={INVENTORY_CTA.href}
-              className={cn(buttonVariants({ variant: "default", size: "default" }), "group/cta gap-1.5")}
+              className={cn(buttonVariants({ variant: "default", size: "default" }), "group/cta gap-2")}
             >
               {INVENTORY_CTA.label}
               <ArrowRight

@@ -192,7 +192,7 @@ function CartToast({ toast }: { toast: ToastState | null }) {
           // Keyed by id so a repeated add remounts the element and replays the
           // entrance, rather than silently swapping the text in place.
           key={toast.id}
-          className="flex max-w-sm items-center gap-2.5 rounded-lg border border-border bg-foreground px-4 py-3 text-small font-medium text-background shadow-lg duration-base animate-in fade-in-0 slide-in-from-bottom-2"
+          className="flex max-w-sm items-center gap-3 rounded-lg border border-border bg-foreground px-4 py-3 text-small font-medium text-background shadow-lg duration-base animate-in fade-in-0 slide-in-from-bottom-2"
         >
           <CheckCircle2 aria-hidden="true" className="size-4 shrink-0 text-gold" />
           <span>{toast.message}</span>

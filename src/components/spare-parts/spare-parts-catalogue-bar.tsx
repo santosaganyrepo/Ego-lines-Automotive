@@ -128,7 +128,7 @@ export function SparePartsCatalogueBar({
       )}
     >
       <Container>
-        <div className="flex flex-col gap-1 py-2.5 sm:gap-1.5 sm:py-3">
+        <div className="flex flex-col gap-1 py-3 sm:gap-2 sm:py-3">
           {showSearch ? (
             <div
               // The target of the toggle's `aria-controls`, so the
@@ -167,7 +167,7 @@ export function SparePartsCatalogueBar({
                 onClick={() => setMobileOpen(false)}
                 aria-label="Close search"
                 className={cn(
-                  "inline-flex size-9 shrink-0 items-center justify-center rounded-full sm:hidden",
+                  "inline-flex size-9 shrink-0 items-center justify-center rounded-full sm:hidden pointer-coarse:size-11",
                   "text-muted-foreground transition-colors duration-fast",
                   "hover:bg-secondary hover:text-foreground",
                   "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
@@ -214,7 +214,7 @@ export function SparePartsCatalogueBar({
                     : "Search spare parts"
                 }
                 className={cn(
-                  "relative inline-flex size-9 shrink-0 items-center justify-center rounded-full sm:hidden",
+                  "relative inline-flex size-9 shrink-0 items-center justify-center rounded-full sm:hidden pointer-coarse:size-11",
                   "border bg-background text-foreground",
                   "transition-[background-color,border-color] duration-fast ease-crownline",
                   "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",

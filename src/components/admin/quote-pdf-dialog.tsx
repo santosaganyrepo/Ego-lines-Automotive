@@ -56,7 +56,7 @@ export function QuotePdfDialog({ quoteId }: { quoteId: string }) {
         </DialogHeader>
 
         {isDirty ? (
-          <p className="flex items-center gap-1.5 text-xs text-warning">
+          <p className="flex items-center gap-2 text-xs text-warning">
             <AlertTriangle aria-hidden="true" className="size-3.5 shrink-0" />
             Unsaved changes are not included.
           </p>
