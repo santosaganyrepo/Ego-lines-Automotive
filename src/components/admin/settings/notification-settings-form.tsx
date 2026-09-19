@@ -84,6 +84,13 @@ export function NotificationSettingsForm({
               defaultChecked={settings.dashboardNotificationsEnabled}
               onCheckedChange={markDirty}
             />
+            <SettingsSwitchRow
+              name="pushNotificationsEnabled"
+              label="Push notifications"
+              description="Alerts on administrators' phones and computers, even with the dashboard closed. Each person switches them on per device below. Security alerts about their own account always reach their devices."
+              defaultChecked={settings.pushNotificationsEnabled}
+              onCheckedChange={markDirty}
+            />
           </SettingsSwitchList>
         </SettingsPanel>
       </fieldset>

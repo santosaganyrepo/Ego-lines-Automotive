@@ -25,9 +25,30 @@ function readWhatsAppNumber(): string {
   return value.trim()
 }
 
+/**
+ * The site's public origin — used for canonical URLs, the sitemap, structured
+ * data, Open Graph images and the links inside emails.
+ *
+ * NEXT_PUBLIC_SITE_URL is the source of truth and must be set in production
+ * (see .env.example). If it is missing on Vercel, the project's own
+ * production domain is used, which Vercel exposes to every build; the last
+ * resort is the original domain, with a warning in the build log, because a
+ * canonical URL pointing at the wrong domain quietly hands search ranking to
+ * that domain.
+ */
 function readSiteUrl(): string {
-  const value = process.env.NEXT_PUBLIC_SITE_URL
-  return value && value.trim().length > 0 ? value.trim() : "https://crownlinemotors.com"
+  const value = process.env.NEXT_PUBLIC_SITE_URL?.trim()
+  if (value) return value.replace(/\/+$/, "")
+
+  const vercel = process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL?.trim()
+  if (vercel) return `https://${vercel.replace(/^https?:\/\//, "").replace(/\/+$/, "")}`
+
+  if (process.env.NODE_ENV === "production" && typeof window === "undefined") {
+    console.warn(
+      "[config/site] NEXT_PUBLIC_SITE_URL is not set — canonical URLs, the sitemap and email links fall back to https://crownlinemotors.com. Set it to the live domain."
+    )
+  }
+  return "https://crownlinemotors.com"
 }
 
 export const siteConfig = {

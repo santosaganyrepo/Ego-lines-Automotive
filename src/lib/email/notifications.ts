@@ -1,6 +1,8 @@
 import "server-only"
 
 import { siteConfig } from "@/config/site"
+import { LegalDocumentKind } from "@/generated/prisma/enums"
+import { legalDocumentMeta } from "@/lib/legal/legal-documents"
 import { getOperationalSettings, getPublicSiteSettings } from "@/lib/queries/settings.queries"
 import { adminPath } from "@/lib/constants/admin-routes"
 import { renderEmailHtml, renderEmailText, type EmailBrand, type EmailContent, type EmailDetail } from "@/lib/email/email-layout"
@@ -272,6 +274,10 @@ export async function notifyCustomerOrderConfirmed(input: {
         input.isVehicle && input.milestones.length > 1
           ? "We will confirm every payment by email as soon as it is received. Once your initial payment is confirmed, that email also carries your tracking number."
           : "We will confirm your payment by email as soon as it is received, together with your tracking number.",
+        // Sent at the moment a customer is about to transfer money — the
+        // moment a fraudster's "our bank details have changed" message works.
+        `Please pay only into our official accounts. We never change our payment details by WhatsApp, text message or phone call — see how to pay safely: ${siteConfig.url}${legalDocumentMeta(LegalDocumentKind.PAYMENT_SAFETY).path}`,
+        `Your order is covered by our Terms of Sale: ${siteConfig.url}${legalDocumentMeta(LegalDocumentKind.TERMS_OF_SALE).path}`,
         CONTACT_CLOSING,
       ],
     },

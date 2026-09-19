@@ -34,7 +34,7 @@ export function ServicesMenu({
         <NavigationMenu.Item>
           <NavigationMenu.Trigger
             className={cn(
-              "group/services relative flex cursor-pointer items-center gap-1 py-1 text-small font-medium whitespace-nowrap outline-none",
+              "group/services relative flex cursor-pointer items-center gap-1 py-1 text-small font-medium whitespace-nowrap outline-none pointer-coarse:min-h-11",
               "transition-colors duration-fast ease-crownline focus-visible:rounded-sm focus-visible:ring-2 focus-visible:ring-ring",
               "after:absolute after:inset-x-0 after:-bottom-0.5 after:h-px after:origin-left after:bg-gold-ink",
               "after:transition-transform after:duration-fast after:ease-crownline",

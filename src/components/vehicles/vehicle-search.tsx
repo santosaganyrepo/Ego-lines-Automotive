@@ -16,7 +16,7 @@ import type { VehicleFacet } from "@/lib/queries/public-vehicle.queries"
 import {
   catalogueHref,
   type VehicleSearchCriteria,
-} from "@/lib/validations/vehicle-search.schema"
+} from "@/lib/validations/vehicle-search-url"
 
 /**
  * Search and filtering for the public catalogue (Stage 12).
@@ -546,7 +546,7 @@ function FilterPanel({
    * running it whenever the filters change would close the panel under the
    * hand of someone who had just cleared a filter from inside it.
    */
-  const startsFiltered = React.useRef(activeCount > 0)
+  const [startsFiltered] = React.useState(activeCount > 0)
 
   React.useEffect(() => {
     const element = detailsRef.current
@@ -554,9 +554,12 @@ function FilterPanel({
 
     const desktop = window.matchMedia(DESKTOP_QUERY)
 
-    if (!desktop.matches && !startsFiltered.current) {
+    if (!desktop.matches && !startsFiltered) {
       element.open = false
     }
+    // Hands control from the pre-hydration CSS (see `data-phone-collapsed`)
+    // to the element's own open state.
+    element.dataset.hydrated = ""
 
     // Above `sm` the summary is hidden, so a panel left closed on a phone
     // and then widened — a rotation, a tablet, a resized window — would be
@@ -567,13 +570,25 @@ function FilterPanel({
 
     desktop.addEventListener("change", handleChange)
     return () => desktop.removeEventListener("change", handleChange)
-  }, [])
+  }, [startsFiltered])
 
   return (
-    <details ref={detailsRef} open className="group/filters">
+    /*
+      `data-phone-collapsed` lets CSS hide the panel's contents on a phone from
+      the very first paint, when scripting is on — so collapsing it after
+      hydration no longer shoves the whole grid up the page (a layout shift).
+      Without JavaScript the rule never applies and the panel stays open.
+      Omitted when the visitor arrived filtered: that panel stays open anyway.
+    */
+    <details
+      ref={detailsRef}
+      open
+      data-phone-collapsed={startsFiltered ? undefined : ""}
+      className="group/filters"
+    >
       <summary
         className={cn(
-          "flex cursor-pointer list-none items-center gap-2 rounded-lg py-1",
+          "flex cursor-pointer list-none items-center gap-2 rounded-lg py-1 pointer-coarse:min-h-11",
           "text-small font-semibold text-foreground select-none",
           "transition-colors duration-fast hover:text-gold-ink",
           "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",

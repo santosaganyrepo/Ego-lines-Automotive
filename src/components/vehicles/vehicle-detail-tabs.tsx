@@ -122,7 +122,7 @@ export function VehicleDetailTabs({
               tabIndex={selected ? 0 : -1}
               onClick={() => setActive(tab.id)}
               className={cn(
-                "relative -mb-px cursor-pointer pb-4 font-heading text-h3 tracking-tight",
+                "relative -mb-px cursor-pointer pb-4 font-heading text-h3 tracking-tight pointer-coarse:min-h-11",
                 "transition-colors duration-fast ease-crownline",
                 "focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring",
                 selected

@@ -292,16 +292,26 @@ test.describe("hardening", () => {
     const REJECTED = "Invalid Server Actions request"
     const proxyHost = "some-codespace-3000.app.github.dev"
 
+    /**
+     * A refusal is a 500. `next dev` puts the reason in the body; `next
+     * start` replaces it with an error digest (the reason goes to the server
+     * log), so the body is only checked for one of the two.
+     */
+    const expectRejected = async (response: Awaited<ReturnType<typeof post>>) => {
+      expect(response.status()).toBe(500)
+      expect(await response.text()).toMatch(new RegExp(`${REJECTED}|"digest"`))
+    }
+
     // Rejected regardless of what the forwarded host claims.
-    expect(await (await post("https://evil.example")).text()).toContain(REJECTED)
-    expect(await (await post("https://evil.example", proxyHost)).text()).toContain(
-      REJECTED
-    )
+    await expectRejected(await post("https://evil.example"))
+    await expectRejected(await post("https://evil.example", proxyHost))
 
     // Control: the app's own origin must still reach an action, or this test
-    // would also pass with Server Actions entirely broken.
-    const own = baseURL ?? "http://localhost:3000"
-    expect(await (await post(own)).text()).not.toContain(REJECTED)
+    // would also pass with Server Actions entirely broken. It gets past the
+    // gate and is told the (bogus) action does not exist.
+    const own = await post(baseURL ?? "http://localhost:3000")
+    expect(own.status()).not.toBe(500)
+    expect(await own.text()).not.toContain(REJECTED)
   })
 
   test("marks admin responses as uncacheable", async ({ request }) => {

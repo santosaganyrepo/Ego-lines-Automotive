@@ -440,11 +440,13 @@ model AdminProfile {
   twoFactorEnabledAt DateTime?
 
   verifiedPayments      Payment[]
-  trackingEventsCreated TrackingEvent[]   @relation("TrackingEventCreatedBy")
-  trackingEventsVoided  TrackingEvent[]   @relation("TrackingEventVoidedBy")
+  trackingEventsCreated TrackingEvent[]         @relation("TrackingEventCreatedBy")
+  trackingEventsVoided  TrackingEvent[]         @relation("TrackingEventVoidedBy")
   auditLogs             AuditLog[]
   sessions              AdminSession[]
   loginEvents           AdminLoginEvent[]
+  legalSectionsEdited   LegalSection[]
+  pushSubscriptions     AdminPushSubscription[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -1240,7 +1242,7 @@ model Order {
   /// operational stage (see Shipment's own note), but staff can promise a
   /// customer a date well before that, and revise it as freight schedules
   /// firm up. Null means "no estimate given yet".
-  estimatedDeliveryDate DateTime?
+  estimatedDeliveryDate   DateTime?
   /// The end of the expected delivery window — "between 17 and 30 October" —
   /// with `estimatedDeliveryDate` as its start. Null means the estimate is a
   /// single day. Shown to the customer on Track My Order. Never before the
@@ -1486,10 +1488,17 @@ model BusinessSettings {
   primaryPhone    String @default("")
   businessEmail   String @default("")
   businessAddress String @default("")
+
+  // The registered company, printed in the footer, on every legal document
+  // and in the homepage's structured data. Empty values are simply not shown:
+  // a dealership still registering is not asked to invent a number.
+  legalName          String @default("")
+  registrationNumber String @default("")
+  taxNumber          String @default("")
   /// Seven `{ day, closed, opensAt, closesAt }` entries, Monday first.
   /// Null means never configured, and the hours are then not published.
   /// Validated with Zod on every read — see `resolveBusinessHours`.
-  businessHours   Json?
+  businessHours      Json?
 
   /// Full https URLs. Null hides the network's icon.
   socialFacebook  String?
@@ -1540,6 +1549,11 @@ model BusinessSettings {
   customerEmailsEnabled          Boolean @default(true)
   adminEmailNotificationsEnabled Boolean @default(true)
   dashboardNotificationsEnabled  Boolean @default(true)
+  /// Web Push to administrators' phones and computers, for business alerts
+  /// (new quote requests). Security alerts about an administrator's own
+  /// account go to their devices regardless — a device receives nothing at
+  /// all unless its administrator switched push on for it.
+  pushNotificationsEnabled       Boolean @default(true)
 
   /// ── SEO & social ────────────────────────────────────────────────────
   seoDefaultTitle       String?
@@ -1712,11 +1726,12 @@ model AdminSession {
   /// their own device, and nothing a stolen table could fingerprint with.
   deviceLabel String?
 
-  createdAt  DateTime               @default(now())
+  createdAt         DateTime                @default(now())
   /// Touched at most every few minutes, not on every request.
-  lastSeenAt DateTime               @default(now())
-  endedAt    DateTime?
-  endReason  AdminSessionEndReason?
+  lastSeenAt        DateTime                @default(now())
+  endedAt           DateTime?
+  endReason         AdminSessionEndReason?
+  pushSubscriptions AdminPushSubscription[]
 
   @@index([adminId, endedAt])
 }
@@ -1744,4 +1759,101 @@ model AdminLoginEvent {
   createdAt DateTime @default(now())
 
   @@index([adminId, createdAt])
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Legal documents
+// ─────────────────────────────────────────────────────────────────────
+
+/// The four published documents. The key is also the primary key of
+/// LegalDocument: there is exactly one of each, never a second draft.
+enum LegalDocumentKind {
+  TERMS_OF_SALE
+  TERMS_OF_USE
+  PRIVACY_POLICY
+  PAYMENT_SAFETY
+}
+
+/// One published legal document — Terms of Sale, Terms of Use, Privacy
+/// Policy, Payment Safety. Written by the dealership in Settings → Legal
+/// documents; the wording that ships with the site (src/lib/legal/
+/// default-documents.ts) is copied in the first time an administrator opens
+/// the document, and the public page shows that same wording until then.
+///
+/// `updatedAt` is the "Last updated" date customers see, so every section
+/// write touches it in the same transaction.
+model LegalDocument {
+  kind      LegalDocumentKind @id
+  title     String
+  /// The introduction under the title. On Payment Safety it is the warning
+  /// panel at the top of the page.
+  summary   String            @db.Text
+  sections  LegalSection[]
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+}
+
+/// A numbered section of a legal document. Hidden sections stay in the
+/// dashboard, with their text, and are simply not published — the switch the
+/// dealership asked for, so a clause can be withdrawn and reinstated without
+/// retyping it. Deleting a section is also possible; its text is kept in the
+/// audit log.
+model LegalSection {
+  id           String            @id @default(cuid())
+  documentKind LegalDocumentKind
+  document     LegalDocument     @relation(fields: [documentKind], references: [kind], onDelete: Cascade)
+
+  heading      String
+  /// Plain text. A blank line starts a new paragraph and a line beginning
+  /// with "- " is a bullet. Never rendered as HTML.
+  body         String  @db.Text
+  isVisible    Boolean @default(true)
+  displayOrder Int
+
+  updatedByAdminId String?
+  updatedBy        AdminProfile? @relation(fields: [updatedByAdminId], references: [id], onDelete: Restrict)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([documentKind, displayOrder])
+}
+
+/// One device an administrator has switched Web Push on for — a phone with
+/// the dashboard installed, or a desktop browser.
+///
+/// Belongs to the administrator, not to a session: sessions expire after
+/// `sessionTimeoutHours`, and an alert that stopped arriving an hour after
+/// sign-in would be useless. What removes a device is someone *choosing* to
+/// end its session — signing out on it, signing it out from another device,
+/// or changing the password (see admin-sessions.ts) — never a timeout. The
+/// session it was last confirmed from is kept so those paths can find it.
+///
+/// `endpoint` is a capability URL at the browser vendor's push service; with
+/// the two keys it is what lets the server deliver to that browser, so the
+/// table is never read by anything but the push sender and the owner's own
+/// settings page. Only the vendors' hosts are accepted (push-endpoint.ts).
+model AdminPushSubscription {
+  id      String       @id @default(cuid())
+  adminId String
+  admin   AdminProfile @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  adminSessionId String?
+  adminSession   AdminSession? @relation(fields: [adminSessionId], references: [id], onDelete: SetNull)
+
+  endpoint    String  @unique
+  p256dh      String
+  auth        String
+  /// "Safari on iPhone" — so the owner can tell their devices apart.
+  deviceLabel String?
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  lastSuccessAt DateTime?
+  /// Consecutive failures that were not a definitive "gone" from the push
+  /// service. Reset by a delivery; the device is dropped after too many.
+  failureCount  Int       @default(0)
+
+  @@index([adminId])
+  @@index([adminSessionId])
 }

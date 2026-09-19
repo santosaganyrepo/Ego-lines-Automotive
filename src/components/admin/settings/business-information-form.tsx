@@ -44,6 +44,7 @@ type Props = {
     | "whatsappNumber"
     | "businessEmail"
     | "businessAddress"
+    | "company"
     | "businessHours"
     | "social"
   >
@@ -278,6 +279,59 @@ export function BusinessInformationForm({ settings, canEdit }: Props) {
               </Link>
               <p className="text-xs text-muted-foreground">Logos are managed in one place for the whole site.</p>
             </div>
+          </SettingsFieldGrid>
+        </SettingsPanel>
+
+        {/* ── Registered company ─────────────────────────────────── */}
+        <SettingsPanel
+          id="company-registration"
+          title="Registered company"
+          description="The legal entity behind the business. Shown in the website footer, on the legal documents and in search results. Leave a field empty to hide it."
+        >
+          <SettingsField
+            label="Registered company name"
+            htmlFor="legalName"
+            hint="As it appears on the certificate of incorporation, e.g. “EGO-Lines Automotive Co. Ltd”. Used as the seller in the Terms of Sale."
+            error={fieldError("legalName")}
+          >
+            <Input
+              id="legalName"
+              name="legalName"
+              defaultValue={settings.company.legalName}
+              maxLength={160}
+              aria-invalid={fieldError("legalName") ? true : undefined}
+              aria-describedby={describedBy("legalName")}
+            />
+          </SettingsField>
+
+          <SettingsFieldGrid>
+            <SettingsField
+              label="Company registration number"
+              htmlFor="registrationNumber"
+              error={fieldError("registrationNumber")}
+            >
+              <Input
+                id="registrationNumber"
+                name="registrationNumber"
+                defaultValue={settings.company.registrationNumber}
+                maxLength={80}
+                autoComplete="off"
+                aria-invalid={fieldError("registrationNumber") ? true : undefined}
+                aria-describedby={describedBy("registrationNumber", false)}
+              />
+            </SettingsField>
+
+            <SettingsField label="Tax identification number (TIN)" htmlFor="taxNumber" error={fieldError("taxNumber")}>
+              <Input
+                id="taxNumber"
+                name="taxNumber"
+                defaultValue={settings.company.taxNumber}
+                maxLength={80}
+                autoComplete="off"
+                aria-invalid={fieldError("taxNumber") ? true : undefined}
+                aria-describedby={describedBy("taxNumber", false)}
+              />
+            </SettingsField>
           </SettingsFieldGrid>
         </SettingsPanel>
 

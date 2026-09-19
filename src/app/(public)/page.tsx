@@ -110,6 +110,8 @@ function HomeJsonLd({ settings }: { settings: Awaited<ReturnType<typeof getPubli
     ...(settings.contact.phone ? { telephone: settings.contact.phone } : {}),
     ...(settings.contact.email ? { email: settings.contact.email } : {}),
     ...(settings.contact.address ? { address: settings.contact.address } : {}),
+    ...(settings.company.legalName ? { legalName: settings.company.legalName } : {}),
+    ...(settings.company.taxNumber ? { taxID: settings.company.taxNumber } : {}),
     ...(settings.branding.logoLightUrl ? { logo: settings.branding.logoLightUrl } : {}),
     ...(settings.social.length > 0 ? { sameAs: settings.social.map((link) => link.url) } : {}),
   }

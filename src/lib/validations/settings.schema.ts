@@ -214,6 +214,18 @@ export const businessInformationSchema = z.object({
       message: "Enter a valid email address.",
     }),
   businessAddress: z.string().trim().max(200, "Keep the address under 200 characters."),
+  /** The registered company. Optional: empty values are simply not shown. */
+  legalName: z.string().trim().max(160, "Keep the registered name under 160 characters."),
+  registrationNumber: z
+    .string()
+    .trim()
+    .max(80, "Keep the registration number under 80 characters.")
+    .regex(/^[\p{L}\p{N} ./\-]*$/u, "Use letters, numbers, spaces, dots, slashes and dashes only."),
+  taxNumber: z
+    .string()
+    .trim()
+    .max(80, "Keep the tax number under 80 characters.")
+    .regex(/^[\p{L}\p{N} ./\-]*$/u, "Use letters, numbers, spaces, dots, slashes and dashes only."),
   /** Absent or unpublished → null, which hides the hours everywhere. */
   publishHours: formSwitch,
   businessHours: jsonField(businessHoursSchema),
@@ -436,6 +448,7 @@ export const notificationSettingsSchema = z.object({
   customerEmailsEnabled: formSwitch,
   adminEmailNotificationsEnabled: formSwitch,
   dashboardNotificationsEnabled: formSwitch,
+  pushNotificationsEnabled: formSwitch,
 })
 
 export type NotificationSettingsInput = z.infer<typeof notificationSettingsSchema>

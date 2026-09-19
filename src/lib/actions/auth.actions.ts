@@ -1,6 +1,7 @@
 "use server"
 
 import { redirect } from "next/navigation"
+import { after } from "next/server"
 
 import { AdminLoginEventKind, AdminSessionEndReason } from "@/generated/prisma/enums"
 import { logSecurityEvent, recordAuditLogBestEffort, redactEmail } from "@/lib/audit"
@@ -32,6 +33,7 @@ import {
   resolveReturnPath,
 } from "@/lib/auth/return-path"
 import { prisma } from "@/lib/prisma"
+import { pushNewDeviceSignIn, pushSignInLockout } from "@/lib/push/admin-alerts"
 import { getOperationalSettings } from "@/lib/queries/settings.queries"
 import { createClient } from "@/lib/supabase/server"
 import {
@@ -202,6 +204,8 @@ export async function signInAction(
     const target = await prisma.adminProfile.findUnique({ where: { email }, select: { id: true, isActive: true } })
     if (target?.isActive) {
       await recordAdminLoginEvent({ adminId: target.id, kind: AdminLoginEventKind.SIGN_IN_FAILED })
+      // Their phone hears about it on the attempt that locks the address.
+      after(() => pushSignInLockout({ adminId: target.id }))
     }
 
     logSecurityEvent("admin_sign_in_failed", {
@@ -278,6 +282,8 @@ export async function signInAction(
     entityId: profile.id,
   })
   await recordAdminLoginEvent({ adminId: profile.id, kind: AdminLoginEventKind.SIGN_IN_SUCCEEDED })
+  const signInDevice = await currentDeviceLabel()
+  after(() => pushNewDeviceSignIn({ adminId: profile.id, deviceLabel: signInDevice }))
 
   // Outside the try/catch above on purpose: redirect() signals by throwing,
   // and catching it would turn a successful sign-in into a swallowed error.

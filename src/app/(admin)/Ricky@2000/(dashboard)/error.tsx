@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import * as Sentry from "@sentry/nextjs"
 import Link from "next/link"
 
 import { ErrorState } from "@/components/shared/error-state"
@@ -23,6 +24,8 @@ export default function AdminError({
 }) {
   React.useEffect(() => {
     console.error("[admin] route error:", error)
+    // Reported to Sentry when it is configured (privacy-scrubbed first).
+    Sentry.captureException(error)
   }, [error])
 
   return (

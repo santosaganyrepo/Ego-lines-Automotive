@@ -464,9 +464,12 @@ export async function listPublishedSpareParts(options?: {
     options?.criteria ? sparePartSearchWhere(options.criteria, siteWide) : {}
   )
 
-  // Count and page fetched in one round trip. Two awaits would be two round
-  // trips to Supabase for data rendered together.
-  const [total, rows] = await prisma.$transaction([
+  // Count and page fetched side by side. Not `$transaction([...])`: a batch
+  // transaction runs its queries one after another on a single connection
+  // and adds a COMMIT, which measured four round trips to Supabase where
+  // these two independent reads need two. Nothing here writes, so there is
+  // nothing for a transaction to protect.
+  const [total, rows] = await Promise.all([
     prisma.sparePart.count({ where }),
     prisma.sparePart.findMany({
       where,

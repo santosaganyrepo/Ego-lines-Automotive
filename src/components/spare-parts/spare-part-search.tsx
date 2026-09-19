@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils"
 import {
   partCatalogueHref,
   type SparePartSearchCriteria,
-} from "@/lib/validations/spare-part-search.schema"
+} from "@/lib/validations/spare-part-search-url"
 
 /**
  * Search for the parts catalogue.

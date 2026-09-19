@@ -131,6 +131,20 @@ The short version:
 | `npm run admin:create` | Provision an administrator |
 | `npm run storage:setup` | Create the Supabase Storage buckets |
 
+## Deployment region
+
+`vercel.json` pins the site's server code to Vercel's Dublin region (`dub1`),
+because the Supabase database is in AWS `eu-west-1` (Ireland). Every page reads
+the database several times, and each read costs one round trip: about 1ms when
+the two sit in the same city, about 75ms from Vercel's default US region, and
+about 150ms as measured from a US-based Codespace. Pages are several times
+slower when the two are far apart.
+
+If the database is ever moved to another region, change `regions` in
+`vercel.json` to the Vercel region nearest to it
+(https://vercel.com/docs/regions). Images, scripts and styles are served from
+Vercel's global CDN whatever this is set to.
+
 ## Project status
 Wave A (Phase 1 — Vehicle Dealership) — in progress.
 

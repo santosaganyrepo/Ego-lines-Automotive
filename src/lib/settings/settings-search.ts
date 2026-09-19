@@ -50,6 +50,7 @@ const TRACKING = "Orders & tracking"
 const CATALOG = "Catalogue display"
 const NOTIFICATIONS = "Notifications"
 const SEO = "SEO & social"
+const LEGAL = "Legal documents"
 const SECURITY = "Admin users & security"
 
 const BRANDING_PATH = adminPath("/settings/branding")
@@ -58,6 +59,7 @@ const TRACKING_PATH = adminPath("/settings/orders-tracking")
 const CATALOG_PATH = adminPath("/settings/catalog-display")
 const NOTIFICATIONS_PATH = adminPath("/settings/notifications")
 const SEO_PATH = adminPath("/settings/seo")
+const LEGAL_PATH = adminPath("/settings/legal")
 
 const settings = (entry: Omit<SettingsSearchEntry, "permission">): SettingsSearchEntry => ({
   ...entry,
@@ -79,6 +81,7 @@ export const SETTINGS_SEARCH_ENTRIES: SettingsSearchEntry[] = [
   settings({ id: "default-country", title: "Default country", section: BUSINESS, href: `${SETTINGS_BASE_PATH}#defaultCountry`, keywords: ["dialling", "code", "country", "south sudan"] }),
   settings({ id: "currency", title: "Currency", section: BUSINESS, href: `${SETTINGS_BASE_PATH}#business-identity`, keywords: ["usd", "dollar", "money"] }),
   settings({ id: "hours", title: "Business hours", section: BUSINESS, href: `${SETTINGS_BASE_PATH}#business-hours`, keywords: ["opening", "closing", "open", "closed", "time", "days", "weekend"] }),
+  settings({ id: "company-registration", title: "Registered company details", section: BUSINESS, href: `${SETTINGS_BASE_PATH}#company-registration`, keywords: ["legal name", "registration", "tin", "tax", "company number", "ltd"] }),
   settings({ id: "social", title: "Social media links", section: BUSINESS, href: `${SETTINGS_BASE_PATH}#social-media`, keywords: ["facebook", "instagram", "tiktok", "youtube", "linkedin", "twitter", "x"] }),
 
   // ── Website & branding ──────────────────────────────────────────────
@@ -101,6 +104,8 @@ export const SETTINGS_SEARCH_ENTRIES: SettingsSearchEntry[] = [
 
   // ── Notifications ───────────────────────────────────────────────────
   settings({ id: "admin-notifications", title: "Admin notifications", section: NOTIFICATIONS, href: `${NOTIFICATIONS_PATH}#admin-notifications`, keywords: ["new quote", "alert", "customer emails", "email"] }),
+  settings({ id: "dashboard-app", title: "Install the dashboard app", section: NOTIFICATIONS, href: `${NOTIFICATIONS_PATH}#dashboard-app`, keywords: ["install", "app", "home screen", "pwa", "phone", "iphone", "android"] }),
+  settings({ id: "push-notifications", title: "Notifications on this device", section: NOTIFICATIONS, href: `${NOTIFICATIONS_PATH}#push-notifications`, keywords: ["push", "alerts", "phone", "mobile", "notify", "bell"] }),
   settings({ id: "notification-channels", title: "Notification channels", section: NOTIFICATIONS, href: `${NOTIFICATIONS_PATH}#notification-channels`, keywords: ["email", "dashboard", "alerts", "bell"] }),
 
   // ── SEO & social ────────────────────────────────────────────────────
@@ -108,6 +113,12 @@ export const SETTINGS_SEARCH_ENTRIES: SettingsSearchEntry[] = [
   settings({ id: "seo-description", title: "Search engine description", section: SEO, href: `${SEO_PATH}#seoDefaultDescription`, keywords: ["google", "meta", "description", "snippet"] }),
   settings({ id: "social-sharing", title: "Social sharing image", section: SEO, href: `${SEO_PATH}#social-sharing`, keywords: ["open graph", "og", "preview", "facebook", "share"] }),
   settings({ id: "crawling", title: "Sitemap and indexing", section: SEO, href: `${SEO_PATH}#crawling`, keywords: ["google", "robots", "index", "crawl", "sitemap"] }),
+
+  // ── Legal documents ─────────────────────────────────────────────────
+  settings({ id: "terms-of-sale", title: "Terms of Sale", section: LEGAL, href: `${LEGAL_PATH}/terms-of-sale#document-details`, keywords: ["terms", "conditions", "refund", "cancellation", "deposit", "contract", "legal"] }),
+  settings({ id: "terms-of-use", title: "Terms of Use", section: LEGAL, href: `${LEGAL_PATH}/terms-of-use#document-details`, keywords: ["terms", "website", "rules", "legal"] }),
+  settings({ id: "privacy-policy", title: "Privacy Policy", section: LEGAL, href: `${LEGAL_PATH}/privacy-policy#document-details`, keywords: ["privacy", "data", "personal information", "gdpr", "legal"] }),
+  settings({ id: "payment-safety", title: "Payment Safety notice", section: LEGAL, href: `${LEGAL_PATH}/payment-safety#document-details`, keywords: ["bank account", "mobile money", "fraud", "scam", "payment details"] }),
 
   // ── Admin users & security ──────────────────────────────────────────
   account({ id: "account", title: "Administrator account", section: SECURITY, href: `${SECURITY_SETTINGS_PATH}#account-overview`, keywords: ["profile", "role", "me", "user"] }),

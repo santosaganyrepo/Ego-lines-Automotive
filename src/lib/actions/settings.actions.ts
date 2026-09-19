@@ -65,6 +65,9 @@ export async function updateBusinessInformationAction(
     whatsappNumber: text(formData, "whatsappNumber"),
     businessEmail: text(formData, "businessEmail"),
     businessAddress: text(formData, "businessAddress"),
+    legalName: text(formData, "legalName"),
+    registrationNumber: text(formData, "registrationNumber"),
+    taxNumber: text(formData, "taxNumber"),
     publishHours: formData.get("publishHours"),
     businessHours: text(formData, "businessHours"),
     socialFacebook: text(formData, "socialFacebook"),
@@ -229,6 +232,7 @@ export async function updateNotificationSettingsAction(
     customerEmailsEnabled: formData.get("customerEmailsEnabled"),
     adminEmailNotificationsEnabled: formData.get("adminEmailNotificationsEnabled"),
     dashboardNotificationsEnabled: formData.get("dashboardNotificationsEnabled"),
+    pushNotificationsEnabled: formData.get("pushNotificationsEnabled"),
   })
 
   if (!parsed.success) return invalid(parsed.error)

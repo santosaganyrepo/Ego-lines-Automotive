@@ -95,6 +95,12 @@ export const RATE_LIMIT_SCOPES = {
   // from minutes into years. Keyed by administrator and by host.
   twoFactorAdmin: "two-factor:admin",
   twoFactorIp: "two-factor:ip",
+  // "Send a test notification": each one is a real delivery through a push
+  // service, so a stuck button or a script cannot turn it into a flood.
+  pushTestAdmin: "push-test:admin",
+  // Subscription renewals from the service worker, which arrive without a
+  // session cookie; keyed by host.
+  pushRenewIp: "push-renew:ip",
 } as const
 
 /** Password confirmations per administrator inside the sign-in window. */
@@ -115,6 +121,10 @@ export const QUOTATION_PDF_WINDOW_MS = 60 * 60 * 1000
  * through them. Forty an hour is far past a customer refreshing their own
  * order, or a family checking two, and still turns enumeration into a crawl.
  */
+export const PUSH_TEST_MAX_PER_ADMIN = 5
+export const PUSH_TEST_WINDOW_MS = 10 * 60 * 1000
+export const PUSH_RENEW_MAX_PER_IP = 20
+export const PUSH_RENEW_WINDOW_MS = 60 * 60 * 1000
 export const TRACKING_LOOKUP_MAX_PER_IP = 40
 export const TRACKING_LOOKUP_WINDOW_MS = 60 * 60 * 1000
 

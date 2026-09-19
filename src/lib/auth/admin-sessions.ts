@@ -2,6 +2,7 @@ import "server-only"
 
 import { headers } from "next/headers"
 
+import type { Prisma } from "@/generated/prisma/client"
 import { AdminLoginEventKind, AdminSessionEndReason } from "@/generated/prisma/enums"
 import { describeDevice } from "@/lib/auth/device-label"
 import { prisma } from "@/lib/prisma"
@@ -145,15 +146,45 @@ export async function registerAdminSession(input: {
   }
 }
 
+/**
+ * Push notifications stop on a device when someone *chooses* to end its
+ * session — signing out on it, signing it out from elsewhere, or changing the
+ * password — so a phone handed on or left signed out does not keep showing
+ * alerts. A session merely timing out does not remove anything: the device is
+ * still its owner's, and alerts arriving while the app is closed is the point
+ * (see AdminPushSubscription in schema.prisma).
+ *
+ * "Sign out other devices" and a password change reach every other device
+ * of that administrator, including ones last confirmed from a session that
+ * has since expired — those two are how someone who fears their account is
+ * compromised cleans up.
+ */
+async function forgetPushDevices(
+  devices: Prisma.AdminPushSubscriptionWhereInput,
+  reason: AdminSessionEndReason
+): Promise<void> {
+  if (reason === AdminSessionEndReason.EXPIRED) return
+
+  try {
+    await prisma.adminPushSubscription.deleteMany({ where: devices })
+  } catch (error) {
+    // Never block a sign-out on this. The device's next delivery attempt
+    // still goes only to an administrator who owns it.
+    console.error("[sessions] could not remove push devices for ended sessions", error)
+  }
+}
+
 export async function endAdminSession(input: {
   adminId: string
   authSessionId: string
   reason: AdminSessionEndReason
 }): Promise<void> {
-  await prisma.adminSession.updateMany({
-    where: { adminId: input.adminId, authSessionId: input.authSessionId, endedAt: null },
-    data: { endedAt: new Date(), endReason: input.reason },
-  })
+  const where = { adminId: input.adminId, authSessionId: input.authSessionId, endedAt: null }
+  await forgetPushDevices(
+    { adminId: input.adminId, adminSession: { authSessionId: input.authSessionId } },
+    input.reason
+  )
+  await prisma.adminSession.updateMany({ where, data: { endedAt: new Date(), endReason: input.reason } })
 }
 
 /** Ends one of this administrator's sessions by its row id. Returns whether one was ended. */
@@ -162,10 +193,9 @@ export async function endAdminSessionById(input: {
   sessionId: string
   reason: AdminSessionEndReason
 }): Promise<boolean> {
-  const result = await prisma.adminSession.updateMany({
-    where: { id: input.sessionId, adminId: input.adminId, endedAt: null },
-    data: { endedAt: new Date(), endReason: input.reason },
-  })
+  const where = { id: input.sessionId, adminId: input.adminId, endedAt: null }
+  await forgetPushDevices({ adminId: input.adminId, adminSessionId: input.sessionId }, input.reason)
+  const result = await prisma.adminSession.updateMany({ where, data: { endedAt: new Date(), endReason: input.reason } })
   return result.count > 0
 }
 
@@ -174,10 +204,15 @@ export async function endOtherAdminSessions(input: {
   keepAuthSessionId: string
   reason: AdminSessionEndReason
 }): Promise<number> {
-  const result = await prisma.adminSession.updateMany({
-    where: { adminId: input.adminId, endedAt: null, authSessionId: { not: input.keepAuthSessionId } },
-    data: { endedAt: new Date(), endReason: input.reason },
-  })
+  const where = { adminId: input.adminId, endedAt: null, authSessionId: { not: input.keepAuthSessionId } }
+  await forgetPushDevices(
+    {
+      adminId: input.adminId,
+      OR: [{ adminSessionId: null }, { adminSession: { authSessionId: { not: input.keepAuthSessionId } } }],
+    },
+    input.reason
+  )
+  const result = await prisma.adminSession.updateMany({ where, data: { endedAt: new Date(), endReason: input.reason } })
   return result.count
 }
 
@@ -185,10 +220,9 @@ export async function endAllAdminSessions(input: {
   adminId: string
   reason: AdminSessionEndReason
 }): Promise<number> {
-  const result = await prisma.adminSession.updateMany({
-    where: { adminId: input.adminId, endedAt: null },
-    data: { endedAt: new Date(), endReason: input.reason },
-  })
+  const where = { adminId: input.adminId, endedAt: null }
+  await forgetPushDevices({ adminId: input.adminId }, input.reason)
+  const result = await prisma.adminSession.updateMany({ where, data: { endedAt: new Date(), endReason: input.reason } })
   return result.count
 }
 

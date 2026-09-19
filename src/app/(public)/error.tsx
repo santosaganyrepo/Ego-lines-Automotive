@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import * as Sentry from "@sentry/nextjs"
 import Link from "next/link"
 
 import { buttonVariants } from "@/components/ui/button"
@@ -31,6 +32,8 @@ export default function PublicError({
     // Wired to Sentry at Stage 39. Until then this at least surfaces the
     // failure in the browser console rather than swallowing it.
     console.error("[public] route error:", error)
+    // Reported to Sentry when it is configured (privacy-scrubbed first).
+    Sentry.captureException(error)
   }, [error])
 
   return (

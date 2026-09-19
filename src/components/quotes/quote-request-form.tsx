@@ -14,7 +14,7 @@ import {
   Send,
 } from "lucide-react"
 
-import { QuoteType } from "@/generated/prisma/enums"
+import { LegalDocumentKind, QuoteType } from "@/generated/prisma/enums"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -26,6 +26,7 @@ import {
   type QuoteRequestState,
 } from "@/lib/actions/quote-request.actions"
 import { advanceOnEnter } from "@/lib/forms/enter-advances"
+import { legalDocumentMeta } from "@/lib/legal/legal-documents"
 import type { CartItem } from "@/lib/cart/cart-storage"
 import {
   COUNTRY_OPTIONS,
@@ -45,7 +46,7 @@ import {
 import { cn } from "@/lib/utils"
 import { DEFAULT_DIAL_COUNTRY, DIAL_CODES, findDialCode } from "@/lib/utils/phone"
 import { buildQuoteFollowUpWhatsAppMessage, buildWhatsAppUrl } from "@/lib/utils/whatsapp"
-import { QUOTE_HONEYPOT_FIELD, QUOTE_NOTES_MAX } from "@/lib/validations/quote.schema"
+import { QUOTE_HONEYPOT_FIELD, QUOTE_NOTES_MAX } from "@/lib/validations/quote-form-constants"
 
 /**
  * The quotation request form — one component behind every "Get a quote" on
@@ -392,6 +393,29 @@ export function QuoteRequestForm({
         <p className="text-center text-xs text-muted-foreground">
           No commitment. We confirm the full price before you pay anything, and
           we only use your details to reply to this request.
+        </p>
+        {/* New tab: a customer checking the terms mid-request must not lose
+            what they have typed, least of all inside the quote panel. */}
+        <p className="text-center text-xs text-muted-foreground">
+          By sending this request you agree to our{" "}
+          <a
+            href={legalDocumentMeta(LegalDocumentKind.TERMS_OF_USE).path}
+            target="_blank"
+            rel="noopener"
+            className="underline underline-offset-2 hover:text-foreground"
+          >
+            Terms of Use
+          </a>{" "}
+          and{" "}
+          <a
+            href={legalDocumentMeta(LegalDocumentKind.PRIVACY_POLICY).path}
+            target="_blank"
+            rel="noopener"
+            className="underline underline-offset-2 hover:text-foreground"
+          >
+            Privacy Policy
+          </a>
+          .
         </p>
       </div>
     </form>

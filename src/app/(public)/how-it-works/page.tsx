@@ -24,7 +24,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return {
     title: "How It Works",
-    description: `How ${businessName} imports your vehicle from Japan, South Korea or China to South Sudan: choosing, reserving, inspection, shipping to Mombasa, clearing, transport and delivery — with staged payments and tracking at every step.`,
+    description: `How ${businessName} imports your car from Japan, South Korea or China to South Sudan — via Mombasa, with staged payments and tracking at every step.`,
     alternates: { canonical: "/how-it-works" },
   }
 }

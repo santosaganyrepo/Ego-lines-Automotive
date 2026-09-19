@@ -106,9 +106,10 @@ test.describe("spare-parts catalogue", () => {
   }) => {
     await page.goto("/spare-parts")
 
-    await expect(
-      page.getByRole("heading", { level: 1, name: /^spare parts$/i })
-    ).toBeVisible()
+    // One h1 per page: the hero's statement carries it, as on /cars; the
+    // "Spare Parts" label in the utility bar above is plain text.
+    await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1)
+    await expect(page).toHaveTitle(/spare parts/i)
 
     const cards = await requireParts(page)
     const card = cards.first()
@@ -303,7 +304,7 @@ test.describe("spare-parts catalogue", () => {
     await preview.getByRole("button", { name: /^Add .+ to cart$/ }).click()
 
     // The confirmation is announced in the provider's single live region.
-    await expect(page.getByRole("status")).toContainText(/added to cart/i)
+    await expect(page.getByRole("status").filter({ hasText: /added to/i })).toContainText(/added to cart/i)
 
     // The panel closes itself, returning the customer to the grid they were
     // working through rather than leaving a finished dialog to dismiss.

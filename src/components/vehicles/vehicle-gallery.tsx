@@ -5,6 +5,7 @@ import { useState } from "react"
 import { ChevronLeft, ChevronRight, Expand, ImageOff } from "lucide-react"
 
 import { PhotoLightbox } from "@/components/shared/photo-lightbox"
+import { useGalleryFrames } from "@/hooks/use-gallery-frames"
 import { useSwipe } from "@/hooks/use-swipe"
 
 import { cn } from "@/lib/utils"
@@ -20,12 +21,14 @@ import { describeVehiclePhoto, type VehicleNaming } from "@/types/vehicle-photo"
  * — description, specifications, pricing, structured data — out of the
  * browser bundle entirely.
  *
- * ── Why every photograph is in the DOM ────────────────────────────────
- * Rather than swapping one `src`. The non-selected frames are hidden but
- * present, so the browser decodes the next image before it is asked for and
- * moving through a gallery does not flash a blank frame on a slow
- * connection. Only the first is eager; the rest carry `loading="lazy"`, so
- * the cost of that is deferred until the viewer actually reaches it.
+ * ── Why photographs stay in the DOM once shown ───────────────────────
+ * Rather than swapping one `src`. Frames the viewer has reached stay mounted
+ * but hidden, and the neighbours of the current one are mounted as soon as
+ * the viewer engages with the gallery, so the browser decodes the next image
+ * before it is asked for and moving through a gallery does not flash a blank
+ * frame on a slow connection. Frames nobody has come near are not mounted at
+ * all — stacked in one box, `loading="lazy"` could not defer them (see
+ * useGalleryFrames), so a visitor who never swipes downloads one photograph.
  *
  * ── Keyboard and screen-reader shape ──────────────────────────────────
  * The thumbnails are a tablist in behaviour, but they are marked up as
@@ -48,6 +51,7 @@ interface VehicleGalleryProps {
 export function VehicleGallery({ photos, vehicle }: VehicleGalleryProps) {
   const [active, setActive] = useState(0)
   const [lightboxOpen, setLightboxOpen] = useState(false)
+  const frames = useGalleryFrames(photos.length, active)
   const swipe = useSwipe({
     onSwipeLeft: () => setActive((current) => (current + 1) % photos.length),
     onSwipeRight: () => setActive((current) => (current - 1 + photos.length) % photos.length),
@@ -86,27 +90,31 @@ export function VehicleGallery({ photos, vehicle }: VehicleGalleryProps) {
       <div
         className="media-frame group/gallery relative aspect-video w-full rounded-xl border border-border bg-muted"
         style={swipe.style}
+        onPointerEnter={frames.engage}
+        onFocus={frames.engage}
         {...swipe.handlers}
       >
-        {photos.map((photo, index) => (
-          <Image
-            key={photo.id}
-            src={photo.url}
-            alt={describe(index)}
-            fill
-            sizes="(min-width: 1024px) 62vw, 100vw"
-            preload={index === 0}
-            loading={index === 0 ? undefined : "lazy"}
-            className={cn(
-              "object-cover transition-opacity duration-base ease-crownline",
-              index === active ? "opacity-100" : "opacity-0"
-            )}
-            // Keeps the hidden frames out of the accessibility tree and out
-            // of the tab order, so a screen reader announces one image
-            // rather than reading the whole gallery on every page load.
-            aria-hidden={index === active ? undefined : "true"}
-          />
-        ))}
+        {photos.map((photo, index) =>
+          frames.isMounted(index) ? (
+            <Image
+              key={photo.id}
+              src={photo.url}
+              alt={describe(index)}
+              fill
+              sizes="(min-width: 1024px) 62vw, 100vw"
+              preload={index === 0}
+              loading={index === 0 ? undefined : "lazy"}
+              className={cn(
+                "object-cover transition-opacity duration-base ease-crownline",
+                index === active ? "opacity-100" : "opacity-0"
+              )}
+              // Keeps the hidden frames out of the accessibility tree and out
+              // of the tab order, so a screen reader announces one image
+              // rather than reading the whole gallery on every page load.
+              aria-hidden={index === active ? undefined : "true"}
+            />
+          ) : null
+        )}
 
         <button
           type="button"

@@ -53,7 +53,7 @@ import {
 
 const TITLE = "Cars for sale in South Sudan"
 const DESCRIPTION =
-  "Browse quality vehicles imported from Japan, South Korea and China, delivered to Juba and across South Sudan. Full specifications, photographs and delivered-price estimates on every listing."
+  "Quality vehicles imported from Japan, South Korea and China, delivered to Juba and across South Sudan. Photos and full specifications on every listing."
 
 /**
  * Metadata that knows whether a filter is applied.

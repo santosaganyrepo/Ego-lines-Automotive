@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils"
 import {
   partCatalogueHref,
   type SparePartSearchCriteria,
-} from "@/lib/validations/spare-part-search.schema"
+} from "@/lib/validations/spare-part-search-url"
 import type { PublicSparePartCategory } from "@/lib/queries/public-spare-part.queries"
 
 /**

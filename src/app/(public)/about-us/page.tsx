@@ -57,7 +57,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return {
     title: "About Us",
-    description: `${businessName} was founded in ${COMPANY_FOUNDED_YEAR} in South Sudan to connect African customers with quality vehicles from Japan, South Korea and China — through reliable sourcing, competitive pricing and professional service.`,
+    description: `${businessName}, founded in ${COMPANY_FOUNDED_YEAR} in South Sudan, imports quality vehicles from Japan, South Korea and China — reliable sourcing, fair prices.`,
     alternates: { canonical: "/about-us" },
   }
 }

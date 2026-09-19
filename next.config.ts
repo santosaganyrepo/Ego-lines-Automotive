@@ -1,16 +1,12 @@
 import type { NextConfig } from "next";
 import { PHASE_PRODUCTION_SERVER } from "next/constants";
+import { withSentryConfig } from "@sentry/nextjs/config";
 
 /**
  * Baseline security headers (SECURITY.MD §25, §26).
  *
- * A full Content-Security-Policy is Stage 36 work: it needs a nonce
- * strategy for Next.js's inline bootstrap scripts and a pass over every
- * third-party origin the finished site loads, and a CSP guessed at now
- * would either be too loose to help or would break pages as they are built.
- *
- * What is here is the subset that is correct regardless of what the site
- * grows into, and that costs nothing to apply early.
+ * The Content-Security-Policy is built separately, in
+ * `contentSecurityPolicy()` below, and sent with the framing headers.
  */
 const baseSecurityHeaders = [
   {
@@ -38,9 +34,11 @@ const baseSecurityHeaders = [
   },
   {
     // Nothing in this application uses these, and denying them means a
-    // compromised embedded script cannot start.
+    // compromised embedded script cannot start. (`interest-cohort` — Google's
+    // cancelled FLoC trial — was removed: browsers now log it as an
+    // unrecognised feature on every page.)
     key: "Permissions-Policy",
-    value: "camera=(), microphone=(), geolocation=(), interest-cohort=()",
+    value: "camera=(), microphone=(), geolocation=()",
   },
 ];
 
@@ -49,13 +47,72 @@ const baseSecurityHeaders = [
  *
  * `frame-ancestors` is the CSP directive that supersedes X-Frame-Options,
  * but not every browser and scanner honours a lone CSP, so both are sent.
- * A CSP carrying only this directive adds no restrictions on scripts or
- * styles, so it can ship now without waiting for the full policy above.
+ * The CSP here is the full policy, of which `frame-ancestors` is one part.
  */
 const framingHeaders = [
   { key: "X-Frame-Options", value: "DENY" },
-  { key: "Content-Security-Policy", value: "frame-ancestors 'none'" },
+  { key: "Content-Security-Policy", value: contentSecurityPolicy("'none'") },
 ];
+
+/**
+ * Content-Security-Policy (SECURITY.MD §24).
+ *
+ * The "without nonces" policy from the Next.js CSP guide
+ * (node_modules/next/dist/docs/01-app/02-guides/content-security-policy.md).
+ * A nonce policy would force every page to render per request — the
+ * prerendered pages (About, Contact, How It Works…) would lose their static
+ * delivery — so scripts are limited by origin instead:
+ *
+ *   - script-src 'self' 'unsafe-inline': Next.js ships its bootstrap and
+ *     page data as inline scripts, and the pages carry JSON-LD. No script may
+ *     load from any other origin, so injected markup cannot pull in an
+ *     attacker's script file.
+ *   - connect-src 'self': the browser talks only to this site. Supabase is
+ *     reached from the server, never from the browser, so it is not listed —
+ *     which also means stolen page data has nowhere to be sent.
+ *   - img-src: next/image serves photographs from this origin; `data:` is the
+ *     two-factor QR code, `blob:` the dashboard's upload previews, and the
+ *     Supabase origin is the storage the photographs come from.
+ *   - frame-src 'self': the dashboard's own quotation PDF preview.
+ *   - object-src 'none', base-uri 'self', form-action 'self': no plugins, no
+ *     <base> hijacking, and forms may only post to this site.
+ *
+ * Adding a third-party service (Sentry, analytics, a map embed) means adding
+ * its origin to the matching directive here — a blocked request is reported
+ * in the browser console as a CSP violation naming the directive.
+ *
+ * `upgrade-insecure-requests` is deliberately absent: HSTS above already keeps
+ * browsers on HTTPS, and the directive would break `next start` on
+ * http://localhost. Development adds 'unsafe-eval', which React's dev build
+ * needs for its error overlays; production never sends it.
+ */
+function contentSecurityPolicy(frameAncestors: "'none'"): string {
+  const supabaseOrigin = (() => {
+    try {
+      return process.env.NEXT_PUBLIC_SUPABASE_URL
+        ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).origin
+        : "";
+    } catch {
+      return "";
+    }
+  })();
+  const isDev = process.env.NODE_ENV === "development";
+
+  return [
+    "default-src 'self'",
+    `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
+    "style-src 'self' 'unsafe-inline'",
+    `img-src 'self' data: blob:${supabaseOrigin ? ` ${supabaseOrigin}` : ""}`,
+    "font-src 'self'",
+    "connect-src 'self'",
+    "frame-src 'self'",
+    "worker-src 'self' blob:",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+    `frame-ancestors ${frameAncestors}`,
+  ].join("; ");
+}
 
 /**
  * Cache-Control for admin and auth routes is deliberately NOT set here.
@@ -257,7 +314,7 @@ function supabaseImagePatterns(): NonNullable<
  * Actions are about to be rejected, so it must reach a running server and
  * stay out of every build log.
  */
-export default function nextConfig(phase: string): NextConfig {
+function buildNextConfig(phase: string): NextConfig {
   const allowedOrigins = developmentServerActionOrigins(phase);
 
   return {
@@ -327,8 +384,41 @@ export default function nextConfig(phase: string): NextConfig {
           source: "/api/quotes/:id/preview",
           headers: [
             { key: "X-Frame-Options", value: "SAMEORIGIN" },
+            // Framing only, like the customer PDF link below: see there.
             { key: "Content-Security-Policy", value: "frame-ancestors 'self'" },
           ],
+        },
+        {
+          /**
+           * The dashboard app's service worker (public/sw.js). Browsers must
+           * always ask for the current copy, or a fix to it could sit behind
+           * a cached old one; `updateViaCache: "none"` at registration says
+           * the same from the other side.
+           */
+          source: "/sw.js",
+          headers: [
+            { key: "Cache-Control", value: "no-cache, max-age=0, must-revalidate" },
+            { key: "Content-Type", value: "application/javascript; charset=utf-8" },
+          ],
+        },
+        {
+          /**
+           * The customer's quotation PDF link (rewritten to the API route).
+           *
+           * A PDF is not a page: it runs no script this policy could
+           * restrict, and Chrome's built-in viewer can refuse to display a PDF
+           * whose own response carries `object-src 'none'` — the customer
+           * would get a blank tab instead of their quotation. So PDF
+           * responses keep the framing directive alone, as before the full
+           * policy existed. Both the public path and the route it rewrites to
+           * are listed, because the header rules match either.
+           */
+          source: "/quotation/:token",
+          headers: [{ key: "Content-Security-Policy", value: "frame-ancestors 'none'" }],
+        },
+        {
+          source: "/api/quotations/:token",
+          headers: [{ key: "Content-Security-Policy", value: "frame-ancestors 'none'" }],
         },
       ];
     },
@@ -346,7 +436,52 @@ export default function nextConfig(phase: string): NextConfig {
           source: "/quotation/:token",
           destination: "/api/quotations/:token",
         },
+        /**
+         * Some crawlers and older browsers request /favicon.ico directly,
+         * whatever the page declares. The generated app icon draws from the
+         * uploaded favicon (or the brand monogram), so it is always the right
+         * picture — and never a 404 in the logs.
+         */
+        {
+          source: "/favicon.ico",
+          destination: "/app-icon/icon-192.png",
+        },
       ];
     },
   };
 }
+
+/**
+ * Sentry's build integration (error monitoring — see src/instrumentation.ts).
+ *
+ *   - Source maps are uploaded to Sentry so stack traces are readable, then
+ *     deleted from the build output, so the site never serves them publicly.
+ *     Without SENTRY_AUTH_TOKEN they are not generated at all: nothing is
+ *     uploaded, and nothing is left behind to leak the source.
+ *   - `/monitoring` relays browser error reports through this site, so
+ *     ad-blockers do not drop them and the CSP needs no Sentry origin. The
+ *     request proxy skips that path (src/proxy.ts).
+ *   - With no DSN configured, the runtime SDK is disabled (sentry-options.ts);
+ *     the build is unaffected either way.
+ */
+const hasSentryAuthToken = Boolean(process.env.SENTRY_AUTH_TOKEN?.trim());
+
+export default function nextConfig(phase: string): NextConfig {
+  return withSentryConfig(buildNextConfig(phase), {
+    org: process.env.SENTRY_ORG,
+    project: process.env.SENTRY_PROJECT,
+    authToken: process.env.SENTRY_AUTH_TOKEN,
+    silent: !process.env.CI,
+    telemetry: false,
+    tunnelRoute: "/monitoring",
+    widenClientFileUpload: true,
+    sourcemaps: {
+      disable: !hasSentryAuthToken,
+      deleteSourcemapsAfterUpload: true,
+    },
+    webpack: {
+      treeshake: { removeDebugLogging: true },
+    },
+  });
+}
+

@@ -1386,6 +1386,13 @@
 
 /* Phones keep the full 44px field: the density a desk needs is a
    mis-tap on a touch screen. */
+/* A touch screen of any width gets the full 44px field, tablets included. */
+@media (pointer: coarse) {
+  [data-admin] {
+    --control-height: 2.75rem;
+  }
+}
+
 @media (width < 48rem) {
   [data-admin] {
     --control-height: 2.75rem;
@@ -1454,4 +1461,15 @@
   --shadow-overlay: 0 0 0 1px oklch(1 0 0 / 0.06), 0 28px 64px -12px oklch(0 0 0 / 0.7);
   --shadow-gold: 0 4px 14px oklch(0 0 0 / 0.22), inset 0 1px 0 oklch(1 0 0 / 0.3);
   --shadow-gold-strong: 0 8px 22px oklch(0 0 0 / 0.28), inset 0 1px 0 oklch(1 0 0 / 0.34);
+}
+
+/* The catalogue filter panel, collapsed on a phone from first paint rather
+   than after hydration (which moved everything below it). Scripting only:
+   without JavaScript the panel must stay open and usable. Unlayered on
+   purpose: the panel's children carry display utilities (`grid`, `flex`) from
+   the utilities layer, which a rule inside a layer could never override. */
+@media (scripting: enabled) and (width < 40rem) {
+  details[data-phone-collapsed]:not([data-hydrated]) > :not(summary) {
+    display: none;
+  }
 }

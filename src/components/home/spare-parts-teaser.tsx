@@ -11,7 +11,7 @@ import type {
   PublicSparePartCard,
   PublicSparePartCategory,
 } from "@/lib/queries/public-spare-part.queries"
-import { partCatalogueHref } from "@/lib/validations/spare-part-search.schema"
+import { partCatalogueHref } from "@/lib/validations/spare-part-search-url"
 
 /** Two columns inside the band's wider half. */
 const PART_CARD_SIZES = "(min-width: 1024px) 360px, 50vw"

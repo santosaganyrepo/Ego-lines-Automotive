@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { notFound } from "next/navigation"
 import {
   ArrowRightIcon,
   BoltIcon,
@@ -90,6 +91,10 @@ const typeSteps = [
 ]
 
 export default function DesignSystemPage() {
+  // An internal style reference with made-up sample data: available while
+  // developing, a real 404 on the live site.
+  if (process.env.NODE_ENV === "production") notFound()
+
   return (
     <>
       <PageHeader

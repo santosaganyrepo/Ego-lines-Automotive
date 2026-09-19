@@ -9,6 +9,7 @@ import {
   CreditCard,
   LayoutGrid,
   Palette,
+  Scale,
   Search,
   ShieldCheck,
   Truck,
@@ -30,6 +31,7 @@ const ICONS: Record<SettingsNavIcon, LucideIcon> = {
   catalog: LayoutGrid,
   notifications: Bell,
   seo: Search,
+  legal: Scale,
   security: ShieldCheck,
 }
 

@@ -74,7 +74,7 @@ export function NavLink({
       aria-current={active ? "page" : undefined}
       onClick={onNavigate}
       className={cn(
-        "relative block py-1",
+        "relative block py-1 pointer-coarse:flex pointer-coarse:min-h-11 pointer-coarse:min-w-11 pointer-coarse:items-center pointer-coarse:justify-center",
         // whitespace-nowrap is required, not cosmetic: without it "Spare
         // Parts", "How It Works" and "Track My Order" break onto a second
         // line at xl and the header grows to two rows.

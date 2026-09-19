@@ -5,6 +5,7 @@ import { after } from "next/server"
 import { QuoteLineKind, QuoteType } from "@/generated/prisma/enums"
 import { logSecurityEvent } from "@/lib/audit"
 import { notifyAdminsOfQuoteRequest, notifyCustomerQuoteReceived } from "@/lib/email/notifications"
+import { pushNewQuoteRequest } from "@/lib/push/admin-alerts"
 import { MAX_ITEM_QUANTITY } from "@/lib/cart/cart-storage"
 import { getClientIp } from "@/lib/auth/client-ip"
 import {
@@ -509,6 +510,11 @@ export async function submitQuoteRequestAction(
         contactEmail: input.email ?? null,
         contactCity: input.city,
         notes: input.notes ?? null,
+      }),
+      pushNewQuoteRequest({
+        quoteId: written.quoteId,
+        quoteNumber: written.quoteNumber,
+        typeLabel: subject.type === QuoteType.SPARE_PART ? "Spare parts" : "Vehicle",
       }),
     ])
   })

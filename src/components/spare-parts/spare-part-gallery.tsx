@@ -5,6 +5,7 @@ import Image from "next/image"
 import { Expand, ImageOff } from "lucide-react"
 
 import { PhotoLightbox } from "@/components/shared/photo-lightbox"
+import { useGalleryFrames } from "@/hooks/use-gallery-frames"
 import { useSwipe } from "@/hooks/use-swipe"
 import { cn } from "@/lib/utils"
 import {
@@ -59,6 +60,7 @@ interface SparePartGalleryProps {
 export function SparePartGallery({ photos, partName }: SparePartGalleryProps) {
   const [active, setActive] = React.useState(0)
   const [lightboxOpen, setLightboxOpen] = React.useState(false)
+  const frames = useGalleryFrames(photos.length, active)
   const swipe = useSwipe({
     onSwipeLeft: () => setActive((current) => (current + 1) % photos.length),
     onSwipeRight: () => setActive((current) => (current - 1 + photos.length) % photos.length),
@@ -89,6 +91,8 @@ export function SparePartGallery({ photos, partName }: SparePartGalleryProps) {
       <div
         className="group/gallery relative aspect-square w-full overflow-hidden rounded-[4px] border border-border bg-card p-4 sm:p-6"
         style={swipe.style}
+        onPointerEnter={frames.engage}
+        onFocus={frames.engage}
         {...swipe.handlers}
       >
         {/* Tap or click for the full-screen viewer; swipe to move on. */}
@@ -105,25 +109,29 @@ export function SparePartGallery({ photos, partName }: SparePartGalleryProps) {
           </span>
         </button>
         <div className="relative size-full overflow-hidden">
-          {photos.map((photo, index) => (
-            <Image
-              key={photo.id}
-              src={photo.url}
-              alt={describe(index)}
-              fill
-              sizes="(min-width: 1024px) 40vw, 100vw"
-              preload={index === 0}
-              loading={index === 0 ? undefined : "lazy"}
-              className={cn(
-                "object-contain transition-opacity duration-base ease-crownline",
-                index === active ? "opacity-100" : "opacity-0"
-              )}
-              // Keeps the hidden frames out of the accessibility tree, so a
-              // screen reader announces one image rather than reading the whole
-              // gallery on every page load.
-              aria-hidden={index === active ? undefined : "true"}
-            />
-          ))}
+          {/* Only frames the viewer has reached, or is about to — see
+              useGalleryFrames for why the rest are not mounted. */}
+          {photos.map((photo, index) =>
+            frames.isMounted(index) ? (
+              <Image
+                key={photo.id}
+                src={photo.url}
+                alt={describe(index)}
+                fill
+                sizes="(min-width: 1024px) 40vw, 100vw"
+                preload={index === 0}
+                loading={index === 0 ? undefined : "lazy"}
+                className={cn(
+                  "object-contain transition-opacity duration-base ease-crownline",
+                  index === active ? "opacity-100" : "opacity-0"
+                )}
+                // Keeps the hidden frames out of the accessibility tree, so a
+                // screen reader announces one image rather than reading the whole
+                // gallery on every page load.
+                aria-hidden={index === active ? undefined : "true"}
+              />
+            ) : null
+          )}
         </div>
       </div>
 

@@ -357,7 +357,10 @@ export async function listPublishedVehicles(options?: {
     ],
   })
 
-  const [total, rows] = await prisma.$transaction([
+  // Side by side, not `$transaction([...])`: a batch transaction runs its
+  // queries one after another on one connection and adds a COMMIT — four
+  // round trips to Supabase where these two independent reads need two.
+  const [total, rows] = await Promise.all([
     prisma.vehicle.count({ where }),
     prisma.vehicle.findMany({
       where,

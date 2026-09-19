@@ -66,6 +66,10 @@ const PUBLIC_ADMIN_PATHS = [
   // /auth/confirm. The page itself gates on that session and the action
   // re-checks the admin profile before writing anything.
   adminPath("/reset-password"),
+  // The installable app's manifest. Browsers fetch it without cookies, so
+  // gating it would make the dashboard uninstallable; it holds only the
+  // business name and icon links (see the route's own comment).
+  adminPath("/manifest.webmanifest"),
 ]
 
 function isPublicAdminPath(pathname: string): boolean {

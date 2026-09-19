@@ -22,6 +22,9 @@ const business = {
   whatsappNumber: "+211900000000",
   businessEmail: "info@ego-lines.example",
   businessAddress: "Juba, South Sudan",
+  legalName: "",
+  registrationNumber: "",
+  taxNumber: "",
   publishHours: "on",
   businessHours: JSON.stringify(DEFAULT_BUSINESS_HOURS),
   socialFacebook: "",
@@ -149,6 +152,28 @@ describe("business information — WhatsApp number", () => {
         `${number} should be rejected`
       ).toBe(false)
     }
+  })
+})
+
+describe("business information — registered company", () => {
+  it("accepts empty values, meaning not yet registered", () => {
+    expect(businessInformationSchema.safeParse(business).success).toBe(true)
+  })
+
+  it("accepts real registration and tax numbers", () => {
+    const parsed = businessInformationSchema.safeParse({
+      ...business,
+      legalName: "  EGO-Lines Automotive Co. Ltd  ",
+      registrationNumber: "RSS/BR/2026-00123",
+      taxNumber: "TIN 100 234 567",
+    })
+    expect(parsed.success && parsed.data.legalName).toBe("EGO-Lines Automotive Co. Ltd")
+  })
+
+  it("refuses markup or symbols in the numbers, and overlong values", () => {
+    expect(businessInformationSchema.safeParse({ ...business, taxNumber: "<script>" }).success).toBe(false)
+    expect(businessInformationSchema.safeParse({ ...business, registrationNumber: "a".repeat(81) }).success).toBe(false)
+    expect(businessInformationSchema.safeParse({ ...business, legalName: "a".repeat(161) }).success).toBe(false)
   })
 })
 

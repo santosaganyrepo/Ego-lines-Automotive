@@ -82,7 +82,7 @@ import {
 
 const TITLE = "Spare parts for Japanese, Korean and Chinese cars in South Sudan"
 const DESCRIPTION =
-  "Genuine and quality spare parts imported from Japan, South Korea and China, delivered across South Sudan. Search by part number or browse by category, with fitment listed on every part."
+  "Genuine and quality spare parts from Japan, South Korea and China, delivered across South Sudan. Search by part number, with fitment on every part."
 
 /**
  * Metadata that knows whether a filter is applied.

@@ -262,7 +262,7 @@ export default async function SparePartPage({ params }: PageProps) {
                         out to be the wrong one. */}
                     <Link
                       href={`/spare-parts?category=${part.categorySlug}`}
-                      className="underline-offset-4 transition-colors duration-fast hover:text-gold-ink hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring pointer-coarse:inline-flex pointer-coarse:min-h-11 pointer-coarse:items-center"
+                      className="underline-offset-4 transition-colors duration-fast hover:text-gold-ink hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring pointer-coarse:inline-flex pointer-coarse:min-h-11 pointer-coarse:min-w-11 pointer-coarse:items-center pointer-coarse:justify-center"
                     >
                       {part.categoryName}
                     </Link>

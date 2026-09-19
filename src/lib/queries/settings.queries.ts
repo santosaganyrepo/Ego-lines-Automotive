@@ -71,7 +71,7 @@ export const BUSINESS_SETTINGS_CACHE_TAG = "business-settings"
  * old object, and every reader of the new field got `undefined` — which is
  * exactly how the homepage's prerender failed.
  */
-const SETTINGS_CACHE_SHAPE_VERSION = "2026-09-19.2"
+const SETTINGS_CACHE_SHAPE_VERSION = "2026-09-27.1"
 
 /**
  * The spare-part steps stored in the Json column, or null when never
@@ -103,6 +103,8 @@ export interface NotificationSettings {
   customerEmailsEnabled: boolean
   adminEmailNotificationsEnabled: boolean
   dashboardNotificationsEnabled: boolean
+  /** Web Push to administrators' devices, for business alerts. */
+  pushNotificationsEnabled: boolean
 }
 
 export interface SecuritySettings {
@@ -112,6 +114,13 @@ export interface SecuritySettings {
 }
 
 /** What the Settings screens get. Decimals are converted so it can cross to a client component. */
+/** The registered company. Each value is empty until the dealership enters it. */
+export interface CompanyDetails {
+  legalName: string
+  registrationNumber: string
+  taxNumber: string
+}
+
 export interface BusinessSettingsDTO {
   businessName: string
   businessDescription: string
@@ -120,6 +129,7 @@ export interface BusinessSettingsDTO {
   whatsappNumber: string
   businessEmail: string
   businessAddress: string
+  company: CompanyDetails
   businessHours: BusinessHours | null
   social: Record<SocialNetworkField, string | null>
 
@@ -156,6 +166,11 @@ function toBusinessSettingsDTO(row: BusinessSettings): BusinessSettingsDTO {
     whatsappNumber: row.whatsappNumber,
     businessEmail: row.businessEmail,
     businessAddress: row.businessAddress,
+    company: {
+      legalName: row.legalName,
+      registrationNumber: row.registrationNumber,
+      taxNumber: row.taxNumber,
+    },
     businessHours: resolveBusinessHours(row.businessHours),
     social: {
       socialFacebook: row.socialFacebook,
@@ -187,6 +202,7 @@ function toBusinessSettingsDTO(row: BusinessSettings): BusinessSettingsDTO {
       customerEmailsEnabled: row.customerEmailsEnabled,
       adminEmailNotificationsEnabled: row.adminEmailNotificationsEnabled,
       dashboardNotificationsEnabled: row.dashboardNotificationsEnabled,
+      pushNotificationsEnabled: row.pushNotificationsEnabled,
     },
 
     seoDefaultTitle: row.seoDefaultTitle,
@@ -252,6 +268,8 @@ export interface PublicSiteSettings {
     /** Tap-to-call is switched on and there is a number to call. */
     callUsEnabled: boolean
   }
+  /** The registered company, for the footer, legal pages and structured data. */
+  company: CompanyDetails
   /** One line per run of days, or null when hours are not published. */
   hours: string[] | null
   social: PublicSocialLink[]
@@ -288,6 +306,9 @@ const PUBLIC_COLUMNS = {
   primaryPhone: true,
   businessEmail: true,
   businessAddress: true,
+  legalName: true,
+  registrationNumber: true,
+  taxNumber: true,
   whatsappNumber: true,
   businessHours: true,
   socialFacebook: true,
@@ -324,6 +345,9 @@ const PUBLIC_DEFAULT_ROW: PublicRow = {
   primaryPhone: "",
   businessEmail: "",
   businessAddress: "",
+  legalName: "",
+  registrationNumber: "",
+  taxNumber: "",
   whatsappNumber: "",
   businessHours: null,
   socialFacebook: null,
@@ -374,6 +398,11 @@ function toPublicSiteSettings(row: PublicRow): PublicSiteSettings {
       address: row.businessAddress,
       whatsappNumber: catalogDisplay.actions.whatsapp ? configuredWhatsApp : "",
       callUsEnabled: catalogDisplay.actions.callUs && row.primaryPhone.trim().length > 0,
+    },
+    company: {
+      legalName: row.legalName,
+      registrationNumber: row.registrationNumber,
+      taxNumber: row.taxNumber,
     },
     hours: hours ? summariseBusinessHours(hours) : null,
     social,
@@ -472,6 +501,7 @@ const OPERATIONAL_DEFAULTS: OperationalSettings = {
     customerEmailsEnabled: true,
     adminEmailNotificationsEnabled: true,
     dashboardNotificationsEnabled: true,
+    pushNotificationsEnabled: true,
   },
   security: { requireTwoFactor: false, allowPasswordRecovery: true, sessionTimeoutHours: 24 },
   trackingNumberPrefix: "CLM",
@@ -488,6 +518,7 @@ const readOperationalSettings = unstable_cache(
         customerEmailsEnabled: true,
         adminEmailNotificationsEnabled: true,
         dashboardNotificationsEnabled: true,
+        pushNotificationsEnabled: true,
         requireTwoFactor: true,
         allowPasswordRecovery: true,
         sessionTimeoutHours: true,
@@ -505,6 +536,7 @@ const readOperationalSettings = unstable_cache(
         customerEmailsEnabled: row.customerEmailsEnabled,
         adminEmailNotificationsEnabled: row.adminEmailNotificationsEnabled,
         dashboardNotificationsEnabled: row.dashboardNotificationsEnabled,
+        pushNotificationsEnabled: row.pushNotificationsEnabled,
       },
       security: {
         requireTwoFactor: row.requireTwoFactor,

@@ -1,7 +1,9 @@
-import type { Metadata } from "next"
+import type { Metadata, Viewport } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
 
 import { AdminSurface } from "@/components/admin/admin-surface"
+import { ServiceWorkerRegistrar } from "@/components/admin/pwa/service-worker-registrar"
+import { ADMIN_BASE_PATH, adminPath } from "@/lib/constants/admin-routes"
 import { getPublicSiteSettings } from "@/lib/queries/settings.queries"
 import { cn } from "@/lib/utils"
 
@@ -61,7 +63,24 @@ export async function generateMetadata(): Promise<Metadata> {
     // Neither this nor robots.txt was ever an access control — SECURITY.MD
     // §46. The DAL does the work.
     robots: { index: false, follow: false },
+    // The installable dashboard app (see manifest.webmanifest/route.ts). Only
+    // dashboard pages link it, so the public site is never offered as an app.
+    manifest: adminPath("/manifest.webmanifest"),
+    appleWebApp: {
+      capable: true,
+      title: `${businessName.split(/[\s-]+/)[0] ?? businessName} Admin`,
+      // "black", not "black-translucent": content starts below the status
+      // bar, so nothing slides under the clock or the notch.
+      statusBarStyle: "black",
+    },
+    icons: {
+      apple: [{ url: "/app-icon/apple-touch-180.png", sizes: "180x180", type: "image/png" }],
+    },
   }
+}
+
+export const viewport: Viewport = {
+  themeColor: "#0f0f0f",
 }
 
 /**
@@ -81,6 +100,7 @@ export default function AdminLayout({ children }: LayoutProps<"/Ricky@2000">) {
   return (
     <div data-admin="" className={cn(FONT_CLASSES, "contents font-sans")}>
       <AdminSurface fontClassName={FONT_CLASSES} />
+      <ServiceWorkerRegistrar scope={ADMIN_BASE_PATH} />
       {children}
     </div>
   )

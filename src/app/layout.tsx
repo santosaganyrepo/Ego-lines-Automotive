@@ -88,12 +88,18 @@ export async function generateMetadata(): Promise<Metadata> {
     robots: settings.seo.indexingEnabled
       ? { index: true, follow: true }
       : { index: false, follow: false },
+    // The uploaded favicon, or — until one is uploaded — the icon generated
+    // from the brand (src/app/app-icon), so browsers and search results never
+    // fall back to a blank page icon or a 404 for /favicon.ico.
     icons: settings.branding.faviconUrl
       ? {
           icon: [{ url: settings.branding.faviconUrl, type: "image/png" }],
           apple: [{ url: settings.branding.faviconUrl, type: "image/png" }],
         }
-      : undefined,
+      : {
+          icon: [{ url: "/app-icon/icon-192.png", sizes: "192x192", type: "image/png" }],
+          apple: [{ url: "/app-icon/apple-touch-180.png", sizes: "180x180", type: "image/png" }],
+        },
   };
 }
 

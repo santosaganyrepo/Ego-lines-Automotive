@@ -19,6 +19,7 @@ export type SettingsNavIcon =
   | "catalog"
   | "notifications"
   | "seo"
+  | "legal"
   | "security"
 
 export interface SettingsNavLink {
@@ -32,6 +33,7 @@ export interface SettingsNavLink {
 
 export const SETTINGS_BASE_PATH = adminPath("/settings")
 export const SECURITY_SETTINGS_PATH = adminPath("/settings/security")
+export const LEGAL_SETTINGS_PATH = adminPath("/settings/legal")
 export const TWO_FACTOR_SETTINGS_PATH = adminPath("/settings/security/two-factor")
 export const SESSION_SETTINGS_PATH = adminPath("/settings/security/sessions")
 export const PASSWORD_SETTINGS_PATH = adminPath("/settings/security/password")
@@ -45,6 +47,7 @@ export const settingsNavLinks: SettingsNavLink[] = [
   { label: "Catalogue display", href: adminPath("/settings/catalog-display"), icon: "catalog", permission: "settings:read" },
   { label: "Notifications", href: adminPath("/settings/notifications"), icon: "notifications", permission: "settings:read" },
   { label: "SEO & social", href: adminPath("/settings/seo"), icon: "seo", permission: "settings:read" },
+  { label: "Legal documents", href: LEGAL_SETTINGS_PATH, icon: "legal", permission: "settings:read" },
   {
     label: "Admin users & security",
     href: SECURITY_SETTINGS_PATH,
@@ -71,6 +74,8 @@ export const settingsNavLinks: SettingsNavLink[] = [
  */
 export function isSettingsLinkActive(link: Pick<SettingsNavLink, "href" | "children">, pathname: string): boolean {
   if (link.href === SETTINGS_BASE_PATH) return pathname === SETTINGS_BASE_PATH
-  if (link.children) return pathname === link.href || pathname.startsWith(`${link.href}/`)
+  if (link.children || link.href === LEGAL_SETTINGS_PATH) {
+    return pathname === link.href || pathname.startsWith(`${link.href}/`)
+  }
   return pathname === link.href
 }

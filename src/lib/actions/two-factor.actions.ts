@@ -2,12 +2,13 @@
 
 import { randomBytes } from "node:crypto"
 import { redirect } from "next/navigation"
+import { after } from "next/server"
 import { revalidatePath } from "next/cache"
 
 import { AdminLoginEventKind } from "@/generated/prisma/enums"
 import { logSecurityEvent, recordAuditLog, recordAuditLogBestEffort } from "@/lib/audit"
 import { authorizeAdmin } from "@/lib/auth/admin-guard"
-import { recordAdminLoginEvent } from "@/lib/auth/admin-sessions"
+import { currentDeviceLabel, recordAdminLoginEvent } from "@/lib/auth/admin-sessions"
 import { getClientIp } from "@/lib/auth/client-ip"
 import { getAdminAccess } from "@/lib/auth/dal"
 import {
@@ -21,6 +22,7 @@ import {
 import { resolveReturnPath } from "@/lib/auth/return-path"
 import { ADMIN_BASE_PATH } from "@/lib/constants/admin-routes"
 import { prisma } from "@/lib/prisma"
+import { pushNewDeviceSignIn } from "@/lib/push/admin-alerts"
 import { getOperationalSettings, getPublicSiteSettings } from "@/lib/queries/settings.queries"
 import { createClient } from "@/lib/supabase/server"
 import {
@@ -372,6 +374,8 @@ export async function verifyTwoFactorSignInAction(
     entityId: admin.id,
   })
   await recordAdminLoginEvent({ adminId: admin.id, kind: AdminLoginEventKind.SIGN_IN_SUCCEEDED })
+  const signInDevice = await currentDeviceLabel()
+  after(() => pushNewDeviceSignIn({ adminId: admin.id, deviceLabel: signInDevice }))
 
   redirect(destination)
 }

@@ -10,6 +10,7 @@ import {
   MessageSquareText,
   Phone,
   Radar,
+  ShieldCheck,
   type LucideIcon,
 } from "lucide-react"
 
@@ -22,6 +23,8 @@ import { ITEM_STEP_MS, delay } from "@/components/motion/motion"
 import { QuoteRequestForm } from "@/components/quotes/quote-request-form"
 import { SocialIcon } from "@/components/shared/social-icon"
 import { WhatsAppGlyph } from "@/components/shared/whatsapp-glyph"
+import { LegalDocumentKind } from "@/generated/prisma/enums"
+import { legalDocumentMeta } from "@/lib/legal/legal-documents"
 import { getPublicSiteSettings } from "@/lib/queries/settings.queries"
 import { cn } from "@/lib/utils"
 import { toTelHref } from "@/lib/utils/tel"
@@ -241,6 +244,31 @@ export default async function ContactPage() {
                     className="size-4 transition-transform duration-fast ease-crownline group-hover/track:translate-x-1"
                   />
                 </Link>
+              </div>
+
+              {/* Beside the contact details on purpose: "is this really their
+                  number and their account?" is asked right here. */}
+              <div className="rv-up flex gap-4 rounded-2xl border border-gold/25 bg-gold/5 p-6" style={delay(800)}>
+                <span className="grid size-11 shrink-0 place-items-center rounded-xl border border-gold/25 bg-gold/10 text-gold">
+                  <ShieldCheck aria-hidden="true" className="size-5" />
+                </span>
+                <div className="flex flex-col gap-2">
+                  <h2 className="font-heading text-title text-foreground">Paying us safely</h2>
+                  <p className="text-body text-muted-foreground">
+                    We only accept payment into accounts in our company&rsquo;s name, and never change our payment
+                    details by message.
+                  </p>
+                  <Link
+                    href={legalDocumentMeta(LegalDocumentKind.PAYMENT_SAFETY).path}
+                    className="group/safety inline-flex w-fit items-center gap-2 text-small font-semibold text-gold transition-colors duration-fast hover:text-gold-bright pointer-coarse:min-h-11"
+                  >
+                    How to pay safely
+                    <ArrowRight
+                      aria-hidden="true"
+                      className="size-4 transition-transform duration-fast ease-crownline group-hover/safety:translate-x-1"
+                    />
+                  </Link>
+                </div>
               </div>
             </div>
 

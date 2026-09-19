@@ -1,5 +1,7 @@
 import { z } from "zod"
 
+import { QUOTE_NOTES_MAX } from "@/lib/validations/quote-form-constants"
+
 import {
   FuelType,
   PreferredCountry,
@@ -82,23 +84,12 @@ const emailField = z.preprocess(
     .optional()
 )
 
-/** Customer notes. Long enough for a real requirement, short enough that a
- *  single request cannot fill an operator's screen. */
-export const QUOTE_NOTES_MAX = 2000
-
 /**
- * The name of the form's honeypot field.
- *
- * Rendered off-screen and out of the tab order, so a person never fills it
- * and a form-filling bot usually does. A non-empty value is answered with the
- * same neutral confirmation a real request gets and nothing is stored — a bot
- * told "rejected" simply learns which field to leave blank.
- *
- * Deliberately a name no browser autofill heuristic maps to a personal field
- * ("website", "company" and "nickname" all get filled by some password
- * managers, which would silently discard a real customer's request).
+ * `QUOTE_NOTES_MAX` and `QUOTE_HONEYPOT_FIELD` live in `quote-form-constants.ts`,
+ * which does not import Zod, because the public quote form needs them in the
+ * browser. Re-exported here so server code keeps one import.
  */
-export const QUOTE_HONEYPOT_FIELD = "crownline_confirm_hp"
+export { QUOTE_HONEYPOT_FIELD, QUOTE_NOTES_MAX } from "@/lib/validations/quote-form-constants"
 
 /** The three shapes a public request takes. */
 export const QUOTE_REQUEST_KINDS = ["VEHICLE_LISTING", "PARTS_LIST", "GENERAL"] as const

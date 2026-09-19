@@ -1,5 +1,7 @@
 import { z } from "zod"
 
+import type { SparePartSearchCriteria } from "@/lib/validations/spare-part-search-url"
+
 /**
  * The public spare-parts catalogue's search parameters.
  *
@@ -108,8 +110,27 @@ export const sparePartSearchSchema = z.object({
 
 export type SparePartSearchParams = z.infer<typeof sparePartSearchSchema>
 
-/** Just the narrowing part — what the query layer turns into a where clause. */
-export type SparePartSearchCriteria = Omit<SparePartSearchParams, "page">
+/**
+ * The criteria type and URL builders live in `spare-part-search-url.ts`,
+ * which does not import Zod, so Client Components can use them without
+ * shipping Zod to the browser. Re-exported here so server code keeps one
+ * import.
+ */
+export {
+  buildPartCatalogueQuery,
+  hasActivePartSearch,
+  partCatalogueHref,
+  type SparePartSearchCriteria,
+} from "@/lib/validations/spare-part-search-url"
+
+/**
+ * Compile-time proof that the hand-written `SparePartSearchCriteria` is
+ * exactly what the schema produces, so the two cannot drift apart.
+ */
+type SchemaCriteria = Omit<SparePartSearchParams, "page">
+type SameShape<A, B> = [A] extends [B] ? ([B] extends [A] ? true : false) : false
+const criteriaMatchesSchema: SameShape<SchemaCriteria, SparePartSearchCriteria> = true
+void criteriaMatchesSchema
 
 /**
  * Parses a Next.js `searchParams` object.
@@ -117,7 +138,7 @@ export type SparePartSearchCriteria = Omit<SparePartSearchParams, "page">
  * A value arrives as `string | string[] | undefined`: a URL may legally repeat
  * a key, and `?category=brakes&category=engine` is not a filter the rail can
  * represent. The first occurrence wins, which matches what a browser submits
- * from a form and what the links below build.
+ * from a form and what the links in `spare-part-search-url.ts` build.
  */
 export function parseSparePartSearchParams(
   params: Record<string, string | string[] | undefined>
@@ -130,43 +151,4 @@ export function parseSparePartSearchParams(
     category: first(params.category),
     page: first(params.page) ?? 1,
   })
-}
-
-/** True when at least one narrowing filter is active. */
-export function hasActivePartSearch(criteria: SparePartSearchCriteria): boolean {
-  return Boolean(criteria.q || criteria.category)
-}
-
-/**
- * Rebuilds a catalogue query string from criteria plus an optional page.
- *
- * One builder for the category rail, the search box, the pagination links and
- * the clear control, so a filtered page-two link cannot lose its filters.
- * Keys are emitted in a fixed order and empty values are omitted, so the same
- * search always produces the same URL — which matters for caching and for not
- * showing a customer two addresses for one result set.
- */
-export function buildPartCatalogueQuery(
-  criteria: SparePartSearchCriteria,
-  page = 1
-): string {
-  const params = new URLSearchParams()
-
-  if (criteria.category) params.set("category", criteria.category)
-  if (criteria.q) params.set("q", criteria.q)
-  // Page one is the default and is left out, so "/spare-parts" and
-  // "/spare-parts?page=1" do not become two URLs for the same page.
-  if (page > 1) params.set("page", String(page))
-
-  return params.toString()
-}
-
-/** `/spare-parts` with the criteria applied. */
-export function partCatalogueHref(
-  criteria: SparePartSearchCriteria,
-  page = 1
-): string {
-  const query = buildPartCatalogueQuery(criteria, page)
-
-  return query ? `/spare-parts?${query}` : "/spare-parts"
 }

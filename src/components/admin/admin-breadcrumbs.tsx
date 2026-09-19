@@ -6,7 +6,13 @@ import { ChevronRight } from "lucide-react"
 
 import { ADMIN_BASE_PATH } from "@/lib/constants/admin-routes"
 import { isAdminNavLinkActive, type AdminNavGroup } from "@/lib/constants/admin-nav"
-import { SETTINGS_BASE_PATH, isSettingsLinkActive, settingsNavLinks } from "@/lib/constants/settings-nav"
+import {
+  LEGAL_SETTINGS_PATH,
+  SETTINGS_BASE_PATH,
+  isSettingsLinkActive,
+  settingsNavLinks,
+} from "@/lib/constants/settings-nav"
+import { legalDocumentBySlug } from "@/lib/legal/legal-documents"
 import { cn } from "@/lib/utils"
 
 interface Crumb {
@@ -40,7 +46,18 @@ function buildTrail(groups: AdminNavGroup[], pathname: string): Crumb[] {
     if (link.href === SETTINGS_BASE_PATH) {
       const section = settingsNavLinks.find((candidate) => isSettingsLinkActive(candidate, pathname))
       trail.push({ label: link.label, href: section ? link.href : undefined })
-      if (section) trail.push({ label: section.label })
+
+      // A legal document is one level below its section: name it, and let
+      // the section link back to the list of documents.
+      const legalDocument =
+        section?.href === LEGAL_SETTINGS_PATH ? legalDocumentBySlug(pathname.slice(section.href.length + 1)) : null
+
+      if (section && legalDocument) {
+        trail.push({ label: section.label, href: section.href })
+        trail.push({ label: legalDocument.label })
+      } else if (section) {
+        trail.push({ label: section.label })
+      }
       return trail
     }
 

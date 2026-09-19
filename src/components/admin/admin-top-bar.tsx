@@ -4,6 +4,7 @@ import { ArrowUpRight } from "lucide-react"
 import { AdminBreadcrumbs } from "@/components/admin/admin-breadcrumbs"
 import { AdminMobileNav } from "@/components/admin/admin-mobile-nav"
 import { AdminProfileMenu } from "@/components/admin/admin-profile-menu"
+import { AppInstallButton } from "@/components/admin/pwa/app-install-button"
 import { ADMIN_ROLE_LABELS } from "@/lib/auth/permissions"
 import type { AdminNavGroup } from "@/lib/constants/admin-nav"
 import type { AdminProfileDTO } from "@/lib/auth/dal"
@@ -32,6 +33,8 @@ export function AdminTopBar({ admin, navGroups }: AdminTopBarProps) {
       <AdminMobileNav groups={navGroups} />
 
       <AdminBreadcrumbs groups={navGroups} className="flex-1" />
+
+      <AppInstallButton />
 
       <Link
         href="/"

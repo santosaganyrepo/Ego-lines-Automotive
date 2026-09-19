@@ -502,6 +502,10 @@ async function main() {
 
     section("The objects the catalogue depends on are installed")
     const expectedConstraints = [
+      "AdminPushSubscription_shape_check",
+      "LegalDocument_length_check",
+      "LegalSection_length_check",
+      "BusinessSettings_company_details_length_check",
       "AdminSession_end_consistency_check",
       "BusinessSettings_default_country_check",
       "BusinessSettings_quote_validity_check",
@@ -560,6 +564,49 @@ async function main() {
     ]) {
       record(`trigram index ${name}`, trigramNames.has(name))
     }
+
+    /**
+     * The browser-facing roles must be locked out of the application tables.
+     *
+     * Supabase's REST API serves this schema to anyone holding the publishable
+     * key, which every browser has. Two independent locks keep it closed: the
+     * `anon`/`authenticated` roles hold no privilege here, and every table has
+     * Row Level Security on with no policy for them. A table created without
+     * RLS — or a privilege granted from the dashboard — fails here.
+     */
+    section("The public API cannot reach application tables")
+    const unprotected = await client.query<{ tablename: string }>(`
+      SELECT c.relname AS tablename
+        FROM pg_class c
+        JOIN pg_namespace n ON n.oid = c.relnamespace
+       WHERE n.nspname = 'public' AND c.relkind = 'r' AND NOT c.relrowsecurity
+    `)
+    record(
+      "row level security is enabled on every table",
+      unprotected.rowCount === 0,
+      unprotected.rows.map((row) => row.tablename).join(", ")
+    )
+    const exposed = await client.query<{ tablename: string }>(`
+      SELECT c.relname AS tablename
+        FROM pg_class c
+        JOIN pg_namespace n ON n.oid = c.relnamespace
+       WHERE n.nspname = 'public' AND c.relkind = 'r'
+         AND (has_table_privilege('anon', c.oid, 'SELECT, INSERT, UPDATE, DELETE')
+           OR has_table_privilege('authenticated', c.oid, 'SELECT, INSERT, UPDATE, DELETE'))
+    `)
+    record(
+      "anon and authenticated hold no table privileges",
+      exposed.rowCount === 0,
+      exposed.rows.map((row) => row.tablename).join(", ")
+    )
+    const schemaUsage = await client.query<{ anon: boolean; authenticated: boolean }>(`
+      SELECT has_schema_privilege('anon', 'public', 'USAGE') AS anon,
+             has_schema_privilege('authenticated', 'public', 'USAGE') AS authenticated
+    `)
+    record(
+      "anon and authenticated cannot use the public schema",
+      !schemaUsage.rows[0]?.anon && !schemaUsage.rows[0]?.authenticated
+    )
   } finally {
     // Always. Nothing this script writes is meant to survive it.
     await client.query("ROLLBACK")

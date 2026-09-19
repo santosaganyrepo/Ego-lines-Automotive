@@ -8,7 +8,7 @@ import { SparePartCategoryRail } from "@/components/spare-parts/spare-part-categ
 import { SparePartSearch } from "@/components/spare-parts/spare-part-search"
 import { cn } from "@/lib/utils"
 import type { PublicSparePartCategory } from "@/lib/queries/public-spare-part.queries"
-import type { SparePartSearchCriteria } from "@/lib/validations/spare-part-search.schema"
+import type { SparePartSearchCriteria } from "@/lib/validations/spare-part-search-url"
 
 /**
  * The catalogue's own toolbar: search and categories, in one sticky band.

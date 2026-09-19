@@ -206,7 +206,7 @@ function ArrowButton({
       disabled={disabled}
       aria-label={`Scroll to ${direction} vehicles`}
       className={cn(
-        "inline-flex size-10 items-center justify-center rounded-lg border border-border bg-card text-foreground",
+        "inline-flex size-10 items-center justify-center rounded-lg border border-border bg-card text-foreground pointer-coarse:size-11",
         "transition-[background-color,border-color,color,opacity] duration-fast ease-crownline",
         "hover:border-gold-ink/40 hover:bg-accent hover:text-gold-ink",
         "disabled:pointer-events-none disabled:opacity-35"

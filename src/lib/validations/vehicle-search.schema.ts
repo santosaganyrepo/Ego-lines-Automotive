@@ -1,7 +1,8 @@
 import { z } from "zod"
 
 import { VehicleBodyType } from "@/generated/prisma/enums"
-import { VEHICLE_YEAR_MIN, bodyTypeToParam, vehicleYearMax } from "@/lib/constants/vehicle-options"
+import { VEHICLE_YEAR_MIN, vehicleYearMax } from "@/lib/constants/vehicle-options"
+import type { VehicleSearchCriteria } from "@/lib/validations/vehicle-search-url"
 
 /**
  * The public catalogue's search parameters (Stage 12).
@@ -78,7 +79,7 @@ const SEARCH_TERM_MAX_LENGTH = 80
  *
  * Whitespace is trimmed *and* collapsed, so "toyota   harrier" and "toyota
  * harrier" are one URL rather than two addresses for one result set — the
- * same canonicalisation rule the query builder below applies for the
+ * same canonicalisation rule the query builder (`vehicle-search-url.ts`) applies for the
  * dropdowns.
  */
 const searchTerm = z
@@ -167,8 +168,27 @@ export const vehicleSearchSchema = z.object({
 
 export type VehicleSearchParams = z.infer<typeof vehicleSearchSchema>
 
-/** Just the narrowing part — what the query layer turns into a where clause. */
-export type VehicleSearchCriteria = Omit<VehicleSearchParams, "page">
+/**
+ * The criteria type and URL builders live in `vehicle-search-url.ts`, which
+ * does not import Zod, so Client Components can use them without shipping
+ * Zod to the browser. Re-exported here so server code keeps one import.
+ */
+export {
+  buildCatalogueQuery,
+  catalogueHref,
+  hasActiveSearch,
+  type VehicleSearchCriteria,
+} from "@/lib/validations/vehicle-search-url"
+
+/**
+ * Compile-time proof that the hand-written `VehicleSearchCriteria` is exactly
+ * what the schema produces. A field added to one and not the other fails the
+ * type check instead of silently dropping a filter.
+ */
+type SchemaCriteria = Omit<VehicleSearchParams, "page">
+type SameShape<A, B> = [A] extends [B] ? ([B] extends [A] ? true : false) : false
+const criteriaMatchesSchema: SameShape<SchemaCriteria, VehicleSearchCriteria> = true
+void criteriaMatchesSchema
 
 /**
  * Parses a Next.js `searchParams` object.
@@ -192,48 +212,4 @@ export function parseVehicleSearchParams(
     bodyType: first(params.type),
     page: first(params.page) ?? 1,
   })
-}
-
-/** True when at least one narrowing filter is active. */
-export function hasActiveSearch(criteria: VehicleSearchCriteria): boolean {
-  return Boolean(
-    criteria.q || criteria.make || criteria.model || criteria.year || criteria.bodyType
-  )
-}
-
-/**
- * Rebuilds a catalogue query string from criteria plus an optional page.
- *
- * One builder for the filter bar, the pagination links and the "clear"
- * control, so a filtered page-two link cannot lose its filters while a
- * page-one link keeps them. Keys are emitted in a fixed order and empty
- * values are omitted, so the same search always produces the same URL —
- * which matters for caching and for not showing a customer two addresses for
- * one result set.
- */
-export function buildCatalogueQuery(
-  criteria: VehicleSearchCriteria,
-  page = 1
-): string {
-  const params = new URLSearchParams()
-
-  // `q` first: it is the control the customer typed into, so it is the one
-  // they will recognise when the address bar is truncated on a phone.
-  if (criteria.q) params.set("q", criteria.q)
-  if (criteria.make) params.set("make", criteria.make)
-  if (criteria.model) params.set("model", criteria.model)
-  if (criteria.year) params.set("year", String(criteria.year))
-  if (criteria.bodyType) params.set("type", bodyTypeToParam(criteria.bodyType))
-  // Page one is the default and is left out, so "/cars" and "/cars?page=1"
-  // do not become two URLs for the same page.
-  if (page > 1) params.set("page", String(page))
-
-  return params.toString()
-}
-
-/** `/cars` with the criteria applied. */
-export function catalogueHref(criteria: VehicleSearchCriteria, page = 1): string {
-  const query = buildCatalogueQuery(criteria, page)
-
-  return query ? `/cars?${query}` : "/cars"
 }

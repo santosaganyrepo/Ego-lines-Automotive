@@ -41,6 +41,9 @@ export type AuditAction =
   | "ADMIN_SESSION_REVOKED"
   | "ADMIN_OTHER_SESSIONS_REVOKED"
   | "ADMIN_ALL_SESSIONS_REVOKED"
+  // A device switched push notifications on or off for this administrator.
+  | "ADMIN_PUSH_DEVICE_ADDED"
+  | "ADMIN_PUSH_DEVICE_REMOVED"
   // ── Settings ────────────────────────────────────────────────────────
   // Written before Settings was split into sections; kept so older rows
   // still name a known action.
@@ -55,6 +58,19 @@ export type AuditAction =
   | "SETTINGS_NOTIFICATIONS_UPDATED"
   | "SETTINGS_SEO_UPDATED"
   | "SETTINGS_SECURITY_UPDATED"
+  // ── Legal documents ─────────────────────────────────────────────────
+  // What the Terms of Sale said, and when, is exactly what gets asked in a
+  // dispute, so every change to published legal wording is recorded. Text
+  // edits autosave; LEGAL_SECTION_UPDATED is written at most once per section
+  // per administrator in a 30-minute editing session (see legal.actions.ts),
+  // with the text as it stood before that session began.
+  | "LEGAL_DOCUMENT_UPDATED"
+  | "LEGAL_SECTION_UPDATED"
+  | "LEGAL_SECTION_SHOWN"
+  | "LEGAL_SECTION_HIDDEN"
+  | "LEGAL_SECTION_ADDED"
+  | "LEGAL_SECTION_REMOVED"
+  | "LEGAL_SECTION_MOVED"
   | "VEHICLE_CREATED"
   | "VEHICLE_UPDATED"
   | "VEHICLE_STATUS_CHANGED"
@@ -125,6 +141,8 @@ export type AuditEntityType =
   | "Payment"
   | "Shipment"
   | "TrackingEvent"
+  | "LegalDocument"
+  | "LegalSection"
 
 export interface AuditLogEntry {
   actorId: string

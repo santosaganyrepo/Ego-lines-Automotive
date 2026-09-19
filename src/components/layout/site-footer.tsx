@@ -6,6 +6,7 @@ import { Container } from "@/components/layout/container"
 import { BrandMark } from "@/components/layout/brand-mark"
 import { toTelHref } from "@/lib/utils/tel"
 import { footerLinkGroups, isNavLinkAvailable } from "@/lib/constants/nav-links"
+import { LEGAL_DOCUMENTS } from "@/lib/legal/legal-documents"
 import { getPublicSiteSettings } from "@/lib/queries/settings.queries"
 import { buildGeneralWhatsAppMessage, buildWhatsAppUrl } from "@/lib/utils/whatsapp"
 import { SocialIcon } from "@/components/shared/social-icon"
@@ -19,7 +20,15 @@ import { SocialIcon } from "@/components/shared/social-icon"
  */
 export async function SiteFooter() {
   const settings = await getPublicSiteSettings()
-  const { contact } = settings
+  const { contact, company } = settings
+
+  // The registered company, when the dealership has entered it: a customer
+  // about to send a deposit checks exactly this line.
+  const registration = [
+    company.legalName && company.legalName !== settings.businessName ? `Trading as ${settings.businessName}` : null,
+    company.registrationNumber ? `Company registration no. ${company.registrationNumber}` : null,
+    company.taxNumber ? `TIN ${company.taxNumber}` : null,
+  ].filter((line) => line !== null)
 
   // Null when no number is configured or WhatsApp buttons are off, and the
   // block below then renders nothing rather than a broken wa.me link.
@@ -172,10 +181,29 @@ export async function SiteFooter() {
           </div>
         </div>
 
-        <div className="mt-14 flex flex-col gap-3 border-t border-white/10 pt-8 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-small text-background/50">
-            © {new Date().getFullYear()} {settings.businessName}. All rights reserved.
-          </p>
+        {/* Legal documents: on every page, where customers look for them. */}
+        <nav aria-label="Legal" className="mt-14 border-t border-white/10 pt-8">
+          <ul className="flex flex-wrap gap-x-6 gap-y-1">
+            {LEGAL_DOCUMENTS.map((document) => (
+              <li key={document.kind}>
+                <Link
+                  href={document.path}
+                  className="inline-flex items-center text-small text-background/70 transition-colors duration-fast hover:text-background pointer-coarse:min-h-11"
+                >
+                  {document.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex flex-col gap-1 text-small text-background/50">
+            <p>
+              © {new Date().getFullYear()} {company.legalName || settings.businessName}. All rights reserved.
+            </p>
+            {registration.length > 0 ? <p>{registration.join(" · ")}</p> : null}
+          </div>
           <p className="text-small text-background/50">
             Vehicles sourced from Japan, South Korea &amp; China · Delivered across South Sudan
           </p>
