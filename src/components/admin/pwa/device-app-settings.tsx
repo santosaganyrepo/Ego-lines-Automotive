@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Bell, BellOff, CheckCircle2, Download, Loader2, MonitorSmartphone, Send, Trash2 } from "lucide-react"
+import { AlertTriangle, Bell, BellOff, CheckCircle2, Download, Loader2, MonitorSmartphone, Send, Trash2 } from "lucide-react"
 import { useRouter } from "next/navigation"
 
 import { ConfirmDialog } from "@/components/admin/confirm-dialog"
@@ -30,15 +30,26 @@ export function DeviceAppSettings({
   publicKey,
   scope,
   devices,
+  channelEnabled,
+  quoteAlertsEnabled,
 }: {
   publicKey: string | null
   scope: string
   devices: PushDevice[]
+  /** Settings → Notification channels → Push notifications. */
+  channelEnabled: boolean
+  /** Settings → Admin notifications → New quote received. */
+  quoteAlertsEnabled: boolean
 }) {
   return (
     <>
       <InstallPanel />
-      <PushPanel publicKey={publicKey} scope={scope} />
+      <PushPanel
+        publicKey={publicKey}
+        scope={scope}
+        channelEnabled={channelEnabled}
+        quoteAlertsEnabled={quoteAlertsEnabled}
+      />
       {devices.length > 0 ? <DeviceList devices={devices} /> : null}
     </>
   )
@@ -104,8 +115,38 @@ function InstallPanel() {
 
 /* ── Push on this device ──────────────────────────────────────────── */
 
-function PushPanel({ publicKey, scope }: { publicKey: string | null; scope: string }) {
+function PushPanel({
+  publicKey,
+  scope,
+  channelEnabled,
+  quoteAlertsEnabled,
+}: {
+  publicKey: string | null
+  scope: string
+  channelEnabled: boolean
+  quoteAlertsEnabled: boolean
+}) {
   const push = usePushNotifications({ publicKey, scope })
+
+  /**
+   * Why "Send a test" can work while nothing real ever arrives.
+   *
+   * A test is sent straight to this device and deliberately ignores the
+   * business switches, so it proves the keys, the subscription and the
+   * device. Business alerts do not: a new quote request is only pushed when
+   * BOTH "Push notifications" and "New quote received" are on under
+   * Settings → Notifications (see pushNewQuoteRequest in
+   * src/lib/push/admin-alerts.ts). With either off, everything on this panel
+   * says "on" and no notification is ever sent — which is invisible unless
+   * the panel says so. Security alerts about this account are unaffected;
+   * they always reach the administrator's own devices.
+   */
+  const silenced =
+    push.state === "on" && (!channelEnabled || !quoteAlertsEnabled)
+      ? !channelEnabled
+        ? "Push notifications are switched off for the business, above, so only security alerts about your own account will reach this device."
+        : "“New quote received” is switched off under Admin notifications, above, so new quote requests will not be sent to any device."
+      : null
 
   return (
     <SettingsPanel
@@ -124,6 +165,12 @@ function PushPanel({ publicKey, scope }: { publicKey: string | null; scope: stri
             <StatusLine icon={Bell} tone="success">
               Notifications are on for this device.
             </StatusLine>
+            {silenced ? (
+              <p className="flex items-start gap-2 rounded-lg border border-warning/35 bg-warning/5 px-4 py-3 text-small text-foreground">
+                <AlertTriangle aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-warning" />
+                {silenced}
+              </p>
+            ) : null}
             <div className="flex flex-wrap gap-2">
               <Button type="button" variant="outline" onClick={() => void push.sendTest()} disabled={push.busy}>
                 <Send aria-hidden="true" className="size-4" />

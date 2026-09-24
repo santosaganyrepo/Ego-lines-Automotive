@@ -12,6 +12,20 @@ import { buildGeneralWhatsAppMessage, buildWhatsAppUrl } from "@/lib/utils/whats
 import { SocialIcon } from "@/components/shared/social-icon"
 
 /**
+ * Phone and email in the contact list.
+ *
+ * The tap target is grown with padding and pulled back out with an equal
+ * negative margin, rather than with `min-h-11`. `min-h-11` made the link box
+ * 44px tall on every touch device and centred the text inside it, which left
+ * the gold icon beside it sitting several pixels above the words it labels —
+ * the footer misalignment. Padding plus an equal negative margin is the same
+ * 44px of reachable area with the line box unchanged, so the icon and the
+ * text stay on the same line.
+ */
+const CONTACT_LINK =
+  "inline-flex items-center transition-colors duration-fast hover:text-gold-ink pointer-coarse:-my-3 pointer-coarse:py-3"
+
+/**
  * The footer, from Settings → Business information.
  *
  * Every contact line is optional: an empty value in Settings renders no row
@@ -57,7 +71,7 @@ export async function SiteFooter() {
           key: "phone",
           icon: PhoneIcon,
           content: contact.callUsEnabled ? (
-            <a href={toTelHref(contact.phone)} className="tabular inline-flex items-center transition-colors hover:text-gold-ink pointer-coarse:min-h-11">
+            <a href={toTelHref(contact.phone)} className={cn(CONTACT_LINK, "tabular")}>
               {contact.phone}
             </a>
           ) : (
@@ -70,7 +84,7 @@ export async function SiteFooter() {
           key: "email",
           icon: MailIcon,
           content: (
-            <a href={`mailto:${contact.email}`} className="inline-flex items-center break-all transition-colors hover:text-gold-ink pointer-coarse:min-h-11">
+            <a href={`mailto:${contact.email}`} className={cn(CONTACT_LINK, "break-all")}>
               {contact.email}
             </a>
           ),
@@ -101,9 +115,19 @@ export async function SiteFooter() {
             {contactItems.length > 0 ? (
               <ul className="mt-8 space-y-3.5 text-small text-background/80">
                 {contactItems.map(({ key, icon: Icon, content }) => (
-                  <li key={key} className="flex items-start gap-3">
-                    <Icon className="mt-0.5 size-4 shrink-0 text-gold-ink" aria-hidden="true" />
-                    <span>{content}</span>
+                  // A two-column grid rather than a flex row: the icon column
+                  // is a fixed 1rem and the text column takes the rest, so a
+                  // wrapping address or a two-line opening-hours block cannot
+                  // shift the icon beside it.
+                  <li key={key} className="grid grid-cols-[1rem_minmax(0,1fr)] items-start gap-x-3">
+                    {/* Centred on the FIRST LINE of the text, not on the whole
+                        row: the box is exactly one line tall (1.55em — the
+                        --type-small-line-height this list is set in) and the
+                        icon centres inside it. */}
+                    <span className="flex h-[1.55em] items-center justify-center">
+                      <Icon className="size-4 text-gold-ink" aria-hidden="true" />
+                    </span>
+                    <span className="min-w-0">{content}</span>
                   </li>
                 ))}
               </ul>

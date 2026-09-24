@@ -18,6 +18,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { useQuotePricing } from "@/lib/quotes/quote-pricing-context"
+import { quoteConvertBlockReason } from "@/lib/quotes/quote-action-readiness"
 import { formatCurrency } from "@/lib/utils/format-currency"
 import { ADMIN_BASE_PATH } from "@/lib/constants/admin-routes"
 
@@ -28,6 +29,8 @@ interface QuoteConvertDialogProps {
   total: number
   disabled?: boolean
   disabledReason?: string
+  /** The trigger's emphasis — see quote-header-actions.tsx. */
+  variant?: "default" | "outline"
 }
 
 /**
@@ -38,7 +41,13 @@ interface QuoteConvertDialogProps {
  * reserves real inventory (a vehicle, or stock a customer elsewhere might
  * also want), so it should never happen from a stray click.
  */
-export function QuoteConvertDialog({ quoteId, total, disabled = false, disabledReason }: QuoteConvertDialogProps) {
+export function QuoteConvertDialog({
+  quoteId,
+  total,
+  disabled = false,
+  disabledReason,
+  variant = "default",
+}: QuoteConvertDialogProps) {
   const router = useRouter()
   const { isDirty } = useQuotePricing()
   const [open, setOpen] = useState(false)
@@ -65,78 +74,74 @@ export function QuoteConvertDialog({ quoteId, total, disabled = false, disabledR
    * error. Blocking it here, before the confirmation dialog even opens, is
    * what stops that mismatch from ever reaching the server.
    */
-  const effectiveDisabled = disabled || isDirty
-  const effectiveReason = disabled
-    ? disabledReason
-    : isDirty
-      ? "You have unsaved changes — save the details before converting this quote."
-      : undefined
+  const effectiveReason =
+    quoteConvertBlockReason({
+      statusReason: disabled ? (disabledReason ?? "This quote cannot be converted yet.") : null,
+      isDirty,
+    }) ?? undefined
+  const effectiveDisabled = Boolean(effectiveReason)
 
   return (
-    <div className="flex flex-col items-end gap-1">
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTrigger
-          render={
-            <Button
-              type="button"
-              disabled={effectiveDisabled}
-              title={effectiveDisabled ? effectiveReason : undefined}
-            />
-          }
-        >
-          Convert to order
-        </DialogTrigger>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger
+        render={
+          <Button
+            type="button"
+            variant={variant}
+            disabled={effectiveDisabled}
+            title={effectiveDisabled ? effectiveReason : undefined}
+            className="w-full sm:w-auto"
+          />
+        }
+      >
+        Convert to order
+      </DialogTrigger>
 
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Convert to order</DialogTitle>
-            <DialogDescription>{formatCurrency(total)} · permanent</DialogDescription>
-          </DialogHeader>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Convert to order</DialogTitle>
+          <DialogDescription>{formatCurrency(total)} · permanent</DialogDescription>
+        </DialogHeader>
 
-          {state.status === "error" && state.message ? (
-            <Alert variant="destructive">
-              <AlertCircle aria-hidden="true" />
-              <AlertDescription>{state.message}</AlertDescription>
-            </Alert>
-          ) : null}
+        {state.status === "error" && state.message ? (
+          <Alert variant="destructive">
+            <AlertCircle aria-hidden="true" />
+            <AlertDescription>{state.message}</AlertDescription>
+          </Alert>
+        ) : null}
 
-          {state.status === "success" ? (
-            <Alert>
-              <CheckCircle2 aria-hidden="true" className="text-success" />
-              <AlertDescription>
-                Order {state.orderNumber} created. Opening it now…
-              </AlertDescription>
-            </Alert>
-          ) : (
-            <form action={formAction} className="flex flex-col gap-4">
-              <input type="hidden" name="quoteId" value={quoteId} />
-              <input type="hidden" name="confirmAccepted" value={confirmed ? "true" : ""} />
+        {state.status === "success" ? (
+          <Alert>
+            <CheckCircle2 aria-hidden="true" className="text-success" />
+            <AlertDescription>
+              Order {state.orderNumber} created. Opening it now…
+            </AlertDescription>
+          </Alert>
+        ) : (
+          <form action={formAction} className="flex flex-col gap-4">
+            <input type="hidden" name="quoteId" value={quoteId} />
+            <input type="hidden" name="confirmAccepted" value={confirmed ? "true" : ""} />
 
-              <label htmlFor={confirmId} className="flex items-start gap-3 text-small">
-                <input
-                  id={confirmId}
-                  type="checkbox"
-                  checked={confirmed}
-                  onChange={(event) => setConfirmed(event.target.checked)}
-                  className="mt-0.5 size-4 rounded border-input"
-                />
-                <span>The customer has accepted this quotation and payment can proceed.</span>
-              </label>
+            <label htmlFor={confirmId} className="flex items-start gap-3 text-small">
+              <input
+                id={confirmId}
+                type="checkbox"
+                checked={confirmed}
+                onChange={(event) => setConfirmed(event.target.checked)}
+                className="mt-0.5 size-4 rounded border-input"
+              />
+              <span>The customer has accepted this quotation and payment can proceed.</span>
+            </label>
 
-              <DialogFooter>
-                <Button type="submit" disabled={isPending || !confirmed}>
-                  {isPending ? <Loader2 aria-hidden="true" className="animate-spin" /> : null}
-                  Create order
-                </Button>
-              </DialogFooter>
-            </form>
-          )}
-        </DialogContent>
-      </Dialog>
-
-      {effectiveDisabled && effectiveReason ? (
-        <p className="max-w-60 text-right text-xs text-balance text-muted-foreground">{effectiveReason}</p>
-      ) : null}
-    </div>
+            <DialogFooter>
+              <Button type="submit" disabled={isPending || !confirmed}>
+                {isPending ? <Loader2 aria-hidden="true" className="animate-spin" /> : null}
+                Create order
+              </Button>
+            </DialogFooter>
+          </form>
+        )}
+      </DialogContent>
+    </Dialog>
   )
 }

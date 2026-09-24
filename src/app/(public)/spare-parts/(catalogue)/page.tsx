@@ -13,9 +13,9 @@ import { CatalogueHero } from "@/components/layout/catalogue-hero"
 import { SparePartsBar } from "@/components/spare-parts/spare-parts-bar"
 import { SparePartsCatalogueBar } from "@/components/spare-parts/spare-parts-catalogue-bar"
 import { PriceEstimateNote } from "@/components/spare-parts/spare-part-price"
-import { siteConfig } from "@/config/site"
 import { getPublishedSparePartStock } from "@/lib/queries/public-spare-part-stock.queries"
 import { getPublicSiteSettings } from "@/lib/queries/settings.queries"
+import { buildPageMetadata } from "@/lib/seo/page-metadata"
 import {
   listPublicSparePartCategories,
   listPublishedSpareParts,
@@ -122,17 +122,12 @@ export async function generateMetadata({
     ? `${named.name} spare parts in South Sudan`
     : TITLE
 
-  return {
+  return buildPageMetadata({
+    settings: await getPublicSiteSettings(),
     title,
     description: DESCRIPTION,
-    alternates: { canonical: "/spare-parts" },
-    openGraph: {
-      title: `${title} | ${(await getPublicSiteSettings()).siteTitle}`,
-      description: DESCRIPTION,
-      url: `${siteConfig.url}/spare-parts`,
-      type: "website",
-    },
-  }
+    path: "/spare-parts",
+  })
 }
 
 export default async function SparePartsPage({

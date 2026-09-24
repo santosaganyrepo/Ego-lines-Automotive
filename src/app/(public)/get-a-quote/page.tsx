@@ -13,6 +13,7 @@ import { WhatsAppGlyph } from "@/components/shared/whatsapp-glyph"
 import { JourneyArt } from "@/components/tracking/journey-art"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { getPublicSiteSettings } from "@/lib/queries/settings.queries"
+import { buildPageMetadata } from "@/lib/seo/page-metadata"
 import { cn } from "@/lib/utils"
 import { buildGeneralWhatsAppMessage, buildWhatsAppUrl } from "@/lib/utils/whatsapp"
 
@@ -33,13 +34,14 @@ const HERO_ACCENT = "We'll find it."
 const HERO_TEXT_AT = 160 + wordsDuration(HERO_LEAD) + wordsDuration(HERO_ACCENT) + 80
 
 export async function generateMetadata(): Promise<Metadata> {
-  const { businessName } = await getPublicSiteSettings()
+  const settings = await getPublicSiteSettings()
 
-  return {
+  return buildPageMetadata({
+    settings,
     title: "Get a Quote",
-    description: `Tell ${businessName} the vehicle or spare parts you are looking for. We source from Japan, South Korea and China and send you a full quotation — no commitment.`,
-    alternates: { canonical: "/get-a-quote" },
-  }
+    description: `Tell ${settings.businessName} the vehicle or spare parts you are looking for. We source from Japan, South Korea and China and send you a full quotation — no commitment.`,
+    path: "/get-a-quote",
+  })
 }
 
 export default async function GetAQuotePage() {

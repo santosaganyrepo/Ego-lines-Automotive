@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server"
 import { ImageResponse } from "next/og"
-import sharp from "sharp"
+import sharp, { type OverlayOptions } from "sharp"
 
 import { getPublicSiteSettings } from "@/lib/queries/settings.queries"
 
@@ -32,6 +32,19 @@ type Variant = {
   /** Share of the edge the artwork may use: maskable icons keep to the safe zone. */
   inset: number
   badge?: boolean
+  /**
+   * Draw the icon as a disc: everything outside the circle is transparent.
+   *
+   * Only the favicon variants use it. A browser tab, a bookmark bar and a
+   * search result all show the icon small, unframed and against whatever
+   * colour the browser's chrome happens to be, and a hard-edged square reads
+   * as a screenshot of a logo rather than as a mark — which is what the
+   * dealership was comparing themselves unfavourably against. The app icons
+   * are deliberately left square: Android applies its own mask (that is what
+   * `maskable-512` is for) and iOS its own rounded rectangle, so pre-cutting
+   * a circle there would be cropped twice.
+   */
+  circle?: boolean
 }
 
 const VARIANTS: Record<string, Variant> = {
@@ -43,6 +56,21 @@ const VARIANTS: Record<string, Variant> = {
   "apple-touch-180.png": { size: 180, inset: 0.7 },
   // Android's status-bar badge: white on transparent, drawn from its alpha.
   "badge-96.png": { size: 96, inset: 0.8, badge: true },
+  // The site favicon, as a disc. Three sizes because browsers pick per
+  // context — 16/32 in a tab, 48 in a bookmark list, 96+ on a new-tab tile —
+  // and letting the browser choose beats making it downscale one.
+  "favicon-32.png": { size: 32, inset: 0.62, circle: true },
+  "favicon-48.png": { size: 48, inset: 0.62, circle: true },
+  "favicon-96.png": { size: 96, inset: 0.62, circle: true },
+}
+
+/** An opaque white disc the size of the icon, used as an alpha mask. */
+function circleMask(size: number): Buffer {
+  const radius = size / 2
+  return Buffer.from(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}">` +
+      `<circle cx="${radius}" cy="${radius}" r="${radius}" fill="#fff"/></svg>`
+  )
 }
 
 const MAX_SOURCE_BYTES = 6 * 1024 * 1024
@@ -100,19 +128,50 @@ async function composite(source: Buffer, variant: Variant): Promise<Buffer> {
   const opaque = data[3] === 255
   const background = opaque ? { r: data[0]!, g: data[1]!, b: data[2]!, alpha: 1 } : BACKGROUND
 
-  const share = opaque ? (variant.maskable ? 0.8 : 1) : variant.inset
+  // A disc has less usable area than the square it sits in: artwork that
+  // filled the square corner to corner would have its corners cut off, so an
+  // opaque upload is inset here as well rather than allowed to bleed.
+  const share = opaque ? (variant.circle ? 0.86 : variant.maskable ? 0.8 : 1) : variant.inset
   const inner = Math.round(variant.size * share)
+
+  /**
+   * Small favicons are drawn large and then reduced.
+   *
+   * Resizing a logo straight down to 32px is where a mark turns to mush: the
+   * detail lands between pixels. Compositing at 4× and reducing the finished
+   * icon in one Lanczos step keeps the edges clean, which is the other half
+   * of what the dealership meant by "optimise it to appear better".
+   */
+  const supersample = variant.circle && variant.size < 128 ? 4 : 1
+  const canvasSize = variant.size * supersample
+
   const artwork = await image
-    .resize(inner, inner, { fit: "contain", background: opaque ? background : { r: 0, g: 0, b: 0, alpha: 0 } })
+    .resize(inner * supersample, inner * supersample, {
+      fit: "contain",
+      background: opaque ? background : { r: 0, g: 0, b: 0, alpha: 0 },
+    })
     .png()
     .toBuffer()
 
-  return sharp({
-    create: { width: variant.size, height: variant.size, channels: 4, background },
-  })
-    .composite([{ input: artwork, gravity: "center" }])
-    .png()
-    .toBuffer()
+  const layers: OverlayOptions[] = [{ input: artwork, gravity: "center" }]
+  if (variant.circle) {
+    // `dest-in` keeps the composed pixels only where the mask is opaque,
+    // which turns the square into a disc with genuinely transparent corners.
+    layers.push({ input: circleMask(canvasSize), blend: "dest-in" })
+  }
+
+  const composed = sharp({
+    create: { width: canvasSize, height: canvasSize, channels: 4, background },
+  }).composite(layers)
+
+  return supersample > 1
+    ? composed
+        .png()
+        .toBuffer()
+        .then((buffer) =>
+          sharp(buffer).resize(variant.size, variant.size, { kernel: "lanczos3" }).png().toBuffer()
+        )
+    : composed.png().toBuffer()
 }
 
 function monogram(name: string, variant: Variant): ImageResponse {
@@ -131,6 +190,9 @@ function monogram(name: string, variant: Variant): ImageResponse {
           fontSize: Math.round(variant.size * variant.inset * (text.length > 1 ? 0.5 : 0.66)),
           fontWeight: 700,
           letterSpacing: "0.04em",
+          // The fallback favicon is a disc for the same reason the rendered
+          // one is; every other variant stays square.
+          borderRadius: variant.circle ? "50%" : 0,
         }}
       >
         {text}

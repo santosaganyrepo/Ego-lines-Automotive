@@ -7,10 +7,9 @@ import { ArrowRight, PackageCheck } from "lucide-react"
 import { AdminMetaDivider, AdminPageHeader } from "@/components/admin/admin-page-header"
 import { OrderFinanceSummaryCard } from "@/components/admin/order-finance-summary"
 import { QuoteActivityTimeline } from "@/components/admin/quote-activity-timeline"
-import { QuoteConvertDialog } from "@/components/admin/quote-convert-dialog"
 import { QuoteCustomerCard } from "@/components/admin/quote-customer-card"
 import { QuoteDetailsForm } from "@/components/admin/quote-details-form"
-import { QuoteDispatchDialog } from "@/components/admin/quote-dispatch-dialog"
+import { QuoteHeaderActions } from "@/components/admin/quote-header-actions"
 import { QuoteIssuesPanel } from "@/components/admin/quote-issues-panel"
 import { QuoteLinkPanel } from "@/components/admin/quote-link-panel"
 import { QuoteStatusBadge } from "@/components/admin/quote-status-badge"
@@ -87,27 +86,22 @@ export default async function AdminQuoteDetailPage(props: PageProps<"/Ricky@2000
             // converted, and the banner below is the way forward from it — two
             // dead buttons beside it would only need explaining.
             quote.order && !sendable ? null : (
-            <>
-              <QuoteDispatchDialog
+              <QuoteHeaderActions
                 quoteId={quote.id}
                 customerName={quote.contactName ?? quote.customerName}
                 contactEmail={quote.contactEmail}
                 contactWhatsapp={quote.contactWhatsapp}
                 alreadySent={Boolean(quote.sentAt)}
-                disabled={!sendable}
-                disabledReason={sendable ? undefined : "This quote is not in a state that can be sent."}
-              />
-              <QuoteConvertDialog
-                quoteId={quote.id}
                 total={quote.totals.total}
-                disabled={!convertible}
-                disabledReason={
-                  quote.order
-                    ? "This quote has already been converted."
-                    : "Send and accept this quote before converting it."
+                sendStatusReason={sendable ? null : "This quote is not in a state that can be sent."}
+                convertStatusReason={
+                  convertible
+                    ? null
+                    : quote.order
+                      ? "This quote has already been converted."
+                      : "Send and accept this quote before converting it."
                 }
               />
-            </>
             )
           }
         />

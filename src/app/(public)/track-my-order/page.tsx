@@ -20,6 +20,7 @@ import {
   consumeRateLimit,
 } from "@/lib/auth/rate-limit"
 import { getPublicSiteSettings } from "@/lib/queries/settings.queries"
+import { buildPageMetadata } from "@/lib/seo/page-metadata"
 import { lookupPublicTracking, type PublicTrackingResult } from "@/lib/queries/tracking.queries"
 import { buildCustomerJourney } from "@/lib/tracking/customer-journey"
 import { parseTrackingLookup } from "@/lib/tracking/tracking-number"
@@ -65,15 +66,16 @@ function readNumber(value: string | string[] | undefined): string {
 
 export async function generateMetadata(props: PageProps<"/track-my-order">): Promise<Metadata> {
   const { number } = await props.searchParams
-  const { businessName } = await getPublicSiteSettings()
+  const settings = await getPublicSiteSettings()
 
-  return {
+  return buildPageMetadata({
+    settings,
     title: "Track My Order",
-    description: `See every stage of your ${businessName} order — from securing your vehicle or parts, through shipping and clearing, to delivery in South Sudan.`,
-    alternates: { canonical: "/track-my-order" },
+    description: `See every stage of your ${settings.businessName} order — from securing your vehicle or parts, through shipping and clearing, to delivery in South Sudan.`,
+    path: "/track-my-order",
     // A result is one customer's shipment. Only the explanation page is indexed.
-    ...(readNumber(number) ? { robots: { index: false, follow: false } } : {}),
-  }
+    robots: readNumber(number) ? { index: false, follow: false } : undefined,
+  })
 }
 
 async function resolveView(raw: string): Promise<ViewState> {

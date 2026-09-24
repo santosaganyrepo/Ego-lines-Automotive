@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 import { PHASE_PRODUCTION_SERVER } from "next/constants";
 import { withSentryConfig } from "@sentry/nextjs/config";
+import { HTML_LIMITED_BOT_UA_RE } from "next/dist/shared/lib/router/utils/html-bots";
 
 /**
  * Baseline security headers (SECURITY.MD §25, §26).
@@ -73,7 +74,8 @@ const framingHeaders = [
  *   - img-src: next/image serves photographs from this origin; `data:` is the
  *     two-factor QR code, `blob:` the dashboard's upload previews, and the
  *     Supabase origin is the storage the photographs come from.
- *   - frame-src 'self': the dashboard's own quotation PDF preview.
+ *   - frame-src 'self': nothing frames another origin; kept explicit so a
+ *     future embed has to be added here deliberately.
  *   - object-src 'none', base-uri 'self', form-action 'self': no plugins, no
  *     <base> hijacking, and forms may only post to this site.
  *
@@ -305,6 +307,73 @@ function supabaseImagePatterns(): NonNullable<
 }
 
 /**
+ * Crawlers that are sent every metadata tag inside <head>.
+ *
+ * Next.js streams `generateMetadata` output: the page starts rendering at
+ * once and the tags arrive later, appended to <body>. Its default list of
+ * "HTML-limited" bots — the ones that instead wait for a complete <head> —
+ * covers Bingbot, the link-preview fetchers and Google's *auxiliary*
+ * crawlers, but not Googlebot itself, nor any AI crawler. Googlebot does
+ * render JavaScript, but its first pass reads the raw HTML, and the title,
+ * canonical and robots tags are exactly what that pass is for; the AI
+ * crawlers never render at all. So both are added to the default list here.
+ * Visitors are unaffected — only these user agents wait for the metadata.
+ */
+const SEO_CRAWLER_UA_RE = new RegExp(
+  [
+    HTML_LIMITED_BOT_UA_RE.source,
+    "Googlebot",
+    "GPTBot|OAI-SearchBot|ChatGPT-User",
+    "ClaudeBot|Claude-User|Claude-SearchBot|anthropic-ai",
+    "PerplexityBot|Perplexity-User",
+    "Amazonbot|CCBot|Meta-ExternalAgent|DuckAssistBot|MistralAI-User|cohere-ai",
+  ].join("|"),
+  "i"
+);
+
+/**
+ * `X-Robots-Tag: noindex` for addresses that must never be indexed.
+ *
+ *   - A Vercel preview deployment (VERCEL_ENV is fixed at build time):
+ *     everything it serves is a copy of the site on another address.
+ *   - Any `*.vercel.app` host of the production deployment, once the site
+ *     has its own domain: Vercel serves production on both, and the
+ *     `.vercel.app` copy is a duplicate of the real one. Only applied when
+ *     NEXT_PUBLIC_SITE_URL names a domain that is not itself on vercel.app —
+ *     otherwise this would de-index the only address the site has.
+ *
+ * The header complements robots.txt (which does the same for those hosts)
+ * and every page's canonical tag, which already points at the real domain.
+ */
+type HeaderRule = Awaited<ReturnType<NonNullable<NextConfig["headers"]>>>[number];
+
+function duplicateHostNoindexRules(): HeaderRule[] {
+  const noindex = [{ key: "X-Robots-Tag", value: "noindex, nofollow" }];
+  const environment = process.env.VERCEL_ENV;
+
+  if (environment === "preview" || environment === "development") {
+    return [{ source: "/:path*", headers: noindex }];
+  }
+
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+  let siteHost = "";
+  try {
+    siteHost = siteUrl ? new URL(siteUrl).hostname : "";
+  } catch {
+    siteHost = "";
+  }
+  if (!siteHost || siteHost.endsWith(".vercel.app")) return [];
+
+  return [
+    {
+      source: "/:path*",
+      has: [{ type: "host", value: ".+\\.vercel\\.app" }],
+      headers: noindex,
+    },
+  ];
+}
+
+/**
  * Exported as a function of the phase, not as a plain object.
  *
  * The phase is the only reliable way to tell `next start` from `next build`
@@ -321,6 +390,8 @@ function buildNextConfig(phase: string): NextConfig {
     // No `X-Powered-By: Next.js`: it tells a scanner which framework (and so
     // which advisories) to try, and tells a customer nothing.
     poweredByHeader: false,
+
+    htmlLimitedBots: SEO_CRAWLER_UA_RE,
 
     experimental: {
       serverActions: {
@@ -363,30 +434,26 @@ function buildNextConfig(phase: string): NextConfig {
           source: "/:path*",
           headers: [...baseSecurityHeaders, ...framingHeaders],
         },
+        ...duplicateHostNoindexRules(),
         {
           /**
-           * The one deliberate exception: the admin "Generate PDF" action
-           * (quote-pdf-dialog.tsx) embeds this exact route in an `<iframe>`
-           * on the quote detail page so an operator can review the document
-           * without leaving it — a same-origin embed, by our own page, of
-           * our own admin-authenticated route.
+           * The admin quotation PDF, for "Open in a new tab" and "Download".
            *
-           * `frame-ancestors 'none'`/`DENY` above refuses that too: neither
-           * directive carries a same-origin exception the way `SAMEORIGIN`/
-           * `'self'` do, so without this override the iframe silently
-           * renders nothing. Scoped to this one route rather than loosened
-           * globally — matched *after* the blanket rule above, so Next.js's
-           * header merge lets these two keys override it here while every
-           * other route keeps the harder `DENY`/`'none'`, including the
-           * unrelated `/quotation/:token` customer PDF link, which is never
-           * framed and stays fully protected.
+           * It keeps the blanket `DENY`: nothing embeds this route any more.
+           * The dashboard's "Generate PDF" dialog used to show it in an
+           * `<iframe>`, which is why this rule once relaxed framing to
+           * `SAMEORIGIN`; it now draws the pages itself
+           * (components/admin/pdf-preview.tsx), because no phone browser
+           * renders a PDF in a frame.
+           *
+           * What it does still override is the *rest* of the policy, for the
+           * same reason as the customer link below: a PDF runs no script this
+           * policy could restrict, and Chrome's built-in viewer can refuse to
+           * display a document whose own response carries `object-src 'none'`
+           * — an operator would get a blank tab instead of the quotation.
            */
           source: "/api/quotes/:id/preview",
-          headers: [
-            { key: "X-Frame-Options", value: "SAMEORIGIN" },
-            // Framing only, like the customer PDF link below: see there.
-            { key: "Content-Security-Policy", value: "frame-ancestors 'self'" },
-          ],
+          headers: [{ key: "Content-Security-Policy", value: "frame-ancestors 'none'" }],
         },
         {
           /**
@@ -444,7 +511,7 @@ function buildNextConfig(phase: string): NextConfig {
          */
         {
           source: "/favicon.ico",
-          destination: "/app-icon/icon-192.png",
+          destination: "/app-icon/favicon-48.png",
         },
       ];
     },

@@ -35,6 +35,8 @@ import {
 } from "@/lib/queries/public-vehicle.queries"
 import { vehicleSubjectLabel } from "@/lib/quotes/quote-subjects"
 import { formatCurrency, formatMileage } from "@/lib/utils/format-currency"
+import { buildPageMetadata } from "@/lib/seo/page-metadata"
+import { sellerJsonLd } from "@/lib/seo/structured-data"
 import { serializeJsonLd } from "@/lib/utils/json-ld"
 import { buildVehicleWhatsAppMessage, buildWhatsAppUrl } from "@/lib/utils/whatsapp"
 
@@ -168,18 +170,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const cover = vehicle.photos[0]
 
-  return {
+  return buildPageMetadata({
+    settings: await getPublicSiteSettings(),
     title: name,
     description,
-    alternates: { canonical: `/cars/${vehicle.slug}` },
-    openGraph: {
-      title: `${name} | ${(await getPublicSiteSettings()).siteTitle}`,
-      description,
-      url: `${siteConfig.url}/cars/${vehicle.slug}`,
-      type: "website",
-      images: cover ? [{ url: cover.url, alt: name }] : undefined,
-    },
-  }
+    path: `/cars/${vehicle.slug}`,
+    images: cover ? [{ url: cover.url, alt: name }] : undefined,
+  })
 }
 
 export default async function VehiclePage({ params }: PageProps) {
@@ -554,14 +551,22 @@ function VehicleStructuredData({
     ...optional("driveWheelConfiguration", vehicle.driveType),
     ...optional("color", vehicle.exteriorColor),
     image: vehicle.photos.map((photo) => photo.url),
-    offers: {
-      "@type": "Offer",
-      priceCurrency: "USD",
-      ...optional("price", vehicle.price),
-      ...optional("availability", vehicle.showAvailability ? "https://schema.org/InStock" : null),
-      url: `${siteConfig.url}/cars/${vehicle.slug}`,
-      seller: { "@type": "AutoDealer", name: sellerName },
-    },
+    url: `${siteConfig.url}/cars/${vehicle.slug}`,
+    // No price, no Offer: an Offer without one is an error to Google's
+    // product validator, and a price hidden on the page must not be published
+    // here either. Same rule as the spare-part page.
+    ...(vehicle.price === null
+      ? {}
+      : {
+          offers: {
+            "@type": "Offer",
+            priceCurrency: "USD",
+            price: vehicle.price,
+            ...optional("availability", vehicle.showAvailability ? "https://schema.org/InStock" : null),
+            url: `${siteConfig.url}/cars/${vehicle.slug}`,
+            seller: sellerJsonLd(sellerName),
+          },
+        }),
   }
 
   return (

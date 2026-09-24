@@ -52,7 +52,8 @@ export default async function AdminLoginPage(props: PageProps<"/Ricky@2000/login
   // reasonably conclude it had not worked.
   const passwordUpdated = searchParams.notice === "password_updated"
 
-  // Why an administrator is back here without having signed out themselves.
+  // Why an administrator is back here without having signed out themselves —
+  // and, for the last one, why a confirmation link did not finish the job.
   const sessionNotice =
     searchParams.notice === "session_expired"
       ? "Your session reached its time limit. Sign in again to continue."
@@ -60,7 +61,12 @@ export default async function AdminLoginPage(props: PageProps<"/Ricky@2000/login
         ? "This session was signed out from another device. Sign in again to continue."
         : searchParams.notice === "signed_out_everywhere"
           ? "You have been signed out of every session."
-          : null
+          : searchParams.notice === "email_change_pending"
+            ? // Supabase's "secure email change" confirms from both the old
+              // and the new address. Nothing has failed; there is one more
+              // link to open, and saying so beats a bare "link not valid".
+              "Confirmation accepted. Open the link in the other inbox as well to finish changing your email address."
+            : null
 
   return (
     <AdminAuthShell

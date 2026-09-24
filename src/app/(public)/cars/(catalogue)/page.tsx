@@ -10,8 +10,8 @@ import { CatalogueHero } from "@/components/layout/catalogue-hero"
 import { RecentlyViewedVehicles } from "@/components/vehicles/recently-viewed-vehicles"
 import { VehicleSearch } from "@/components/vehicles/vehicle-search"
 import { VehicleGrid } from "@/components/vehicles/vehicle-grid"
-import { siteConfig } from "@/config/site"
 import { getPublicSiteSettings } from "@/lib/queries/settings.queries"
+import { buildPageMetadata } from "@/lib/seo/page-metadata"
 import {
   listPublishedVehicles,
   listVehicleBodyTypes,
@@ -95,17 +95,12 @@ export async function generateMetadata({
 
   const title = described ? `${described} for sale in South Sudan` : TITLE
 
-  return {
+  return buildPageMetadata({
+    settings: await getPublicSiteSettings(),
     title,
     description: DESCRIPTION,
-    alternates: { canonical: "/cars" },
-    openGraph: {
-      title: `${title} | ${(await getPublicSiteSettings()).siteTitle}`,
-      description: DESCRIPTION,
-      url: `${siteConfig.url}/cars`,
-      type: "website",
-    },
-  }
+    path: "/cars",
+  })
 }
 
 export default async function CarsPage({

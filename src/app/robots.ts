@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 
 import { siteConfig } from "@/config/site";
+import { isNonProductionDeployment } from "@/lib/seo/deployment";
 import { getPublicSiteSettings } from "@/lib/queries/settings.queries";
 
 /**
@@ -16,13 +17,31 @@ import { getPublicSiteSettings } from "@/lib/queries/settings.queries";
  * publish it to every scanner. Its pages carry `noindex`, and require
  * sign-in regardless.
  *
- * The named AI crawlers get the same rules as everyone else; they are listed
- * so the permission is explicit (brief: the site should be readable by AI
- * assistants — see also /llms.txt).
+ * The app icons under /app-icon/ are deliberately NOT disallowed: the site's
+ * favicon is served from there, and Google only shows a favicon beside a
+ * search result if its crawler is allowed to fetch the file.
+ *
+ * The named search and AI crawlers get the same rules as everyone else; they
+ * are listed so the permission is explicit (brief: the site should be
+ * readable by AI assistants — see also /llms.txt). A crawler obeys only the
+ * most specific group that names it, so each group carries the full list.
  *
  * Settings → SEO & social can switch indexing off, which disallows everything.
+ * So does any deployment that is not production (a Vercel preview): those
+ * serve the same pages on another address, and indexing them would compete
+ * with the real site.
  */
-const DISALLOW = ["/api/", "/auth/", "/quotation/", "/app-icon/"];
+const DISALLOW = ["/api/", "/auth/", "/quotation/", "/monitoring"];
+
+const SEARCH_CRAWLERS = [
+  "Googlebot",
+  "Googlebot-Image",
+  "Bingbot",
+  "DuckDuckBot",
+  "Slurp",
+  "YandexBot",
+  "Applebot",
+];
 
 const AI_CRAWLERS = [
   "GPTBot",
@@ -46,13 +65,14 @@ const AI_CRAWLERS = [
 export default async function robots(): Promise<MetadataRoute.Robots> {
   const { seo } = await getPublicSiteSettings();
 
-  if (!seo.indexingEnabled) {
+  if (!seo.indexingEnabled || isNonProductionDeployment()) {
     return { rules: { userAgent: "*", disallow: "/" } };
   }
 
   return {
     rules: [
       { userAgent: "*", allow: "/", disallow: DISALLOW },
+      { userAgent: SEARCH_CRAWLERS, allow: "/", disallow: DISALLOW },
       { userAgent: AI_CRAWLERS, allow: "/", disallow: DISALLOW },
     ],
     // Advertised only while the sitemap is published.

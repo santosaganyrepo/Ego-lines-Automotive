@@ -27,8 +27,16 @@ export default async function NotificationSettingsPage() {
         canEdit={can(admin.role, "settings:write")}
       />
       {/* This device and this administrator: not business settings, so not
-          part of the form above and open to every administrator. */}
-      <DeviceAppSettings publicKey={vapidPublicKey()} scope={ADMIN_BASE_PATH} devices={devices} />
+          part of the form above and open to every administrator. The two
+          business switches are passed in so the panel can say when a device
+          is registered but nothing will ever be sent to it. */}
+      <DeviceAppSettings
+        publicKey={vapidPublicKey()}
+        scope={ADMIN_BASE_PATH}
+        devices={devices}
+        channelEnabled={settings.notifications.pushNotificationsEnabled}
+        quoteAlertsEnabled={settings.notifications.notifyAdminsOfNewQuotes}
+      />
     </>
   )
 }

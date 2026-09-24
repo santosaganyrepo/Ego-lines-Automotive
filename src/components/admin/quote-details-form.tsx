@@ -231,11 +231,13 @@ export function QuoteDetailsForm({
             <div
               className={cn(
                 "hidden items-center gap-2 border-b border-border bg-sunken/70 px-3 py-2 sm:grid",
-                "sm:grid-cols-[1fr_7.5rem_3.25rem_6rem_6rem_1.75rem]"
+                "sm:grid-cols-[1fr_8.75rem_3.25rem_6rem_6rem_1.75rem]"
               )}
             >
               <span className="text-xs font-medium text-muted-foreground">Item</span>
-              <span className="text-xs font-medium text-muted-foreground">Reference</span>
+              <span className="text-xs font-medium text-muted-foreground">
+                Reference <span className="font-normal text-muted-foreground/70">(optional)</span>
+              </span>
               <span className="text-right text-xs font-medium text-muted-foreground">Qty</span>
               <span className="text-right text-xs font-medium text-muted-foreground">Unit price</span>
               <span className="text-right text-xs font-medium text-muted-foreground">Total</span>
@@ -253,11 +255,12 @@ export function QuoteDetailsForm({
                     key={line.key}
                     className={cn(
                       "grid grid-cols-2 gap-x-2 gap-y-2 px-3 py-3",
-                      "sm:grid-cols-[1fr_7.5rem_3.25rem_6rem_6rem_1.75rem] sm:items-center sm:gap-2"
+                      "sm:grid-cols-[1fr_8.75rem_3.25rem_6rem_6rem_1.75rem] sm:items-center sm:gap-2"
                     )}
                   >
                     <FieldSlot label="Item" className="col-span-2 sm:col-span-1">
                       <Input
+                        aria-label="Item description"
                         value={line.description}
                         onChange={(event) => updateLine(line.key, { description: event.target.value })}
                         placeholder="2021 Toyota Harrier, 2.0L"
@@ -265,11 +268,15 @@ export function QuoteDetailsForm({
                       />
                     </FieldSlot>
 
-                    <FieldSlot label="Reference">
+                    {/* Optional: a line only carries a listing reference when
+                        it is one of ours. Accessories and sourced-to-order
+                        items legitimately have none (quote.schema.ts). */}
+                    <FieldSlot label="Reference (optional)">
                       <Input
+                        aria-label="Listing reference (optional)"
                         value={line.reference}
                         onChange={(event) => updateLine(line.key, { reference: event.target.value })}
-                        placeholder="CLM-V-2026-…"
+                        placeholder="Optional"
                         className={FIELD}
                       />
                     </FieldSlot>
@@ -278,6 +285,7 @@ export function QuoteDetailsForm({
                       <Input
                         type="number"
                         min={1}
+                        aria-label="Quantity"
                         value={line.quantity}
                         onChange={(event) => updateLine(line.key, { quantity: event.target.value })}
                         className={cn(FIELD, "text-right sm:text-left")}
@@ -287,6 +295,7 @@ export function QuoteDetailsForm({
                     <FieldSlot label="Unit price">
                       <Input
                         inputMode="decimal"
+                        aria-label="Unit price"
                         value={line.unitPrice}
                         onChange={(event) => updateLine(line.key, { unitPrice: event.target.value })}
                         placeholder="0.00"

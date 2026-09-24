@@ -51,6 +51,16 @@ import { SUPABASE_COOKIE_OPTIONS } from "@/lib/supabase/cookie-options"
 const NO_STORE = "no-store, no-cache, must-revalidate, private"
 
 /**
+ * Keeps the dashboard and the auth endpoints out of search indexes.
+ *
+ * The dashboard pages already carry a `noindex` meta tag, but a redirect, a
+ * route handler or an error response has no <head> to carry one; the header
+ * covers every response on these paths. Unlike a robots.txt entry, it does
+ * not publish the dashboard's address to anyone who reads robots.txt.
+ */
+const NOINDEX = "noindex, nofollow"
+
+/**
  * Admin routes reachable without a session. Everything else under the
  * dashboard's base path is gated.
  *
@@ -120,6 +130,7 @@ export async function updateSession(request: NextRequest) {
 
   if (isAdminRoute || isAuthRoute) {
     response.headers.set("Cache-Control", NO_STORE)
+    response.headers.set("X-Robots-Tag", NOINDEX)
   }
 
   if (isAdminRoute && !isPublicAdminPath(pathname) && !hasSession) {
@@ -142,6 +153,7 @@ export async function updateSession(request: NextRequest) {
     })
 
     redirectResponse.headers.set("Cache-Control", NO_STORE)
+    redirectResponse.headers.set("X-Robots-Tag", NOINDEX)
 
     return redirectResponse
   }

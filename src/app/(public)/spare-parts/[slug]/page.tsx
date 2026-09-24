@@ -35,6 +35,8 @@ import {
   getPublicSiteSettings,
 } from "@/lib/queries/settings.queries"
 import { getPublishedSparePartStock } from "@/lib/queries/public-spare-part-stock.queries"
+import { buildPageMetadata } from "@/lib/seo/page-metadata"
+import { sellerJsonLd } from "@/lib/seo/structured-data"
 import { serializeJsonLd } from "@/lib/utils/json-ld"
 import { buildSparePartWhatsAppMessage, buildWhatsAppUrl } from "@/lib/utils/whatsapp"
 
@@ -119,18 +121,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const cover = part.photos[0]
 
-  return {
+  return buildPageMetadata({
+    settings: await getPublicSiteSettings(),
     title: part.name,
     description,
-    alternates: { canonical: `/spare-parts/${part.slug}` },
-    openGraph: {
-      title: `${part.name} | ${(await getPublicSiteSettings()).siteTitle}`,
-      description,
-      url: `${siteConfig.url}/spare-parts/${part.slug}`,
-      type: "website",
-      images: cover ? [{ url: cover.url, alt: part.name }] : undefined,
-    },
-  }
+    path: `/spare-parts/${part.slug}`,
+    images: cover ? [{ url: cover.url, alt: part.name }] : undefined,
+  })
 }
 
 export default async function SparePartPage({ params }: PageProps) {
@@ -508,6 +505,7 @@ function SparePartStructuredData({ part, sellerName }: { part: PublicSparePartDe
     ...(part.brand ? { brand: { "@type": "Brand", name: part.brand } } : {}),
     ...(part.categoryName ? { category: part.categoryName } : {}),
     image: part.photos.map((photo) => photo.url),
+    url: `${siteConfig.url}/spare-parts/${part.slug}`,
     ...(part.price === null
       ? {}
       : {
@@ -516,7 +514,7 @@ function SparePartStructuredData({ part, sellerName }: { part: PublicSparePartDe
             priceCurrency: "USD",
             price: part.price,
             url: `${siteConfig.url}/spare-parts/${part.slug}`,
-            seller: { "@type": "AutoDealer", name: sellerName },
+            seller: sellerJsonLd(sellerName),
           },
         }),
   }

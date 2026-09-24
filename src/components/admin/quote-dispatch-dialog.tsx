@@ -7,6 +7,7 @@ import { QuoteDispatchChannel } from "@/generated/prisma/enums"
 import { sendQuoteDispatchAction, type QuoteDispatchState } from "@/lib/actions/quote.actions"
 import { useSiteSettings } from "@/components/shared/site-settings-provider"
 import { defaultQuoteNote } from "@/lib/quotes/quote-messages"
+import { quoteDispatchBlockReason } from "@/lib/quotes/quote-action-readiness"
 import { useQuotePricing } from "@/lib/quotes/quote-pricing-context"
 import { cn } from "@/lib/utils"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -37,6 +38,9 @@ interface QuoteDispatchDialogProps {
   alreadySent?: boolean
   disabled?: boolean
   disabledReason?: string
+  /** The trigger's emphasis. `default` (gold) unless the page has a stronger
+   *  action beside it — see quote-header-actions.tsx. */
+  variant?: "default" | "outline"
 }
 
 const CHANNEL_LABEL: Record<QuoteDispatchChannel, string> = {
@@ -79,6 +83,7 @@ export function QuoteDispatchDialog({
   alreadySent = false,
   disabled = false,
   disabledReason,
+  variant = "default",
 }: QuoteDispatchDialogProps) {
   const hasEmail = Boolean(contactEmail)
   const hasWhatsapp = Boolean(contactWhatsapp)
@@ -124,202 +129,198 @@ export function QuoteDispatchDialog({
    * the exact same message come back, because the database still has the
    * old value. See the file note on `isDirty` in quote-pricing-context.tsx.
    */
-  const dirtyReason = "You have unsaved changes — save the details before sending this quotation."
-  const effectiveDisabled = disabled || isDirty || Boolean(readinessProblem)
-  const effectiveReason = disabled
-    ? disabledReason
-    : isDirty
-      ? dirtyReason
-      : (readinessProblem ?? undefined)
+  const effectiveReason =
+    quoteDispatchBlockReason({
+      statusReason: disabled ? (disabledReason ?? "This quote cannot be sent yet.") : null,
+      isDirty,
+      readinessProblem,
+    }) ?? undefined
+  const effectiveDisabled = Boolean(effectiveReason)
 
   const canPreview = totals.itemLineCount > 0
   const previewHref = `/api/quotes/${quoteId}/preview`
 
   return (
-    <div className="flex flex-col items-end gap-1">
-      <Dialog
-        open={open}
-        onOpenChange={(next) => {
-          if (next) setDispatchId(newDispatchId())
-          setOpen(next)
-        }}
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
+        if (next) setDispatchId(newDispatchId())
+        setOpen(next)
+      }}
+    >
+      <DialogTrigger
+        render={
+          <Button
+            type="button"
+            variant={variant}
+            disabled={effectiveDisabled}
+            title={effectiveDisabled ? effectiveReason : undefined}
+            className="w-full sm:w-auto"
+          />
+        }
       >
-        <DialogTrigger
-          render={
-            <Button
-              type="button"
-              disabled={effectiveDisabled}
-              title={effectiveDisabled ? effectiveReason : undefined}
-            />
-          }
-        >
-          {verb} quotation
-        </DialogTrigger>
+        {verb} quotation
+      </DialogTrigger>
 
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle>{verb} quotation</DialogTitle>
-          </DialogHeader>
+      <DialogContent className="sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle>{verb} quotation</DialogTitle>
+        </DialogHeader>
 
-          {state.status === "success" ? (
-            <div className="flex flex-col gap-4">
-              <Alert>
-                <CheckCircle2 aria-hidden="true" className="text-success" />
-                <AlertDescription>
-                  {state.channel === QuoteDispatchChannel.EMAIL
-                    ? `The quotation has been emailed to ${contactEmail}.`
-                    : state.channel === QuoteDispatchChannel.BOTH
-                      ? `The quotation has been emailed to ${contactEmail}. Finish sending it on WhatsApp below.`
-                      : "The quotation has been marked as sent. Finish sending it below."}
-                </AlertDescription>
+        {state.status === "success" ? (
+          <div className="flex flex-col gap-4">
+            <Alert>
+              <CheckCircle2 aria-hidden="true" className="text-success" />
+              <AlertDescription>
+                {state.channel === QuoteDispatchChannel.EMAIL
+                  ? `The quotation has been emailed to ${contactEmail}.`
+                  : state.channel === QuoteDispatchChannel.BOTH
+                    ? `The quotation has been emailed to ${contactEmail}. Finish sending it on WhatsApp below.`
+                    : "The quotation has been marked as sent. Finish sending it below."}
+              </AlertDescription>
+            </Alert>
+
+            {(state.channel === QuoteDispatchChannel.WHATSAPP || state.channel === QuoteDispatchChannel.BOTH) &&
+            state.dispatchUrl ? (
+              <Button
+                render={<a href={state.dispatchUrl} target="_blank" rel="noopener noreferrer" />}
+                variant="whatsapp"
+                className="h-10"
+              >
+                <ExternalLink aria-hidden="true" />
+                Open in WhatsApp
+              </Button>
+            ) : null}
+
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+                Done
+              </Button>
+            </DialogFooter>
+          </div>
+        ) : (
+          <form action={formAction} className="flex flex-col gap-6">
+            <input type="hidden" name="quoteId" value={quoteId} />
+            <input type="hidden" name="channel" value={channel} />
+            <input type="hidden" name="note" value={note} />
+            <input type="hidden" name="instructions" value={instructions} />
+            <input type="hidden" name="dispatchId" value={dispatchId} />
+
+            {state.status === "error" && state.message ? (
+              <Alert variant="destructive">
+                <AlertCircle aria-hidden="true" />
+                <AlertDescription>{state.message}</AlertDescription>
               </Alert>
+            ) : null}
 
-              {(state.channel === QuoteDispatchChannel.WHATSAPP || state.channel === QuoteDispatchChannel.BOTH) &&
-              state.dispatchUrl ? (
-                <Button
-                  render={<a href={state.dispatchUrl} target="_blank" rel="noopener noreferrer" />}
-                  variant="whatsapp"
-                  className="h-10"
-                >
-                  <ExternalLink aria-hidden="true" />
-                  Open in WhatsApp
-                </Button>
-              ) : null}
-
-              <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-                  Done
-                </Button>
-              </DialogFooter>
+            {/* Customer summary — confirmation before anything goes out. */}
+            <div className="flex flex-col gap-1 rounded-xl bg-accent/30 p-4 ring-1 ring-foreground/10">
+              <p className="text-small font-semibold text-foreground">{customerName}</p>
+              <p className="flex items-center gap-2 text-small text-muted-foreground">
+                <WhatsAppGlyph className="size-3.5 shrink-0" />
+                {contactWhatsapp ?? "No WhatsApp number on file"}
+              </p>
+              <p className="flex items-center gap-2 text-small text-muted-foreground">
+                <Mail aria-hidden="true" className="size-3.5 shrink-0" />
+                {contactEmail ?? "No email address on file"}
+              </p>
             </div>
-          ) : (
-            <form action={formAction} className="flex flex-col gap-6">
-              <input type="hidden" name="quoteId" value={quoteId} />
-              <input type="hidden" name="channel" value={channel} />
-              <input type="hidden" name="note" value={note} />
-              <input type="hidden" name="instructions" value={instructions} />
-              <input type="hidden" name="dispatchId" value={dispatchId} />
 
-              {state.status === "error" && state.message ? (
-                <Alert variant="destructive">
-                  <AlertCircle aria-hidden="true" />
-                  <AlertDescription>{state.message}</AlertDescription>
-                </Alert>
-              ) : null}
-
-              {/* Customer summary — confirmation before anything goes out. */}
-              <div className="flex flex-col gap-1 rounded-xl bg-accent/30 p-4 ring-1 ring-foreground/10">
-                <p className="text-small font-semibold text-foreground">{customerName}</p>
-                <p className="flex items-center gap-2 text-small text-muted-foreground">
-                  <WhatsAppGlyph className="size-3.5 shrink-0" />
-                  {contactWhatsapp ?? "No WhatsApp number on file"}
-                </p>
-                <p className="flex items-center gap-2 text-small text-muted-foreground">
-                  <Mail aria-hidden="true" className="size-3.5 shrink-0" />
-                  {contactEmail ?? "No email address on file"}
-                </p>
-              </div>
-
-              {/* Channel selector — two selectable cards. */}
-              <div className="flex flex-col gap-2">
-                <span className="text-xs font-medium text-muted-foreground">Send via</span>
-                <div role="group" aria-label="Send via" className="grid grid-cols-2 gap-3">
-                  <ChannelCard
-                    label="WhatsApp"
-                    detail={contactWhatsapp ?? "Not on file"}
-                    icon={<WhatsAppGlyph className="size-5 text-[#11823f]" />}
-                    selected={sendWhatsapp && hasWhatsapp}
-                    disabled={!hasWhatsapp}
-                    // The last selected channel cannot be switched off.
-                    onSelect={() => (sendWhatsapp && !sendEmail ? undefined : setSendWhatsapp(!sendWhatsapp))}
-                  />
-                  <ChannelCard
-                    label="Email"
-                    detail={contactEmail ?? "Not on file"}
-                    icon={<Mail aria-hidden="true" className="size-5 text-gold-ink" />}
-                    selected={sendEmail && hasEmail}
-                    disabled={!hasEmail}
-                    onSelect={() => (sendEmail && !sendWhatsapp ? undefined : setSendEmail(!sendEmail))}
-                  />
-                </div>
-              </div>
-
-              <label htmlFor={includeLinkId} className="flex items-start gap-3 text-small">
-                <input
-                  id={includeLinkId}
-                  type="checkbox"
-                  name="includeLink"
-                  checked={includeLink}
-                  onChange={(event) => setIncludeLink(event.target.checked)}
-                  className="mt-0.5 size-4 rounded border-input"
+            {/* Channel selector — two selectable cards. */}
+            <div className="flex flex-col gap-2">
+              <span className="text-xs font-medium text-muted-foreground">Send via</span>
+              <div role="group" aria-label="Send via" className="grid grid-cols-2 gap-3">
+                <ChannelCard
+                  label="WhatsApp"
+                  detail={contactWhatsapp ?? "Not on file"}
+                  icon={<WhatsAppGlyph className="size-5 text-[#11823f]" />}
+                  selected={sendWhatsapp && hasWhatsapp}
+                  disabled={!hasWhatsapp}
+                  // The last selected channel cannot be switched off.
+                  onSelect={() => (sendWhatsapp && !sendEmail ? undefined : setSendWhatsapp(!sendWhatsapp))}
                 />
-                <span>Attach PDF quotation</span>
+                <ChannelCard
+                  label="Email"
+                  detail={contactEmail ?? "Not on file"}
+                  icon={<Mail aria-hidden="true" className="size-5 text-gold-ink" />}
+                  selected={sendEmail && hasEmail}
+                  disabled={!hasEmail}
+                  onSelect={() => (sendEmail && !sendWhatsapp ? undefined : setSendEmail(!sendEmail))}
+                />
+              </div>
+            </div>
+
+            <label htmlFor={includeLinkId} className="flex items-start gap-3 text-small">
+              <input
+                id={includeLinkId}
+                type="checkbox"
+                name="includeLink"
+                checked={includeLink}
+                onChange={(event) => setIncludeLink(event.target.checked)}
+                className="mt-0.5 size-4 rounded border-input"
+              />
+              <span>Attach PDF quotation</span>
+            </label>
+
+            <div className="flex flex-col gap-2">
+              <label htmlFor={noteId} className="text-xs font-medium text-muted-foreground">
+                Message
               </label>
+              <Textarea
+                id={noteId}
+                value={note}
+                onChange={(event) => setNote(event.target.value)}
+                rows={3}
+                maxLength={2000}
+                placeholder={defaultQuoteNote(businessName)}
+              />
+            </div>
 
-              <div className="flex flex-col gap-2">
-                <label htmlFor={noteId} className="text-xs font-medium text-muted-foreground">
-                  Message
-                </label>
-                <Textarea
-                  id={noteId}
-                  value={note}
-                  onChange={(event) => setNote(event.target.value)}
-                  rows={3}
-                  maxLength={2000}
-                  placeholder={defaultQuoteNote(businessName)}
-                />
-              </div>
+            <div className="flex flex-col gap-2">
+              <label htmlFor={instructionsId} className="text-xs font-medium text-muted-foreground">
+                Notes for the customer
+              </label>
+              <Textarea
+                id={instructionsId}
+                value={instructions}
+                onChange={(event) => setInstructions(event.target.value)}
+                rows={2}
+                maxLength={2000}
+                placeholder="Optional"
+              />
+            </div>
 
-              <div className="flex flex-col gap-2">
-                <label htmlFor={instructionsId} className="text-xs font-medium text-muted-foreground">
-                  Notes for the customer
-                </label>
-                <Textarea
-                  id={instructionsId}
-                  value={instructions}
-                  onChange={(event) => setInstructions(event.target.value)}
-                  rows={2}
-                  maxLength={2000}
-                  placeholder="Optional"
-                />
-              </div>
+            <DialogFooter className="items-center sm:justify-between">
+              <Button
+                render={<a href={previewHref} target="_blank" rel="noopener noreferrer" />}
+                type="button"
+                variant="ghost"
+                size="sm"
+                disabled={!canPreview}
+                title={canPreview ? undefined : "Add at least one item to preview the quotation."}
+              >
+                <Eye aria-hidden="true" />
+                Preview quotation
+              </Button>
 
-              <DialogFooter className="items-center sm:justify-between">
-                <Button
-                  render={<a href={previewHref} target="_blank" rel="noopener noreferrer" />}
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  disabled={!canPreview}
-                  title={canPreview ? undefined : "Add at least one item to preview the quotation."}
-                >
-                  <Eye aria-hidden="true" />
-                  Preview quotation
-                </Button>
-
-                <Button
-                  type="submit"
-                  disabled={isPending || effectiveDisabled || channelUnavailable}
-                >
-                  {isPending ? (
-                    <Loader2 aria-hidden="true" className="animate-spin" />
-                  ) : channel === QuoteDispatchChannel.WHATSAPP ? (
-                    <WhatsAppGlyph className="size-4" />
-                  ) : (
-                    <Send aria-hidden="true" />
-                  )}
-                  {verb} via {CHANNEL_LABEL[channel]}
-                </Button>
-              </DialogFooter>
-            </form>
-          )}
-        </DialogContent>
-      </Dialog>
-
-      {effectiveDisabled && effectiveReason ? (
-        <p className="max-w-60 text-right text-xs text-balance text-muted-foreground">{effectiveReason}</p>
-      ) : null}
-    </div>
+              <Button
+                type="submit"
+                disabled={isPending || effectiveDisabled || channelUnavailable}
+              >
+                {isPending ? (
+                  <Loader2 aria-hidden="true" className="animate-spin" />
+                ) : channel === QuoteDispatchChannel.WHATSAPP ? (
+                  <WhatsAppGlyph className="size-4" />
+                ) : (
+                  <Send aria-hidden="true" />
+                )}
+                {verb} via {CHANNEL_LABEL[channel]}
+              </Button>
+            </DialogFooter>
+          </form>
+        )}
+      </DialogContent>
+    </Dialog>
   )
 }
 

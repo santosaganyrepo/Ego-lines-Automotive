@@ -29,14 +29,35 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     return [];
   }
 
-  const now = new Date();
   const url = (path: string) => `${siteConfig.url}${path}`;
 
+  let listings: Awaited<ReturnType<typeof listSitemapListings>> | null = null;
+  try {
+    listings = await listSitemapListings();
+  } catch (error) {
+    console.error("[sitemap] could not read listings; publishing the static pages only", error);
+  }
+
+  /**
+   * `lastmod` only where it is true. The home page and the two catalogues
+   * change when a listing does, so they carry the newest listing's date;
+   * the fixed pages carry none. A date that is always "now" is one search
+   * engines learn to ignore — for every URL in the file, not just that one.
+   */
+  const newest = (entries: { updatedAt: Date }[] | undefined) =>
+    entries && entries.length > 0 ? entries[0]!.updatedAt : undefined;
+  const vehiclesChanged = newest(listings?.vehicles);
+  const partsChanged = newest(listings?.spareParts);
+  const anyChanged =
+    vehiclesChanged && partsChanged
+      ? new Date(Math.max(vehiclesChanged.getTime(), partsChanged.getTime()))
+      : (vehiclesChanged ?? partsChanged);
+
   const pages: MetadataRoute.Sitemap = [
-    { url: url("/"), lastModified: now, changeFrequency: "daily", priority: 1 },
-    { url: url("/cars"), lastModified: now, changeFrequency: "daily", priority: 0.9 },
-    { url: url("/spare-parts"), lastModified: now, changeFrequency: "daily", priority: 0.9 },
-    ...["/how-it-works", "/track-my-order", "/get-a-quote", "/about-us", "/contact"].map((path) => ({
+    { url: url("/"), lastModified: anyChanged, changeFrequency: "daily", priority: 1 },
+    { url: url("/cars"), lastModified: vehiclesChanged, changeFrequency: "daily", priority: 0.9 },
+    { url: url("/spare-parts"), lastModified: partsChanged, changeFrequency: "daily", priority: 0.9 },
+    ...["/how-it-works", "/get-a-quote", "/about-us", "/contact", "/track-my-order"].map((path) => ({
       url: url(path),
       changeFrequency: "monthly" as const,
       priority: 0.7,
@@ -48,13 +69,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })),
   ];
 
-  let listings: Awaited<ReturnType<typeof listSitemapListings>>;
-  try {
-    listings = await listSitemapListings();
-  } catch (error) {
-    console.error("[sitemap] could not read listings; publishing the static pages only", error);
-    return pages;
-  }
+  if (!listings) return pages;
 
   return [
     ...pages,
@@ -63,12 +78,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: vehicle.updatedAt,
       changeFrequency: "weekly" as const,
       priority: 0.8,
+      ...(vehicle.imageUrl ? { images: [vehicle.imageUrl] } : {}),
     })),
     ...listings.spareParts.map((part) => ({
       url: url(`/spare-parts/${part.slug}`),
       lastModified: part.updatedAt,
       changeFrequency: "weekly" as const,
       priority: 0.6,
+      ...(part.imageUrl ? { images: [part.imageUrl] } : {}),
     })),
   ];
 }

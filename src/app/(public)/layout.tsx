@@ -46,7 +46,7 @@ export default async function PublicLayout({
     <CartProvider>
       {/*
         `--header-offset` is the fixed header's full height at the top of the
-        page — the navigation row (h-16 / md:h-20) plus the contact bar (h-11)
+        page — the navigation row (h-20 / md:h-28) plus the contact bar (h-11)
         when there is one. Content is padded by it, and the homepage hero
         pulls itself up under the header by the same amount, so the two can
         never disagree.
@@ -54,8 +54,8 @@ export default async function PublicLayout({
       <div
         className={
           showTopBar
-            ? "flex flex-1 flex-col [--header-offset:6.75rem] md:[--header-offset:7.75rem]"
-            : "flex flex-1 flex-col [--header-offset:4rem] md:[--header-offset:5rem]"
+            ? "flex flex-1 flex-col [--header-offset:7.75rem] md:[--header-offset:9.75rem]"
+            : "flex flex-1 flex-col [--header-offset:5rem] md:[--header-offset:7rem]"
         }
       >
         {/* First element in the tab order, so keyboard users can jump the

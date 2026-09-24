@@ -1,7 +1,6 @@
-import { createHash } from "node:crypto"
-
 import { NextResponse } from "next/server"
 
+import { brandingIconUrl, brandingIconVersion } from "@/lib/branding/icon-version"
 import { ADMIN_BASE_PATH } from "@/lib/constants/admin-routes"
 import { getPublicSiteSettings } from "@/lib/queries/settings.queries"
 
@@ -24,14 +23,12 @@ export const runtime = "nodejs"
  */
 export async function GET() {
   const settings = await getPublicSiteSettings()
-  const { businessName, branding } = settings
+  const { businessName } = settings
 
-  // Icons change with the uploaded branding; the version makes a new logo a new URL.
-  const version = createHash("sha256")
-    .update([businessName, branding.faviconUrl, branding.logoDarkUrl, branding.logoLightUrl].join("|"))
-    .digest("hex")
-    .slice(0, 10)
-  const icon = (file: string) => `/app-icon/${file}?v=${version}`
+  // Icons change with the uploaded branding; the version makes a new logo a
+  // new URL. Shared with the root layout's favicon so the two agree.
+  const version = brandingIconVersion(settings)
+  const icon = (file: string) => brandingIconUrl(file, version)
 
   const firstWord = businessName.split(/[\s-]+/)[0] ?? businessName
   const shortName = `${firstWord} Admin`.length <= 14 ? `${firstWord} Admin` : "Dashboard"

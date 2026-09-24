@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
 
 import { AdminSurface } from "@/components/admin/admin-surface"
+import { brandingIconUrl, brandingIconVersion } from "@/lib/branding/icon-version"
 import { ServiceWorkerRegistrar } from "@/components/admin/pwa/service-worker-registrar"
 import { ADMIN_BASE_PATH, adminPath } from "@/lib/constants/admin-routes"
 import { getPublicSiteSettings } from "@/lib/queries/settings.queries"
@@ -48,7 +49,9 @@ const FONT_CLASSES = cn(geistSans.variable, geistMono.variable)
  * What this layout does contribute is metadata inherited by every admin page.
  */
 export async function generateMetadata(): Promise<Metadata> {
-  const { businessName } = await getPublicSiteSettings()
+  const settings = await getPublicSiteSettings()
+  const { businessName } = settings
+  const iconVersion = brandingIconVersion(settings)
 
   return {
     title: {
@@ -73,8 +76,21 @@ export async function generateMetadata(): Promise<Metadata> {
       // bar, so nothing slides under the clock or the notch.
       statusBarStyle: "black",
     },
+    /**
+     * Metadata fields are replaced, not merged, by a nested layout — so this
+     * has to restate the tab icon as well as the Apple one, or dashboard
+     * pages would drop the favicon the root layout declares and fall back to
+     * /favicon.ico. Same generated disc, same branding fingerprint.
+     */
     icons: {
-      apple: [{ url: "/app-icon/apple-touch-180.png", sizes: "180x180", type: "image/png" }],
+      icon: [
+        { url: brandingIconUrl("favicon-32.png", iconVersion), sizes: "32x32", type: "image/png" },
+        { url: brandingIconUrl("favicon-48.png", iconVersion), sizes: "48x48", type: "image/png" },
+        { url: brandingIconUrl("favicon-96.png", iconVersion), sizes: "96x96", type: "image/png" },
+      ],
+      apple: [
+        { url: brandingIconUrl("apple-touch-180.png", iconVersion), sizes: "180x180", type: "image/png" },
+      ],
     },
   }
 }

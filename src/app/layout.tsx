@@ -3,8 +3,10 @@ import { Inter, Manrope } from "next/font/google";
 import "./globals.css";
 
 import { SiteSettingsProvider } from "@/components/shared/site-settings-provider";
+import { brandingIconUrl, brandingIconVersion } from "@/lib/branding/icon-version";
 import { siteConfig } from "@/config/site";
 import { getPublicSiteSettings } from "@/lib/queries/settings.queries";
+import { OG_LOCALE, defaultOgImages } from "@/lib/seo/page-metadata";
 
 /**
  * Two families, deliberately.
@@ -53,11 +55,22 @@ const inter = Inter({
  * public pages into dynamic rendering, and a save in Settings is live on the
  * next request.
  */
+function siteVerification(): Metadata["verification"] {
+  const google = process.env.GOOGLE_SITE_VERIFICATION?.trim();
+  const bing = process.env.BING_SITE_VERIFICATION?.trim();
+  if (!google && !bing) return undefined;
+  return {
+    ...(google ? { google } : {}),
+    ...(bing ? { other: { "msvalidate.01": bing } } : {}),
+  };
+}
+
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getPublicSiteSettings();
-  const ogImages = settings.seo.ogImageUrl
-    ? [{ url: settings.seo.ogImageUrl, width: 1200, height: 630, alt: settings.businessName }]
-    : undefined;
+  // Changes whenever the branding does, so a browser holding a cached
+  // favicon is asked for a new URL rather than keeping the old picture.
+  const iconVersion = brandingIconVersion(settings);
+  const ogImages = defaultOgImages(settings);
 
   return {
     metadataBase: new URL(siteConfig.url),
@@ -67,16 +80,17 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     description: settings.seo.description,
     applicationName: settings.siteTitle,
-    alternates: {
-      canonical: "/",
-    },
+    // No `alternates.canonical` and no `openGraph.url` here. Metadata merges
+    // shallowly, so a value set at the root is inherited by every page that
+    // does not set its own — a root canonical of "/" would tell search
+    // engines that such a page is a duplicate of the homepage. Each public
+    // page declares its own through buildPageMetadata().
     openGraph: {
       type: "website",
       siteName: settings.siteTitle,
       title: settings.seo.title,
       description: settings.seo.description,
-      url: "/",
-      locale: "en_GB",
+      locale: OG_LOCALE,
       images: ogImages,
     },
     twitter: {
@@ -85,21 +99,39 @@ export async function generateMetadata(): Promise<Metadata> {
       description: settings.seo.description,
       images: ogImages,
     },
+    // `max-image-preview:large` lets Google show the listing photographs at
+    // full width in results and Discover; without it the default is a
+    // thumbnail.
     robots: settings.seo.indexingEnabled
-      ? { index: true, follow: true }
+      ? { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large" } }
       : { index: false, follow: false },
-    // The uploaded favicon, or — until one is uploaded — the icon generated
-    // from the brand (src/app/app-icon), so browsers and search results never
-    // fall back to a blank page icon or a 404 for /favicon.ico.
-    icons: settings.branding.faviconUrl
-      ? {
-          icon: [{ url: settings.branding.faviconUrl, type: "image/png" }],
-          apple: [{ url: settings.branding.faviconUrl, type: "image/png" }],
-        }
-      : {
-          icon: [{ url: "/app-icon/icon-192.png", sizes: "192x192", type: "image/png" }],
-          apple: [{ url: "/app-icon/apple-touch-180.png", sizes: "180x180", type: "image/png" }],
-        },
+    // Search Console / Bing Webmaster ownership, by the HTML-tag method. The
+    // tokens are not secrets — they are published in every page's <head> —
+    // but they belong to the deployment, not the repository.
+    verification: siteVerification(),
+    /**
+     * The favicon, always generated rather than linked straight from storage.
+     *
+     * Pointing at the uploaded file gave a square image in the tab, and no
+     * two uploads were framed alike. `/app-icon/favicon-*.png` draws whatever
+     * has been uploaded (or the brand monogram, when nothing has) as a disc
+     * on the brand's background, at three sizes, supersampled so it stays
+     * sharp at 32px — see src/app/app-icon/[variant]/route.tsx.
+     *
+     * The Apple touch icon stays square and opaque: iOS applies its own
+     * rounded-rectangle mask and puts a black backdrop behind transparency,
+     * so a pre-cut disc would appear as a circle floating in a black tile.
+     */
+    icons: {
+      icon: [
+        { url: brandingIconUrl("favicon-32.png", iconVersion), sizes: "32x32", type: "image/png" },
+        { url: brandingIconUrl("favicon-48.png", iconVersion), sizes: "48x48", type: "image/png" },
+        { url: brandingIconUrl("favicon-96.png", iconVersion), sizes: "96x96", type: "image/png" },
+      ],
+      apple: [
+        { url: brandingIconUrl("apple-touch-180.png", iconVersion), sizes: "180x180", type: "image/png" },
+      ],
+    },
   };
 }
 

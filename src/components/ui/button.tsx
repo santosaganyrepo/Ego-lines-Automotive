@@ -168,24 +168,35 @@ function Button({
    * A link keeps its link role. Base UI stamps `role="button"` on any
    * non-native element it renders, so without this every CTA built as
    * `render={<Link href=… />}` was announced as a "button" — telling a
-   * screen-reader user it cannot be opened in a new tab or bookmarked. Base
-   * UI merges the render element's own props last, so a role set on it wins.
+   * screen-reader user it cannot be opened in a new tab or bookmarked.
+   *
+   * The role is passed to `ButtonPrimitive` rather than cloned onto the
+   * render element, which is what this used to do. Cloning worked for a
+   * component render element (`<Link>`) but not for a bare intrinsic one
+   * (`render={<a href=… />}`, which the homepage's WhatsApp call to action
+   * and several vehicle pages use): the server emitted `role="button"` and
+   * the client `role="link"`, and React reported a hydration mismatch in the
+   * console on every such page. Passing it as an ordinary prop goes through
+   * the same merge on both passes — external props win over Base UI's own,
+   * and `{...props}` below still lets a caller override it.
+   *
+   * A render element that sets its own `role` is left alone, so nothing is
+   * imposed on a caller who has already been explicit.
    */
-  const renderElement =
+  const rendersLink =
     React.isValidElement<{ href?: unknown; role?: string }>(render) &&
     !isNativeButton &&
     render.props.href !== undefined &&
     render.props.role === undefined
-      ? React.cloneElement(render, { role: "link" })
-      : render
 
   return (
     <ButtonPrimitive
       data-slot="button"
       data-variant={variant}
-      render={renderElement}
+      render={render}
       nativeButton={isNativeButton}
       className={cn(buttonVariants({ variant, size, className }))}
+      {...(rendersLink ? { role: "link" as const } : null)}
       {...props}
     />
   )

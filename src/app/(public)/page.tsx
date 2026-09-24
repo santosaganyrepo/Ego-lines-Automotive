@@ -10,20 +10,29 @@ import { HomeFaq, buildHomeFaqs } from "@/components/home/home-faq"
 import { JourneyOverview } from "@/components/home/journey-overview"
 import { SparePartsTeaser } from "@/components/home/spare-parts-teaser"
 import { WhyCrownline } from "@/components/home/why-crownline"
-import { siteConfig } from "@/config/site"
 import { getInventorySummary, listHomepageVehicles } from "@/lib/queries/public-vehicle.queries"
 import {
   listFeaturedSpareParts,
   listPublicSparePartCategories,
 } from "@/lib/queries/public-spare-part.queries"
 import { getPublicSiteSettings } from "@/lib/queries/settings.queries"
+import { buildPageMetadata } from "@/lib/seo/page-metadata"
+import { organizationJsonLd, websiteJsonLd } from "@/lib/seo/structured-data"
 import { serializeJsonLd } from "@/lib/utils/json-ld"
 import { buildGeneralWhatsAppMessage, buildWhatsAppUrl } from "@/lib/utils/whatsapp"
 
-export const metadata: Metadata = {
-  // The root layout supplies the configured SEO title and description; the
-  // homepage keeps them rather than prefixing its own.
-  alternates: { canonical: "/" },
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getPublicSiteSettings()
+
+  // The configured SEO title and description (Settings → SEO & social), used
+  // as they are rather than prefixed: the homepage title is already the full
+  // brand title.
+  return buildPageMetadata({
+    settings,
+    title: { absolute: settings.seo.title },
+    description: settings.seo.description,
+    path: "/",
+  })
 }
 
 /**
@@ -94,26 +103,14 @@ export default async function HomePage() {
 }
 
 /**
- * The dealership as structured data, for search results (brief §18).
- *
- * Only facts that are configured are emitted — an empty telephone or address
- * would be worse for the listing than none.
+ * The dealership and the website as structured data, for search results
+ * (brief §18) — see src/lib/seo/structured-data.ts for what is emitted and
+ * why. One `@graph`, so the WebSite's publisher resolves to the dealer.
  */
 function HomeJsonLd({ settings }: { settings: Awaited<ReturnType<typeof getPublicSiteSettings>> }) {
   const data = {
     "@context": "https://schema.org",
-    "@type": "AutoDealer",
-    name: settings.businessName,
-    description: settings.businessDescription,
-    url: siteConfig.url,
-    areaServed: { "@type": "Country", name: "South Sudan" },
-    ...(settings.contact.phone ? { telephone: settings.contact.phone } : {}),
-    ...(settings.contact.email ? { email: settings.contact.email } : {}),
-    ...(settings.contact.address ? { address: settings.contact.address } : {}),
-    ...(settings.company.legalName ? { legalName: settings.company.legalName } : {}),
-    ...(settings.company.taxNumber ? { taxID: settings.company.taxNumber } : {}),
-    ...(settings.branding.logoLightUrl ? { logo: settings.branding.logoLightUrl } : {}),
-    ...(settings.social.length > 0 ? { sameAs: settings.social.map((link) => link.url) } : {}),
+    "@graph": [organizationJsonLd(settings), websiteJsonLd(settings)],
   }
 
   return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(data) }} />

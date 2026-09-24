@@ -8,6 +8,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { PasswordInput } from "@/components/ui/password-input"
 
 const INITIAL_STATE: AuthFormState = {}
 
@@ -99,10 +100,9 @@ export function AdminLoginForm({ next }: AdminLoginFormProps) {
 
       <div className="flex flex-col gap-2">
         <Label htmlFor={passwordId}>Password</Label>
-        <Input
+        <PasswordInput
           id={passwordId}
           name="password"
-          type="password"
           autoComplete="current-password"
           required
           aria-invalid={state.fieldErrors?.password ? true : undefined}

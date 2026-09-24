@@ -26,19 +26,21 @@ import { WhatsAppGlyph } from "@/components/shared/whatsapp-glyph"
 import { LegalDocumentKind } from "@/generated/prisma/enums"
 import { legalDocumentMeta } from "@/lib/legal/legal-documents"
 import { getPublicSiteSettings } from "@/lib/queries/settings.queries"
+import { buildPageMetadata } from "@/lib/seo/page-metadata"
 import { cn } from "@/lib/utils"
 import { toTelHref } from "@/lib/utils/tel"
 import { buildGeneralWhatsAppMessage, buildWhatsAppUrl } from "@/lib/utils/whatsapp"
 
 export async function generateMetadata(): Promise<Metadata> {
-  const { businessName, contact } = await getPublicSiteSettings()
-  const where = contact.address ? ` in ${contact.address}` : " in South Sudan"
+  const settings = await getPublicSiteSettings()
+  const where = settings.contact.address ? ` in ${settings.contact.address}` : " in South Sudan"
 
-  return {
+  return buildPageMetadata({
+    settings,
     title: "Contact",
-    description: `Contact ${businessName}${where} — call, WhatsApp, email or send us a message about a vehicle, spare parts or an order.`,
-    alternates: { canonical: "/contact" },
-  }
+    description: `Contact ${settings.businessName}${where} — call, WhatsApp, email or send us a message about a vehicle, spare parts or an order.`,
+    path: "/contact",
+  })
 }
 
 const HERO_LEAD = "Talk to a real person"

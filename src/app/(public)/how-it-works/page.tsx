@@ -16,17 +16,19 @@ import { ITEM_STEP_MS, delay } from "@/components/motion/motion"
 import { WhatsAppGlyph } from "@/components/shared/whatsapp-glyph"
 import { Button } from "@/components/ui/button"
 import { getPublicSiteSettings, getSparePartDeliverySteps } from "@/lib/queries/settings.queries"
+import { buildPageMetadata } from "@/lib/seo/page-metadata"
 import { customerTimelineStages } from "@/lib/settings/tracking-stages"
 import { buildGeneralWhatsAppMessage, buildWhatsAppUrl } from "@/lib/utils/whatsapp"
 
 export async function generateMetadata(): Promise<Metadata> {
-  const { businessName } = await getPublicSiteSettings()
+  const settings = await getPublicSiteSettings()
 
-  return {
+  return buildPageMetadata({
+    settings,
     title: "How It Works",
-    description: `How ${businessName} imports your car from Japan, South Korea or China to South Sudan — via Mombasa, with staged payments and tracking at every step.`,
-    alternates: { canonical: "/how-it-works" },
-  }
+    description: `How ${settings.businessName} imports your car from Japan, South Korea or China to South Sudan — via Mombasa, with staged payments and tracking at every step.`,
+    path: "/how-it-works",
+  })
 }
 
 const HERO_LEAD = "From the auction floor"

@@ -17,8 +17,8 @@ import { useSiteSettings } from "@/components/shared/site-settings-provider"
 import { INVENTORY_CTA, headerNavItems, isNavGroup, isNavLinkAvailable } from "@/lib/constants/nav-links"
 
 /** Fallback header height used for the observer's top inset if the header
- *  cannot be measured for any reason. Matches the `h-16` mobile height. */
-const FALLBACK_HEADER_HEIGHT_PX = 64
+ *  cannot be measured for any reason. Matches the `h-20` mobile height. */
+const FALLBACK_HEADER_HEIGHT_PX = 80
 
 /**
  * Reports whether a dark hero is currently sitting underneath the header.
@@ -194,7 +194,10 @@ export function SiteHeader({ whatsappUrl, topBar }: SiteHeaderProps) {
       <Container size="wide">
         <nav
           aria-label="Main"
-          className="flex h-16 items-center justify-between gap-6 md:h-20"
+          // Sized around the brand mark, which the dealership asked to carry
+          // the header (60px on a phone, 100px from md — see brand-mark.tsx).
+          // `--header-offset` in the public layout reserves exactly this.
+          className="flex h-20 items-center justify-between gap-6 md:h-28"
         >
           {/* The brand: the logo, then the name with its last word in gold. */}
           <Link

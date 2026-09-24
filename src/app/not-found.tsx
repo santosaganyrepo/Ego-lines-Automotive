@@ -54,8 +54,8 @@ export default async function NotFound() {
       <div
         className={
           hasTopBarContent(settings)
-            ? "flex flex-1 flex-col [--header-offset:6.75rem] md:[--header-offset:7.75rem]"
-            : "flex flex-1 flex-col [--header-offset:4rem] md:[--header-offset:5rem]"
+            ? "flex flex-1 flex-col [--header-offset:7.75rem] md:[--header-offset:9.75rem]"
+            : "flex flex-1 flex-col [--header-offset:5rem] md:[--header-offset:7rem]"
         }
       >
         <SiteHeader

@@ -14,6 +14,15 @@ import type { QuotePdfData } from "@/lib/pdf/quote-pdf-data"
  * file to bundle or license), black text on white with a single gold rule for
  * the brand accent. A quotation a customer may forward to a bank is not the
  * place for a design flourish.
+ *
+ * ── Type scale ───────────────────────────────────────────────────────────
+ * Body text is 11.5pt. That is deliberately above the 9–10pt a lot of
+ * generated paperwork settles on: this document is read on a phone as often
+ * as on paper, frequently forwarded as a photograph of a screen, and the
+ * dealership asked for it to be legible rather than merely compact. Every
+ * other size is set in proportion to it, and the numeric columns and totals
+ * block were widened to match — larger figures in the old column widths
+ * would wrap a five-digit total onto two lines.
  */
 
 const INK = "#141414"
@@ -44,7 +53,7 @@ const styles = StyleSheet.create({
     paddingTop: SPACE.xxl + SPACE.lg,
     paddingBottom: SPACE.xxl * 2,
     paddingHorizontal: SPACE.xxl + SPACE.md,
-    fontSize: 10,
+    fontSize: 11.5,
     color: INK,
     fontFamily: "Helvetica",
   },
@@ -54,8 +63,17 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
     marginBottom: SPACE.xl,
   },
+  // Takes the space the quotation number does not, and wraps inside it. Both
+  // blocks used to size to their content, so a long business name simply
+  // overran the number printed beside it.
+  brandBlock: {
+    flexGrow: 1,
+    flexShrink: 1,
+    flexBasis: 0,
+    paddingRight: SPACE.lg,
+  },
   brand: {
-    fontSize: 19,
+    fontSize: 20,
     fontFamily: "Helvetica-Bold",
     letterSpacing: 1.5,
     // Tight on purpose: a display-weight heading carries generous built-in
@@ -66,15 +84,16 @@ const styles = StyleSheet.create({
     lineHeight: 1,
   },
   tagline: {
-    fontSize: 8.5,
+    fontSize: 10,
     color: MUTED,
     marginTop: SPACE.sm,
   },
   quoteMeta: {
     alignItems: "flex-end",
+    flexShrink: 0,
   },
   quoteNumber: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: "Helvetica-Bold",
     lineHeight: 1,
   },
@@ -84,7 +103,7 @@ const styles = StyleSheet.create({
     marginBottom: SPACE.xl,
   },
   sectionTitle: {
-    fontSize: 8,
+    fontSize: 9.5,
     fontFamily: "Helvetica-Bold",
     color: MUTED,
     letterSpacing: 1.2,
@@ -95,7 +114,7 @@ const styles = StyleSheet.create({
     marginBottom: SPACE.xl,
   },
   customerName: {
-    fontSize: 12.5,
+    fontSize: 14.5,
     fontFamily: "Helvetica-Bold",
     marginBottom: SPACE.sm,
   },
@@ -121,11 +140,11 @@ const styles = StyleSheet.create({
     paddingVertical: SPACE.md,
   },
   colDescription: { flexGrow: 1, flexBasis: 0, paddingRight: SPACE.md },
-  colQty: { width: 46, textAlign: "right" },
-  colUnit: { width: 78, textAlign: "right" },
-  colTotal: { width: 86, textAlign: "right" },
+  colQty: { width: 52, textAlign: "right" },
+  colUnit: { width: 92, textAlign: "right" },
+  colTotal: { width: 100, textAlign: "right" },
   tableHeaderText: {
-    fontSize: 8,
+    fontSize: 9.5,
     fontFamily: "Helvetica-Bold",
     color: MUTED,
     letterSpacing: 0.6,
@@ -134,7 +153,7 @@ const styles = StyleSheet.create({
   totalsBlock: {
     marginTop: SPACE.xl,
     alignSelf: "flex-end",
-    width: 250,
+    width: 280,
   },
   totalsRow: {
     flexDirection: "row",
@@ -159,15 +178,15 @@ const styles = StyleSheet.create({
   },
   grandTotalLabel: {
     fontFamily: "Helvetica-Bold",
-    fontSize: 11.5,
+    fontSize: 13.5,
   },
   grandTotalValue: {
     fontFamily: "Helvetica-Bold",
-    fontSize: 11.5,
+    fontSize: 13.5,
   },
   validity: {
     marginTop: SPACE.lg,
-    fontSize: 9,
+    fontSize: 10.5,
     color: MUTED,
     lineHeight: 1.5,
   },
@@ -177,7 +196,7 @@ const styles = StyleSheet.create({
   textBody: {
     marginTop: SPACE.sm,
     lineHeight: 1.6,
-    fontSize: 9.5,
+    fontSize: 11,
   },
   footer: {
     position: "absolute",
@@ -187,7 +206,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: BORDER,
     paddingTop: SPACE.md,
-    fontSize: 8,
+    fontSize: 9,
     color: MUTED,
     textAlign: "center",
   },
@@ -201,7 +220,7 @@ export function QuoteDocument({ data }: { data: QuotePdfData }) {
     <Document title={`Quotation ${data.quoteNumber}`}>
       <Page size="A4" style={styles.page}>
         <View style={styles.header}>
-          <View>
+          <View style={styles.brandBlock}>
             <Text style={styles.brand}>{data.siteName.toUpperCase()}</Text>
             <Text style={styles.tagline}>Quality Cars. Global Standards. Local Commitment.</Text>
           </View>
@@ -266,7 +285,7 @@ export function QuoteDocument({ data }: { data: QuotePdfData }) {
           {data.discount ? (
             <View style={styles.totalsRow}>
               <Text style={styles.totalsLabel}>{data.discount.label}</Text>
-              <Text style={styles.discountValue}>−{formatCurrency(data.discount.amount)}</Text>
+              <Text style={styles.discountValue}>-{formatCurrency(data.discount.amount)}</Text>
             </View>
           ) : null}
 

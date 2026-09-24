@@ -11,6 +11,7 @@ import { fillPlaceholders, sectionAnchor } from "@/lib/legal/legal-text"
 import { legalPlaceholderValues } from "@/lib/legal/placeholder-values"
 import { getPublicLegalDocument } from "@/lib/queries/legal.queries"
 import { getPublicSiteSettings } from "@/lib/queries/settings.queries"
+import { buildPageMetadata } from "@/lib/seo/page-metadata"
 import { toTelHref } from "@/lib/utils/tel"
 
 /**
@@ -32,11 +33,12 @@ export async function legalDocumentMetadata(kind: LegalDocumentKind): Promise<Me
   const [document, settings] = await Promise.all([getPublicLegalDocument(kind), getPublicSiteSettings()])
   const summary = fillPlaceholders(document.summary, legalPlaceholderValues(settings))
 
-  return {
+  return buildPageMetadata({
+    settings,
     title: document.title,
     description: summary.length > 158 ? `${summary.slice(0, 155).trimEnd()}…` : summary,
-    alternates: { canonical: legalDocumentMeta(kind).path },
-  }
+    path: legalDocumentMeta(kind).path,
+  })
 }
 
 export async function LegalDocumentPage({ kind }: { kind: LegalDocumentKind }) {

@@ -20,8 +20,25 @@ const markSizes = {
     sub: "text-[0.5625rem]",
     gap: "gap-[0.2rem]",
     logo: "h-8 md:h-9",
-    lockupWord: "text-base md:text-lg",
-    lockupLogo: "h-9 md:h-10",
+    /**
+     * Tighter on a phone than the mark it sits beside would suggest, and
+     * deliberately so: the emblem is now 60px there, and at the desktop size
+     * and tracking the name no longer fitted on one line between the logo
+     * and the menu button — it wrapped, and a two-line wordmark beside a
+     * large mark reads as a mistake. From md there is room for both.
+     */
+    lockupWord: "text-sm tracking-[0.08em] md:text-2xl md:tracking-[0.12em]",
+    /**
+     * The public header's mark, and the largest thing in the navigation bar
+     * by design — the dealership asked for the emblem to carry the header
+     * rather than sit in a corner of it. 60px on a phone, 100px from md,
+     * against a bar of 80px/112px (site-header.tsx), which is what
+     * `--header-offset` in the public layout reserves.
+     *
+     * Raising these three numbers means raising all three: the bar, the
+     * offset, and this.
+     */
+    lockupLogo: "h-[3.75rem] md:h-[6.25rem]",
   },
   lg: {
     word: "text-2xl md:text-3xl",
@@ -97,10 +114,16 @@ function BrandMark({
             // The name is written out beside it, so the image is decorative
             // here — announcing both would read the business name twice.
             alt=""
-            width={160}
-            height={160}
+            // Only seeds the srcset — the rendered size comes from the height
+            // class below. Large enough that a wide logo is still sharp at
+            // 100px tall on a 2× screen.
+            width={320}
+            height={320}
             loading="eager"
-            className={cn("w-auto shrink-0 object-contain", scale.lockupLogo)}
+            // `max-w` matters now the mark is tall: a logo drawn wide rather
+            // than square would otherwise take the whole row before the
+            // navigation got any. `w-auto` keeps its aspect ratio either way.
+            className={cn("w-auto max-w-40 shrink-0 object-contain md:max-w-64", scale.lockupLogo)}
           />
         ) : null}
         <span
