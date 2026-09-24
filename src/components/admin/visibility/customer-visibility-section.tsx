@@ -105,7 +105,15 @@ function VisibilityRow({
   return (
     <li className="flex min-h-12 items-center justify-between gap-3 border-b border-border/60 py-2">
       <label htmlFor={id} className={cn("flex min-w-0 flex-col", lockedBySettings ? "cursor-not-allowed" : "cursor-pointer")}>
-        <span className={cn("truncate text-small", checked ? "text-foreground" : "text-muted-foreground")}>{label}</span>
+        {/* The full sentence lives in the label as well as in the switch's
+            aria-label: the label is associated with the switch's form input,
+            and a bare "Year" there would give that input the same name as the
+            Year field above. Screen readers read "Show Year to customers". */}
+        <span className={cn("truncate text-small", checked ? "text-foreground" : "text-muted-foreground")}>
+          <span className="sr-only">Show </span>
+          {label}
+          <span className="sr-only"> to customers</span>
+        </span>
         {lockedBySettings ? (
           <Link
             href={`${adminPath("/settings/catalog-display")}`}
@@ -120,7 +128,7 @@ function VisibilityRow({
         checked={checked}
         onCheckedChange={onCheckedChange}
         disabled={lockedBySettings}
-        aria-label={`Show ${label.toLowerCase()} to customers`}
+        aria-label={`Show ${label} to customers`}
       />
     </li>
   )

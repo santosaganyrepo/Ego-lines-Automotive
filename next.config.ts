@@ -437,23 +437,27 @@ function buildNextConfig(phase: string): NextConfig {
         ...duplicateHostNoindexRules(),
         {
           /**
-           * The admin quotation PDF, for "Open in a new tab" and "Download".
+           * The admin quotation PDF: "Open in a new tab", "Download", and the
+           * preview dialog's fallback frame.
            *
-           * It keeps the blanket `DENY`: nothing embeds this route any more.
-           * The dashboard's "Generate PDF" dialog used to show it in an
-           * `<iframe>`, which is why this rule once relaxed framing to
-           * `SAMEORIGIN`; it now draws the pages itself
+           * The dialog draws the pages itself with PDF.js
            * (components/admin/pdf-preview.tsx), because no phone browser
-           * renders a PDF in a frame.
+           * renders a PDF in a frame. But PDF.js needs Safari 16.4 or later,
+           * and on an older Mac the preview falls back to the browser's own
+           * viewer in an `<iframe>` — so this one route may be framed by the
+           * dashboard itself. Same origin only: it is still unframeable by any
+           * other site, and it is a session-gated, read-only GET.
            *
-           * What it does still override is the *rest* of the policy, for the
-           * same reason as the customer link below: a PDF runs no script this
-           * policy could restrict, and Chrome's built-in viewer can refuse to
-           * display a document whose own response carries `object-src 'none'`
-           * — an operator would get a blank tab instead of the quotation.
+           * The rest of the policy is dropped for the same reason as the
+           * customer link below: a PDF runs no script this policy could
+           * restrict, and Chrome's built-in viewer can refuse to display a
+           * document whose own response carries `object-src 'none'`.
            */
           source: "/api/quotes/:id/preview",
-          headers: [{ key: "Content-Security-Policy", value: "frame-ancestors 'none'" }],
+          headers: [
+            { key: "X-Frame-Options", value: "SAMEORIGIN" },
+            { key: "Content-Security-Policy", value: "frame-ancestors 'self'" },
+          ],
         },
         {
           /**

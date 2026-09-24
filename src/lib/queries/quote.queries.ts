@@ -212,6 +212,25 @@ export async function getNewQuoteLeadCount(): Promise<number> {
   return prisma.quote.count({ where: { status: QuoteStatus.NEW } })
 }
 
+/**
+ * Quotations customers have accepted online after `since`, newest first —
+ * still waiting in ACCEPTED (a quote already converted or reopened is no
+ * longer news). Served by the `customerAcceptedAt` index.
+ */
+export async function getRecentCustomerAcceptances(
+  since: Date
+): Promise<{ id: string; quoteNumber: string; acceptedAt: Date }[]> {
+  const rows = await prisma.quote.findMany({
+    where: { status: QuoteStatus.ACCEPTED, customerAcceptedAt: { gt: since } },
+    orderBy: { customerAcceptedAt: "desc" },
+    take: 5,
+    select: { id: true, quoteNumber: true, customerAcceptedAt: true },
+  })
+  return rows.flatMap((row) =>
+    row.customerAcceptedAt ? [{ id: row.id, quoteNumber: row.quoteNumber, acceptedAt: row.customerAcceptedAt }] : []
+  )
+}
+
 export interface QuoteDetailItem {
   id: string
   kind: "ITEM" | "ACCESSORY"
@@ -278,6 +297,9 @@ export interface QuoteDetail {
   sentAt: Date | null
   lastSentVia: QuoteDispatchChannel | null
   shareToken: string | null
+
+  /** Set when the customer pressed "Accept quotation" on their link. */
+  customerAcceptance: { acceptedAt: Date; total: number; note: string | null } | null
 
   adminNotes: string | null
 
@@ -395,6 +417,15 @@ export async function getQuoteById(id: string): Promise<QuoteDetail | null> {
     lastSentVia: quote.lastSentVia,
     shareToken: quote.shareToken,
 
+    customerAcceptance:
+      quote.customerAcceptedAt && quote.customerAcceptedTotal
+        ? {
+            acceptedAt: quote.customerAcceptedAt,
+            total: quote.customerAcceptedTotal.toNumber(),
+            note: quote.customerAcceptanceNote,
+          }
+        : null,
+
     adminNotes: quote.adminNotes,
 
     order: quote.order
@@ -510,17 +541,53 @@ function toQuotePdfSourceRow(
  */
 const SHAREABLE_QUOTE_STATUSES: readonly QuoteStatus[] = [QuoteStatus.SENT, QuoteStatus.ACCEPTED, QuoteStatus.WON]
 
-export async function getQuoteForPdf(shareToken: string): Promise<QuotePdfSourceRow | null> {
-  const quote = await prisma.quote.findFirst({
-    where: { shareToken, status: { in: [...SHAREABLE_QUOTE_STATUSES] } },
-    select: QUOTE_PDF_SOURCE_SELECT,
-  })
-
-  return quote ? toQuotePdfSourceRow(quote) : null
+export interface QuoteForAcceptance {
+  id: string
+  status: QuoteStatus
+  customerAcceptedAt: Date | null
+  customerAcceptedTotal: number | null
+  document: QuotePdfSourceRow
 }
 
 /**
- * The same narrow projection as `getQuoteForPdf`, keyed by id rather than
+ * Everything the customer's share token may read — for their PDF
+ * (/quotation/<token>) and their Accept page (/quotation/<token>/accept):
+ * the document's narrow projection, plus the quote's status and the
+ * customer's own acceptance. Only quotes in a shareable status are found, so
+ * a link that no longer opens the PDF does not open the page either.
+ *
+ * `id` is returned for the server action that records the acceptance; the
+ * page never renders it. `db` lets that action read inside its transaction,
+ * after the row is locked.
+ */
+export async function getQuoteForAcceptance(
+  shareToken: string,
+  db: Pick<Prisma.TransactionClient, "quote"> = prisma
+): Promise<QuoteForAcceptance | null> {
+  const quote = await db.quote.findFirst({
+    where: { shareToken, status: { in: [...SHAREABLE_QUOTE_STATUSES] } },
+    select: {
+      ...QUOTE_PDF_SOURCE_SELECT,
+      id: true,
+      status: true,
+      customerAcceptedAt: true,
+      customerAcceptedTotal: true,
+    },
+  })
+  if (!quote) return null
+
+  const { id, status, customerAcceptedAt, customerAcceptedTotal, ...document } = quote
+  return {
+    id,
+    status,
+    customerAcceptedAt,
+    customerAcceptedTotal: customerAcceptedTotal?.toNumber() ?? null,
+    document: toQuotePdfSourceRow(document),
+  }
+}
+
+/**
+ * The same narrow projection as `getQuoteForAcceptance`, keyed by id rather than
  * share token — for the admin "Preview quotation" action, which reviews the
  * PDF before a share link necessarily exists yet.
  *

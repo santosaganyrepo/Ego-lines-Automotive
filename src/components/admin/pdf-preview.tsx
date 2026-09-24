@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import * as Sentry from "@sentry/nextjs"
 import { AlertTriangle, Loader2 } from "lucide-react"
 
 import { cn } from "@/lib/utils"
@@ -40,6 +41,19 @@ import { cn } from "@/lib/utils"
  * (capped, so a 3× phone screen does not allocate a canvas nobody can see),
  * and redrawn when that width changes. The document is the real file — the
  * same bytes the customer is sent and the "Download" action saves.
+ *
+ * ── When PDF.js cannot run ────────────────────────────────────────────────
+ * Even the legacy build needs a browser from 2023 onwards: it is written with
+ * class static blocks and draws through `OffscreenCanvas`, both of which
+ * Safari gained only in 16.4. A Mac that has not been updated past macOS
+ * Monterey's first Safari fails to load the engine at all — which is the
+ * "works on my phone, fails on the Mac" report. Every *desktop* browser,
+ * old or new, has its own PDF viewer that renders inline, so there the
+ * preview falls back to showing the document in a frame (the route allows
+ * same-origin framing for exactly this — see next.config.ts). Phones have no
+ * such viewer, and keep the message pointing at "Open" and "Download".
+ * Either way the failure is reported to Sentry, with the browser version, so
+ * the next one is diagnosable rather than anecdotal.
  */
 
 /** Above this, extra pixels cost memory and buy nothing visible. */
@@ -121,7 +135,24 @@ interface PdfPreviewProps {
 type Status =
   | { kind: "loading" }
   | { kind: "ready"; pages: number }
+  | { kind: "native" }
   | { kind: "error"; message: string }
+
+/**
+ * Whether this browser shows a PDF inline in a frame with its own viewer.
+ *
+ * `navigator.pdfViewerEnabled` answers it directly where it exists (Chrome
+ * 94+, Firefox 99+, Safari 16.4+). Older desktop browsers predate the
+ * property but all ship a viewer; phones and tablets do not render a framed
+ * PDF usefully even when they claim one. iPadOS reports a Mac user agent, so
+ * touch points tell the two apart.
+ */
+function canShowPdfInline(): boolean {
+  if (typeof navigator === "undefined") return false
+  const touchDevice = navigator.maxTouchPoints > 1 || /Android|iPhone|iPad|iPod|Mobi/i.test(navigator.userAgent)
+  if (touchDevice) return false
+  return navigator.pdfViewerEnabled !== false
+}
 
 export function PdfPreview({ src, label, className }: PdfPreviewProps) {
   const canvasHostRef = React.useRef<HTMLDivElement>(null)
@@ -231,10 +262,18 @@ export function PdfPreview({ src, label, className }: PdfPreviewProps) {
       } catch (error) {
         if (cancelled) return
         console.error("[pdf-preview] could not render the document", error)
-        setStatus({
-          kind: "error",
-          message: "The preview could not be drawn here. Open or download the document instead.",
+        const fallback = canShowPdfInline()
+        Sentry.captureException(error, {
+          tags: { feature: "pdf-preview", fallback: fallback ? "native-viewer" : "none" },
         })
+        setStatus(
+          fallback
+            ? { kind: "native" }
+            : {
+                kind: "error",
+                message: "The preview could not be drawn here. Open or download the document instead.",
+              }
+        )
       }
     })()
 
@@ -264,6 +303,12 @@ export function PdfPreview({ src, label, className }: PdfPreviewProps) {
           <AlertTriangle aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-warning" />
           {status.message}
         </p>
+      ) : null}
+
+      {status.kind === "native" ? (
+        // Same-origin, session-authenticated, and the exact bytes PDF.js
+        // would have drawn. `min-h` because a frame has no intrinsic height.
+        <iframe src={src} title={label} className="block h-[60vh] min-h-96 w-full rounded-md bg-white" />
       ) : null}
 
       {status.kind === "loading" ? (

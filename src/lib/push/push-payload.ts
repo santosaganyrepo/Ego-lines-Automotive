@@ -17,7 +17,7 @@
 
 export const PUSH_PAYLOAD_VERSION = 1
 
-export type PushKind = "QUOTE_REQUEST" | "SECURITY" | "TEST"
+export type PushKind = "QUOTE_REQUEST" | "QUOTE_ACCEPTED" | "SECURITY" | "TEST"
 
 export interface PushPayload {
   v: typeof PUSH_PAYLOAD_VERSION

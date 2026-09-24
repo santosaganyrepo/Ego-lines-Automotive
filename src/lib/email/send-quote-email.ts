@@ -1,6 +1,6 @@
 import "server-only"
 
-import { escapeHtml } from "@/lib/email/email-layout"
+import { quoteEmailHtml } from "@/lib/email/quote-email-html"
 import { sendEmail } from "@/lib/email/send-email"
 
 /**
@@ -25,6 +25,10 @@ export interface SendQuoteEmailInput {
   /** The rendered quotation PDF, attached when the operator has the
    *  "Attach PDF quotation" toggle on. Omitted for a text-only send. */
   attachment?: SendQuoteEmailAttachment
+  /** The customer's "Accept quotation" page — shown as the email's main button. */
+  acceptUrl?: string | null
+  /** The secure PDF link — shown as a secondary button beside it. */
+  pdfUrl?: string | null
   idempotencyKey?: string
 }
 
@@ -35,7 +39,7 @@ export async function sendQuoteEmail(input: SendQuoteEmailInput): Promise<SendQu
     to: input.to,
     subject: input.subject,
     text: input.text,
-    html: textToSimpleHtml(input.text),
+    html: quoteEmailHtml(input.text, { acceptUrl: input.acceptUrl ?? null, pdfUrl: input.pdfUrl ?? null }),
     attachments: input.attachment ? [input.attachment] : undefined,
     idempotencyKey: input.idempotencyKey,
   })
@@ -51,12 +55,4 @@ export async function sendQuoteEmail(input: SendQuoteEmailInput): Promise<SendQu
         ? "Email sending isn't configured yet. Add RESEND_API_KEY (see .env.example) to send quotations by email, or send this one over WhatsApp instead."
         : "Could not send the email. Please try again shortly.",
   }
-}
-
-/** A minimal HTML rendering of the same plain-text body, so mail clients
- *  that prefer HTML still show readable paragraphs rather than one run-on
- *  line. Deliberately not a branded template — the PDF attachment already
- *  carries the logo and layout; this is the envelope, not the document. */
-function textToSimpleHtml(text: string): string {
-  return `<div style="font-family:Helvetica,Arial,sans-serif;font-size:14px;line-height:1.6;color:#141414;white-space:pre-wrap;">${escapeHtml(text)}</div>`
 }

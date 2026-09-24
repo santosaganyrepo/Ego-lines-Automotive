@@ -15,7 +15,7 @@ import {
 } from "@/lib/auth/admin-sessions"
 import { getClientIp } from "@/lib/auth/client-ip"
 import { getSessionUser } from "@/lib/auth/dal"
-import { getEmailLinkOrigin } from "@/lib/auth/email-link-origin"
+import { sendAdminPasswordResetEmail } from "@/lib/auth/password-reset-email"
 import {
   ADMIN_LOGIN_RATE_LIMITED_MESSAGE,
   PASSWORD_RESET_MAX_ATTEMPTS,
@@ -38,6 +38,7 @@ import { getOperationalSettings } from "@/lib/queries/settings.queries"
 import { createClient } from "@/lib/supabase/server"
 import {
   passwordResetRequestSchema,
+  passwordResetTokenSchema,
   signInSchema,
   updatePasswordSchema,
 } from "@/lib/validations/auth.schema"
@@ -421,19 +422,14 @@ export async function requestPasswordResetAction(
     return { notice: genericNotice }
   }
 
-  const origin = await getEmailLinkOrigin()
-  const supabase = await createClient()
+  // Minted and emailed by the application; see password-reset-email.ts for
+  // why Supabase's own reset email is only the fallback.
+  const delivery = await sendAdminPasswordResetEmail(email)
 
-  const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    // Supabase sends a one-time token to this URL; /auth/confirm exchanges
-    // it for a recovery session and then forwards to the form below.
-    redirectTo: `${origin}/auth/confirm?next=${encodeURIComponent(`${ADMIN_BASE_PATH}/reset-password`)}`,
-  })
-
-  if (error) {
+  if (delivery === "FAILED") {
     logSecurityEvent("admin_password_reset_send_failed", {
       email: redactEmail(email),
-      reason: error.code ?? "unknown",
+      reason: "delivery_failed",
     })
 
     // Still the generic notice. A "we could not send that email" response
@@ -450,6 +446,36 @@ export async function requestPasswordResetAction(
   })
 
   return { notice: genericNotice }
+}
+
+/**
+ * Spends the one-time token from a password-reset email and starts the
+ * recovery session the "Set a new password" form needs.
+ *
+ * A POST, from the "Continue" button on the reset page, on purpose. The
+ * emailed link only *opens* that page: mail scanners that follow every link
+ * in an inbox would otherwise redeem the token before the administrator ever
+ * clicked it, and they would find "this link is invalid or has expired".
+ *
+ * Every failure looks the same — expired, already used, or forged — for the
+ * reason written on the login page's `invalid_link` message.
+ */
+export async function redeemPasswordResetLinkAction(formData: FormData): Promise<never> {
+  const parsed = passwordResetTokenSchema.safeParse({ tokenHash: formData.get("tokenHash") })
+  if (!parsed.success) {
+    redirect(`${ADMIN_BASE_PATH}/login?error=invalid_link`)
+  }
+
+  const supabase = await createClient()
+  const { error } = await supabase.auth.verifyOtp({ token_hash: parsed.data.tokenHash, type: "recovery" })
+
+  if (error) {
+    logSecurityEvent("admin_password_reset_link_refused", { reason: error.code ?? "unknown" })
+    redirect(`${ADMIN_BASE_PATH}/login?error=invalid_link`)
+  }
+
+  // The same page, without the spent token in the address bar or history.
+  redirect(`${ADMIN_BASE_PATH}/reset-password`)
 }
 
 /**

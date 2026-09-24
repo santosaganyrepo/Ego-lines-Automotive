@@ -500,6 +500,24 @@ async function main() {
       `UPDATE "Quote" SET "discountType" = 'FIXED_AMOUNT', "discountValue" = -1 WHERE id = 'chk-quote'`
     )
 
+    section("A customer's online acceptance is complete or absent")
+    await mustAccept(
+      "an acceptance with its time and total",
+      `UPDATE "Quote" SET "customerAcceptedAt" = NOW(), "customerAcceptedTotal" = 22000.00, "customerAcceptanceNote" = 'Yes' WHERE id = 'chk-quote'`
+    )
+    await mustReject(
+      "an acceptance time without the accepted total",
+      `UPDATE "Quote" SET "customerAcceptedAt" = NOW(), "customerAcceptedTotal" = NULL WHERE id = 'chk-quote'`
+    )
+    await mustReject(
+      "a note with no acceptance",
+      `UPDATE "Quote" SET "customerAcceptedAt" = NULL, "customerAcceptedTotal" = NULL, "customerAcceptanceNote" = 'Yes' WHERE id = 'chk-quote'`
+    )
+    await mustReject(
+      "a negative accepted total",
+      `UPDATE "Quote" SET "customerAcceptedAt" = NOW(), "customerAcceptedTotal" = -1 WHERE id = 'chk-quote'`
+    )
+
     section("The objects the catalogue depends on are installed")
     const expectedConstraints = [
       "AdminPushSubscription_shape_check",
@@ -519,6 +537,7 @@ async function main() {
       "OrderItem_quantity_positive_check",
       "OrderItem_stock_reserved_check",
       "Quote_costs_non_negative_check",
+      "Quote_customer_acceptance_check",
       "Quote_discount_check",
       "QuoteItem_accessory_no_product_check",
       "QuoteItem_at_most_one_product_check",

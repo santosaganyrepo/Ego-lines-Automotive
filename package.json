@@ -7,7 +7,7 @@
   },
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint",
     "typecheck": "next typegen && tsc --noEmit",
@@ -23,7 +23,8 @@
     "storage:setup": "NODE_OPTIONS=--experimental-websocket tsx scripts/create-storage-buckets.ts",
     "admin:create": "NODE_OPTIONS=--experimental-websocket tsx scripts/create-admin.ts",
     "admin:reset-link": "NODE_OPTIONS=--experimental-websocket tsx scripts/admin-reset-link.ts",
-    "admin:reset-2fa": "NODE_OPTIONS=--experimental-websocket tsx scripts/admin-reset-2fa.ts"
+    "admin:reset-2fa": "NODE_OPTIONS=--experimental-websocket tsx scripts/admin-reset-2fa.ts",
+    "auth:configure-urls": "tsx scripts/configure-auth-urls.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",

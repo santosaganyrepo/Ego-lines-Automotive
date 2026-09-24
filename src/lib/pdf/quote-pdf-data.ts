@@ -11,7 +11,7 @@ import {
 /**
  * Maps a quotation's stored fields to what the PDF actually renders.
  *
- * Pure and separate from the database read (`getQuoteForPdf` in
+ * Pure and separate from the database read (`getQuoteForAcceptance` in
  * quote.queries.ts) so the two can be tested and reasoned about
  * independently: this file decides what a customer sees, that one decides
  * what is allowed to reach it. Nothing internal is threaded through here —

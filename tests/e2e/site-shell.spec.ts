@@ -152,7 +152,7 @@ test("skip link is the first stop in the tab order and targets the content", asy
 
 test.describe("scroll reveal", () => {
   test("content below the fold becomes visible once scrolled to", async ({ page }) => {
-    await page.goto("/design-system")
+    await page.goto("/track-my-order")
 
     const revealed = page.locator("[data-reveal]").last()
     await revealed.scrollIntoViewIfNeeded()
@@ -169,7 +169,7 @@ test.describe("scroll reveal", () => {
     // still reporting no-preference, so the test passed or failed for
     // reasons unrelated to the thing it is meant to check.
     await page.emulateMedia({ reducedMotion: "reduce" })
-    await page.goto("/design-system")
+    await page.goto("/track-my-order")
 
     const opacities = await page
       .locator("[data-reveal]")
@@ -188,7 +188,7 @@ test.describe("scroll reveal", () => {
     const page = await context.newPage()
 
     try {
-      await page.goto("/design-system")
+      await page.goto("/track-my-order")
 
       const opacities = await page
         .locator("[data-reveal]")
@@ -249,7 +249,7 @@ test.describe("header legibility", () => {
     // the display. Asserting on the button alone would not have caught it —
     // the button was correctly positioned relative to a viewport that was
     // itself wrong — so the page width is checked as well.
-    for (const route of ["/", "/design-system", "/cars", "/contact"]) {
+    for (const route of ["/", "/how-it-works", "/cars", "/contact"]) {
       await page.goto(route)
 
       const { scrollWidth, clientWidth } = await page.evaluate(() => ({

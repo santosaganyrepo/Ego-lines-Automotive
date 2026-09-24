@@ -13,6 +13,9 @@ import type { QuotePdfData } from "@/lib/pdf/quote-pdf-data"
  * any future caller (e.g. attaching the PDF to a stored document once
  * Documents land in Wave B) share exactly one rendering path.
  */
-export async function renderQuotePdfBuffer(data: QuotePdfData): Promise<Buffer> {
-  return renderToBuffer(<QuoteDocument data={data} />)
+export async function renderQuotePdfBuffer(
+  data: QuotePdfData,
+  options: { acceptUrl?: string | null } = {}
+): Promise<Buffer> {
+  return renderToBuffer(<QuoteDocument data={data} acceptUrl={options.acceptUrl} />)
 }

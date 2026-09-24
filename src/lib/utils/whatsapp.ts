@@ -157,6 +157,22 @@ export function buildQuoteFollowUpWhatsAppMessage({
 }
 
 /**
+ * The message a customer sends from their quotation's Accept page, when they
+ * would rather talk it through than press Accept — a question, a counter-
+ * offer, or accepting in their own words. The quote number is what lets
+ * whoever answers open the right quotation at once.
+ */
+export function buildQuotationWhatsAppMessage({
+  siteName,
+  quoteNumber,
+}: {
+  siteName: string
+  quoteNumber: string
+}): string {
+  return `Hello ${siteName}, I am writing about my quotation ${quoteNumber}.`
+}
+
+/**
  * The message a customer sends from the tracking page.
  *
  * The tracking number is the only identifier this customer has — they may

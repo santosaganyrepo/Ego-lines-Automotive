@@ -1,8 +1,5 @@
-import Link from "next/link";
-
 import { CartProvider } from "@/components/cart/cart-provider";
-import { buttonVariants } from "@/components/ui/button";
-import { Container } from "@/components/layout/container";
+import { NotFoundContent } from "@/components/shared/not-found-content";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteTopBar, hasTopBarContent } from "@/components/layout/site-top-bar";
@@ -26,6 +23,11 @@ export const metadata = {
  * because an unmatched URL belongs to no group and so would never reach a
  * group-scoped not-found. It therefore composes the header and footer
  * itself to stay inside the same shell as the rest of the site.
+ *
+ * A public page that calls `notFound()` (a sold car's old link, a mistyped
+ * part) is answered by src/app/(public)/not-found.tsx instead, which renders
+ * only the message: the public layout around it already has the header and
+ * footer, and this page's own would appear a second time inside them.
  *
  * It is written to be a useful redirect rather than a dead end: every route
  * in the main navigation now resolves, so anyone landing here has followed a
@@ -64,66 +66,7 @@ export default async function NotFound() {
         />
 
         <main className="flex flex-1 items-center pt-(--header-offset)">
-          <Container className="py-20 md:py-32">
-            <div className="flex max-w-2xl flex-col gap-6">
-              <span className="eyebrow text-gold-ink">Error 404</span>
-
-              <h1 className="text-h1">This page isn&apos;t here</h1>
-
-              <p className="max-w-xl text-body-lg text-muted-foreground">
-                The page you&apos;re looking for may have moved, or the address
-                may have been mistyped. Our vehicles and our spare parts are
-                both below.
-              </p>
-
-              <div className="mt-2 flex flex-wrap gap-3">
-                <Link
-                  href="/cars"
-                  className={buttonVariants({ variant: "default", size: "lg" })}
-                >
-                  Browse Vehicles
-                </Link>
-                {/* The parts catalogue is live, so it belongs among the ways
-                    out of a 404 rather than in an apology above it. */}
-                <Link
-                  href="/spare-parts"
-                  className={buttonVariants({ variant: "outline", size: "lg" })}
-                >
-                  Spare Parts
-                </Link>
-                <Link
-                  href="/track-my-order"
-                  className={buttonVariants({ variant: "outline", size: "lg" })}
-                >
-                  Track My Order
-                </Link>
-              </div>
-
-              <div className="mt-6 border-t border-border pt-6">
-                <p className="text-small text-muted-foreground">
-                  Looking for something specific?{" "}
-                  {settings.catalogDisplay.actions.getQuote ? (
-                    <>
-                      <Link
-                        href="/get-a-quote"
-                        className="text-foreground underline underline-offset-4 hover:text-gold-ink"
-                      >
-                        Request a vehicle
-                      </Link>{" "}
-                      or{" "}
-                    </>
-                  ) : null}
-                  <Link
-                    href="/contact"
-                    className="text-foreground underline underline-offset-4 hover:text-gold-ink"
-                  >
-                    contact our team
-                  </Link>
-                  .
-                </p>
-              </div>
-            </div>
-          </Container>
+          <NotFoundContent settings={settings} />
         </main>
 
         <SiteFooter />

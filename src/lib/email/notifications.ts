@@ -16,6 +16,7 @@ import { formatCurrency } from "@/lib/utils/format-currency"
  * The emails the system sends on its own, at each stage of an enquiry's life:
  *
  *   quote request received  → the customer, and every active administrator
+ *   quotation accepted       → every active administrator, and the customer
  *   quote converted to order → the customer (order confirmed, what to pay)
  *   payment recorded         → the customer (receipt, balance, what is next)
  *   payment refunded         → the customer
@@ -43,7 +44,12 @@ import { formatCurrency } from "@/lib/utils/format-currency"
 
 export type NotificationOutcome = "SENT" | "NO_RECIPIENT" | "NOT_CONFIGURED" | "DISABLED" | "FAILED"
 
-type Audience = "customer" | "admin"
+/**
+ * "admin" is the new-lead alert (its own switch in Settings); "admin-activity"
+ * is anything else staff are told about — today, a customer accepting a
+ * quotation — and follows the admin email channel switch alone.
+ */
+type Audience = "customer" | "admin" | "admin-activity"
 
 /** The sender's name as configured in Settings, and the public site's address. */
 async function emailBrand(): Promise<EmailBrand> {
@@ -53,9 +59,14 @@ async function emailBrand(): Promise<EmailBrand> {
 async function isAudienceEnabled(audience: Audience): Promise<boolean> {
   const { notifications } = await getOperationalSettings()
 
-  return audience === "customer"
-    ? notifications.customerEmailsEnabled
-    : notifications.notifyAdminsOfNewQuotes && notifications.adminEmailNotificationsEnabled
+  switch (audience) {
+    case "customer":
+      return notifications.customerEmailsEnabled
+    case "admin":
+      return notifications.notifyAdminsOfNewQuotes && notifications.adminEmailNotificationsEnabled
+    case "admin-activity":
+      return notifications.adminEmailNotificationsEnabled
+  }
 }
 
 async function deliver(
@@ -225,6 +236,82 @@ export async function notifyAdminsOfQuoteRequest(input: {
         url: `${siteConfig.url}${adminPath(`/quotes/${input.quoteId}`)}`,
       },
     },
+    input.quoteNumber
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Quotation accepted by the customer
+// ─────────────────────────────────────────────────────────────────────
+
+export async function notifyAdminsOfQuoteAcceptance(input: {
+  quoteId: string
+  quoteNumber: string
+  contactName: string
+  total: number
+  note: string | null
+}): Promise<NotificationOutcome> {
+  if (!(await isAudienceEnabled("admin-activity"))) return "DISABLED"
+
+  let recipients: string[]
+  try {
+    const admins = await prisma.adminProfile.findMany({ where: { isActive: true }, select: { email: true } })
+    recipients = admins.map((admin) => admin.email)
+  } catch (error) {
+    console.error("[email] could not load administrator addresses for an accepted quotation", error)
+    return "FAILED"
+  }
+
+  return deliver(
+    "admin-quote-accepted",
+    "admin-activity",
+    recipients,
+    `Quotation ${input.quoteNumber} accepted — ${input.contactName}`,
+    {
+      preheader: `${input.contactName} accepted ${input.quoteNumber} (${formatCurrency(input.total)}). Convert it to an order.`,
+      heading: "A customer accepted their quotation",
+      greeting: "Hello,",
+      paragraphs: [
+        `${input.contactName} has accepted quotation ${input.quoteNumber} online. It is now marked Accepted and is ready to be converted to an order.`,
+        ...(input.note ? [`Their message:\n${input.note}`] : []),
+      ],
+      details: [
+        { label: "Reference", value: input.quoteNumber },
+        { label: "Accepted total", value: formatCurrency(input.total) },
+      ],
+      callToAction: {
+        label: "Open in dashboard",
+        url: `${siteConfig.url}${adminPath(`/quotes/${input.quoteId}`)}`,
+      },
+    },
+    input.quoteNumber
+  )
+}
+
+export async function notifyCustomerQuoteAccepted(input: {
+  to: string | null
+  customerName: string
+  quoteNumber: string
+  total: number
+}): Promise<NotificationOutcome> {
+  return deliver(
+    "quote-accepted",
+    "customer",
+    input.to,
+    `Thank you — quotation ${input.quoteNumber} accepted`,
+    (brand) => ({
+      preheader: `We have your acceptance of ${input.quoteNumber}. Next: your order and first payment.`,
+      heading: "Thank you for accepting your quotation",
+      greeting: greeting(input.customerName),
+      paragraphs: [
+        `We have received your acceptance of quotation ${input.quoteNumber}. Our team at ${brand.siteName} will now confirm your order and send you the payment details.`,
+      ],
+      details: [
+        { label: "Reference", value: input.quoteNumber },
+        { label: "Agreed total", value: formatCurrency(input.total) },
+      ],
+      closing: [CONTACT_CLOSING],
+    }),
     input.quoteNumber
   )
 }

@@ -23,23 +23,25 @@ function uniqueModel() {
 }
 
 async function fillVehicleForm(page: Page, model: string, price = "22500") {
-  await page.getByLabel("Make").fill(TEST_MAKE)
-  await page.getByLabel("Model").fill(model)
-  await page.getByLabel("Year").fill("2021")
-  await page.getByLabel("Price (USD)").fill(price)
-  await page.getByLabel("Mileage (km)").fill("42000")
-  await page.getByLabel("Engine size").fill("2.0L")
-  await page.getByLabel("Current location").fill("Yokohama, Japan")
-  await page.getByLabel("Exterior colour").fill("Black")
-  await page.getByLabel("Interior colour").fill("Black")
+  await page.getByLabel("Make", { exact: true }).fill(TEST_MAKE)
+  await page.getByLabel("Model", { exact: true }).fill(model)
+  await page.getByLabel("Year", { exact: true }).fill("2021")
+  await page.getByLabel("Price (USD)", { exact: true }).fill(price)
+  await page.getByLabel("Mileage (km)", { exact: true }).fill("42000")
+  await page.getByLabel("Engine size", { exact: true }).fill("2.0L")
+  await page.getByLabel("Current location", { exact: true }).fill("Yokohama, Japan")
+  await page.getByLabel("Exterior colour", { exact: true }).fill("Black")
+  await page.getByLabel("Interior colour", { exact: true }).fill("Black")
   await page
-    .getByLabel("Description")
+    .getByLabel("Description", { exact: true })
     .fill("Automated test listing. Safe to archive — created by the e2e suite.")
 }
 
 /** Archives the vehicle currently open, so the suite leaves nothing live. */
 async function archiveCurrent(page: Page) {
-  const archive = page.getByRole("button", { name: "Archive" })
+  // `exact`: the vehicles list has an "Archived" status filter chip, which a
+  // substring match would find if this ran before a navigation finished.
+  const archive = page.getByRole("button", { name: "Archive", exact: true })
   if (await archive.isVisible().catch(() => false)) {
     await archive.click()
     // Waits on the action's own confirmation rather than on the status
@@ -93,7 +95,7 @@ test.describe("vehicle inventory", () => {
 
     // Three digits too many — the classic data-entry slip this bound exists
     // to catch.
-    await page.getByLabel("Mileage (km)").fill("42000000")
+    await page.getByLabel("Mileage (km)", { exact: true }).fill("42000000")
     await page.getByRole("button", { name: "Create vehicle" }).click()
 
     await expect(page.getByText("That mileage looks wrong")).toBeVisible()
@@ -112,13 +114,13 @@ test.describe("vehicle inventory", () => {
      * fields" over a blank form. Assert several, spanning a text input, a
      * number, a select and the textarea, because they fail independently.
      */
-    await expect(page.getByLabel("Make")).toHaveValue(TEST_MAKE)
-    await expect(page.getByLabel("Model")).toHaveValue(model)
-    await expect(page.getByLabel("Price (USD)")).toHaveValue("22500")
-    await expect(page.getByLabel("Mileage (km)")).toHaveValue("42000000")
-    await expect(page.getByLabel("Engine size")).toHaveValue("2.0L")
-    await expect(page.getByLabel("Current location")).toHaveValue("Yokohama, Japan")
-    await expect(page.getByLabel("Description")).not.toBeEmpty()
+    await expect(page.getByLabel("Make", { exact: true })).toHaveValue(TEST_MAKE)
+    await expect(page.getByLabel("Model", { exact: true })).toHaveValue(model)
+    await expect(page.getByLabel("Price (USD)", { exact: true })).toHaveValue("22500")
+    await expect(page.getByLabel("Mileage (km)", { exact: true })).toHaveValue("42000000")
+    await expect(page.getByLabel("Engine size", { exact: true })).toHaveValue("2.0L")
+    await expect(page.getByLabel("Current location", { exact: true })).toHaveValue("Yokohama, Japan")
+    await expect(page.getByLabel("Description", { exact: true })).not.toBeEmpty()
   })
 
   test("keeps a rejected edit on screen instead of reverting it", async ({ page }) => {
@@ -133,13 +135,13 @@ test.describe("vehicle inventory", () => {
       // A price the operator meant, alongside a mileage they mistyped. The
       // save is refused — and the corrected price must survive the refusal,
       // or fixing the mileage silently reverts the price too.
-      await page.getByLabel("Price (USD)").fill("19950")
-      await page.getByLabel("Mileage (km)").fill("42000000")
+      await page.getByLabel("Price (USD)", { exact: true }).fill("19950")
+      await page.getByLabel("Mileage (km)", { exact: true }).fill("42000000")
       await page.getByRole("button", { name: "Save changes" }).click()
 
       await expect(page.getByText("That mileage looks wrong")).toBeVisible()
-      await expect(page.getByLabel("Price (USD)")).toHaveValue("19950")
-      await expect(page.getByLabel("Mileage (km)")).toHaveValue("42000000")
+      await expect(page.getByLabel("Price (USD)", { exact: true })).toHaveValue("19950")
+      await expect(page.getByLabel("Mileage (km)", { exact: true })).toHaveValue("42000000")
     } finally {
       await archiveCurrent(page)
     }
@@ -181,9 +183,11 @@ test.describe("vehicle inventory", () => {
     await expect(page).toHaveURL(/\?created=1$/)
 
     try {
-      const slugBefore = await page.locator("code").first().innerText()
+      // The listing's public address, shown in the page header.
+      const webAddress = () => page.getByText(/^\/cars\//).first().innerText()
+      const slugBefore = await webAddress()
 
-      await page.getByLabel("Price (USD)").fill("19950")
+      await page.getByLabel("Price (USD)", { exact: true }).fill("19950")
       await page.getByRole("button", { name: "Save changes" }).click()
 
       // The confirmation is the signal that the write committed. Reloading
@@ -193,11 +197,11 @@ test.describe("vehicle inventory", () => {
       await expect(page.getByText("Changes saved.")).toBeVisible()
 
       await page.reload()
-      await expect(page.getByLabel("Price (USD)")).toHaveValue("19950")
+      await expect(page.getByLabel("Price (USD)", { exact: true })).toHaveValue("19950")
 
       // The slug is a public URL that gets shared and indexed. Correcting a
       // price must never change it.
-      expect(await page.locator("code").first().innerText()).toBe(slugBefore)
+      expect(await webAddress()).toBe(slugBefore)
     } finally {
       await archiveCurrent(page)
     }
@@ -217,7 +221,7 @@ test.describe("vehicle inventory", () => {
 
       // Filters live in the URL, so the list is shareable and survives Back.
       await expect(page).toHaveURL(new RegExp(`search=${model}`), { timeout: 15_000 })
-      await expect(page.getByRole("link", { name: new RegExp(model) })).toBeVisible()
+      await expect(page.getByRole("link", { name: new RegExp(model) }).first()).toBeVisible()
 
       // The vehicle is a draft, so the Published filter must exclude it.
       await page.goto(`${ADMIN_BASE_PATH}/vehicles?search=${model}&status=PUBLISHED`)
@@ -225,7 +229,12 @@ test.describe("vehicle inventory", () => {
     } finally {
       await page.goto(adminPath("/vehicles"))
       await page.getByRole("searchbox", { name: "Search vehicles" }).fill(model)
-      await page.getByRole("link", { name: new RegExp(model) }).click()
+      // The search is written to the URL after a short debounce; wait for it,
+      // or that navigation lands after the click below and undoes it.
+      await expect(page).toHaveURL(new RegExp(`search=${model}`), { timeout: 15_000 })
+      // The row's own link; the row also has an "Add photographs" link naming it.
+      await page.getByRole("link", { name: new RegExp(model) }).first().click()
+      await expect(page).toHaveURL(/\/vehicles\/c[a-z0-9]+/)
       await archiveCurrent(page)
     }
   })
@@ -321,7 +330,9 @@ test.describe("vehicle status transitions", () => {
 
       // And the vehicle is still sold — nothing was written.
       await page.reload()
-      await expect(page.getByText("Sold and no longer available")).toBeVisible()
+      const status = page.getByRole("region", { name: "Listing status" })
+      await expect(status.getByText("Sold", { exact: true })).toBeVisible()
+      await expect(status.getByText("Not visible on the website")).toBeVisible()
     } finally {
       await archiveCurrent(page)
     }

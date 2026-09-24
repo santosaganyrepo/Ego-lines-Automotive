@@ -7,7 +7,9 @@ import {
   consumeRateLimit,
 } from "@/lib/auth/rate-limit"
 import { getClientIp } from "@/lib/auth/client-ip"
-import { getQuoteForPdf } from "@/lib/queries/quote.queries"
+import { siteConfig } from "@/config/site"
+import { getQuoteForAcceptance } from "@/lib/queries/quote.queries"
+import { quoteAcceptanceState, quoteAcceptanceUrl } from "@/lib/quotes/quote-acceptance"
 import { buildQuotePdfData, buildQuotationFilename } from "@/lib/pdf/quote-pdf-data"
 import { getPublicSiteSettings } from "@/lib/queries/settings.queries"
 import { renderQuotePdfBuffer } from "@/lib/pdf/render-quote-pdf"
@@ -23,7 +25,7 @@ import { renderQuotePdfBuffer } from "@/lib/pdf/render-quote-pdf"
  * this one document and nothing else (see the schema documentation on
  * `Quote.shareToken`). There is no admin session and no customer account
  * involved: possession of the token *is* the authorization. It reaches
- * exactly one query (`getQuoteForPdf`), which selects only the fields a
+ * exactly one query (`getQuoteForAcceptance`), which selects only the fields a
  * customer's own quotation may show them — never `adminNotes`, the customer
  * record, or the linked order.
  *
@@ -106,16 +108,30 @@ export async function GET(
     }
   }
 
-  const quote = await getQuoteForPdf(token)
+  const found = await getQuoteForAcceptance(token)
 
-  if (!quote) {
+  if (!found) {
     return failurePage(404, NOT_FOUND.title, NOT_FOUND.message)
   }
+
+  const quote = found.document
+  // The "Accept quotation" button is printed only while there is something
+  // to accept; an accepted or ordered quotation's PDF is just the document.
+  const acceptUrl =
+    quoteAcceptanceState({
+      status: found.status,
+      customerAcceptedAt: found.customerAcceptedAt,
+      validUntil: quote.validUntil,
+    }) === "OPEN"
+      ? quoteAcceptanceUrl(siteConfig.url, token)
+      : null
 
   let buffer: Buffer
 
   try {
-    buffer = await renderQuotePdfBuffer(buildQuotePdfData(quote, (await getPublicSiteSettings()).businessName))
+    buffer = await renderQuotePdfBuffer(buildQuotePdfData(quote, (await getPublicSiteSettings()).businessName), {
+      acceptUrl,
+    })
   } catch (error) {
     console.error("[quotation-pdf] failed to render PDF", error)
     return failurePage(

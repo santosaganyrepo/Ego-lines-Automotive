@@ -45,6 +45,34 @@ export async function pushNewQuoteRequest(input: {
   }
 }
 
+/**
+ * A customer pressed "Accept quotation" on their quotation link. Sent to every
+ * active administrator while the push channel is on — the one moment a
+ * customer is ready to pay, and worth interrupting for. No amount or name on
+ * the lock screen, as for every notification here.
+ */
+export async function pushQuoteAccepted(input: { quoteId: string; quoteNumber: string }): Promise<void> {
+  try {
+    const { notifications } = await getOperationalSettings()
+    if (!notifications.pushNotificationsEnabled) return
+
+    await sendPushToAdmins(
+      { allActiveAdmins: true },
+      buildPushPayload({
+        kind: "QUOTE_ACCEPTED",
+        title: "Quotation accepted",
+        body: `The customer accepted ${input.quoteNumber}. Tap to open it and convert it to an order.`,
+        path: `/quotes/${input.quoteId}`,
+        tag: `accepted-${input.quoteNumber}`,
+        requireInteraction: true,
+      }),
+      { ttlSeconds: 24 * 60 * 60, urgency: "high" }
+    )
+  } catch (error) {
+    console.error("[push] could not announce an accepted quotation", error)
+  }
+}
+
 /** How far back a device counts as "seen before" for the new-device alert. */
 const KNOWN_DEVICE_DAYS = 90
 

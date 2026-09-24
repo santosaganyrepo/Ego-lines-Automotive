@@ -24,15 +24,15 @@ function uniqueName() {
 }
 
 async function fillPartForm(page: Page, name: string, price = "120") {
-  await page.getByLabel("Part name").fill(name)
+  await page.getByLabel("Part name", { exact: true }).fill(name)
   // Availability is a published promise and is chosen by the operator — it
   // is not derived from the stock figure below. Set explicitly here so the
   // flow exercises the field rather than riding on its default.
-  await page.getByLabel("Availability").selectOption("IN_STOCK")
-  await page.getByLabel("Stock quantity").fill("4")
-  await page.getByLabel("Price (USD)").fill(price)
+  await page.getByLabel("Availability", { exact: true }).selectOption("IN_STOCK")
+  await page.getByRole("spinbutton", { name: /^Stock quantity/ }).fill("4")
+  await page.getByRole("spinbutton", { name: /^Price \(USD\)/ }).fill(price)
   await page
-    .getByLabel("Description")
+    .getByLabel("Description", { exact: true })
     .fill("Automated test listing. Safe to archive — created by the e2e suite.")
 }
 
@@ -97,9 +97,9 @@ test.describe("spare parts catalogue", () => {
     const name = uniqueName()
 
     await page.goto(adminPath("/spare-parts/new"))
-    await page.getByLabel("Part name").fill(name)
+    await page.getByLabel("Part name", { exact: true }).fill(name)
     await page
-      .getByLabel("Description")
+      .getByLabel("Description", { exact: true })
       .fill("Automated test listing. Safe to archive — created by the e2e suite.")
     await page.getByRole("button", { name: "Create part" }).click()
 
@@ -111,8 +111,8 @@ test.describe("spare parts catalogue", () => {
       // With no price, the listing is quoted on enquiry — which is what an
       // empty price box means, rather than an error about a mode the operator
       // was never asked to choose.
-      await expect(page.getByLabel("Price (USD)")).toHaveValue("")
-      await expect(page.getByLabel("Stock quantity")).toHaveValue("0")
+      await expect(page.getByRole("spinbutton", { name: /^Price \(USD\)/ })).toHaveValue("")
+      await expect(page.getByRole("spinbutton", { name: /^Stock quantity/ })).toHaveValue("0")
     } finally {
       await archiveCurrent(page)
     }
@@ -126,7 +126,7 @@ test.describe("spare parts catalogue", () => {
 
     // Too short to be a description of anything, which is the one content
     // rule this form enforces.
-    await page.getByLabel("Description").fill("no")
+    await page.getByLabel("Description", { exact: true }).fill("no")
     await page.getByRole("button", { name: "Create part" }).click()
 
     await expect(page.getByText(/Check the highlighted fields/)).toBeVisible()
@@ -140,9 +140,9 @@ test.describe("spare parts catalogue", () => {
      * on success; the action echoes the submitted values back as the form's
      * defaults so the reset restores them.
      */
-    await expect(page.getByLabel("Part name")).toHaveValue(name)
-    await expect(page.getByLabel("Stock quantity")).toHaveValue("4")
-    await expect(page.getByLabel("Price (USD)")).toHaveValue("120")
+    await expect(page.getByLabel("Part name", { exact: true })).toHaveValue(name)
+    await expect(page.getByRole("spinbutton", { name: /^Stock quantity/ })).toHaveValue("4")
+    await expect(page.getByRole("spinbutton", { name: /^Price \(USD\)/ })).toHaveValue("120")
   })
 
   test("separates what customers see from what only the admin sees", async ({
@@ -159,7 +159,7 @@ test.describe("spare parts catalogue", () => {
       page.getByText("Shown on the website", { exact: true })
     ).toBeVisible()
     await expect(
-      page.getByText("Admin only — never shown on the website", { exact: true })
+      page.getByText("Admin only", { exact: true })
     ).toBeVisible()
   })
 
@@ -179,7 +179,7 @@ test.describe("spare parts catalogue", () => {
       ).toBeVisible()
 
       await page.getByRole("button", { name: "Publish" }).click()
-      await expect(page.getByText("Live in the catalogue")).toBeVisible()
+      await expect(page.getByText("Live on the website")).toBeVisible()
 
       /**
        * Unpublishing is the transition the vehicle table deliberately
@@ -223,10 +223,12 @@ test.describe("spare parts catalogue", () => {
     await expect(page).toHaveURL(/\?created=1$/)
 
     try {
-      const slugBefore = await page.locator("code").first().innerText()
+      // The listing's public address, shown in the page header.
+      const webAddress = () => page.getByText(/^\/spare-parts\//).first().innerText()
+      const slugBefore = await webAddress()
 
-      await page.getByLabel("Price (USD)").fill("99.5")
-      await page.getByLabel("Stock quantity").fill("0")
+      await page.getByRole("spinbutton", { name: /^Price \(USD\)/ }).fill("99.5")
+      await page.getByRole("spinbutton", { name: /^Stock quantity/ }).fill("0")
       await page.getByRole("button", { name: "Save changes" }).click()
 
       // The confirmation is the signal that the write committed. Reloading
@@ -234,12 +236,12 @@ test.describe("spare parts catalogue", () => {
       await expect(page.getByText("Changes saved.")).toBeVisible()
 
       await page.reload()
-      await expect(page.getByLabel("Price (USD)")).toHaveValue("99.5")
-      await expect(page.getByLabel("Stock quantity")).toHaveValue("0")
+      await expect(page.getByRole("spinbutton", { name: /^Price \(USD\)/ })).toHaveValue("99.5")
+      await expect(page.getByRole("spinbutton", { name: /^Stock quantity/ })).toHaveValue("0")
 
       // The slug is a public URL that gets shared and indexed. Correcting a
       // price must never change it.
-      expect(await page.locator("code").first().innerText()).toBe(slugBefore)
+      expect(await webAddress()).toBe(slugBefore)
     } finally {
       await archiveCurrent(page)
     }

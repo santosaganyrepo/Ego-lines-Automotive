@@ -126,8 +126,8 @@ test("refuses further sign-in attempts after the budget is spent", async ({
    * state is the unambiguous signal that a response has been rendered.
    */
   async function attempt() {
-    await page.getByLabel("Email address").fill(email)
-    await page.getByLabel("Password").fill("not-the-right-password")
+    await page.getByLabel("Email address", { exact: true }).fill(email)
+    await page.getByLabel("Password", { exact: true }).fill("not-the-right-password")
     await submit.click()
     await expect(submit).toBeDisabled()
     await expect(submit).toBeEnabled({ timeout: 30_000 })
@@ -148,5 +148,5 @@ test("refuses further sign-in attempts after the budget is spent", async ({
 
   // The email field survives the refusal, so the person is not retyping it
   // alongside everything else that has just gone wrong.
-  await expect(page.getByLabel("Email address")).toHaveValue(email)
+  await expect(page.getByLabel("Email address", { exact: true })).toHaveValue(email)
 })

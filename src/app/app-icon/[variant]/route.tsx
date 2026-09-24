@@ -33,18 +33,22 @@ type Variant = {
   inset: number
   badge?: boolean
   /**
-   * Draw the icon as a disc: everything outside the circle is transparent.
+   * Draw the icon as a favicon: a full square tile, the mark filling it.
    *
-   * Only the favicon variants use it. A browser tab, a bookmark bar and a
-   * search result all show the icon small, unframed and against whatever
-   * colour the browser's chrome happens to be, and a hard-edged square reads
-   * as a screenshot of a logo rather than as a mark — which is what the
-   * dealership was comparing themselves unfavourably against. The app icons
-   * are deliberately left square: Android applies its own mask (that is what
-   * `maskable-512` is for) and iOS its own rounded rectangle, so pre-cutting
-   * a circle there would be cropped twice.
+   * The way Sentry's and Supabase's tab icons work, at the dealership's
+   * request. A browser tab shows the icon at 16px, so the mark is the only
+   * thing that matters there and every pixel spent on a frame or on the
+   * upload's own padding is taken from it. So the mark is located in the
+   * upload (markBounds) and drawn at FAVICON_MARK_SHARE of the tile, on the
+   * upload's own background colour, with square corners — nothing of the
+   * mark can be cut off. This replaced a disc, which could only use ~73% of
+   * its diameter for a mark that fills its bounding box before the circle
+   * clipped its corners.
+   *
+   * The app icons are left alone: Android applies its own mask (that is what
+   * `maskable-512` is for) and iOS its own rounded rectangle.
    */
-  circle?: boolean
+  favicon?: boolean
 }
 
 const VARIANTS: Record<string, Variant> = {
@@ -56,21 +60,102 @@ const VARIANTS: Record<string, Variant> = {
   "apple-touch-180.png": { size: 180, inset: 0.7 },
   // Android's status-bar badge: white on transparent, drawn from its alpha.
   "badge-96.png": { size: 96, inset: 0.8, badge: true },
-  // The site favicon, as a disc. Three sizes because browsers pick per
-  // context — 16/32 in a tab, 48 in a bookmark list, 96+ on a new-tab tile —
-  // and letting the browser choose beats making it downscale one.
-  "favicon-32.png": { size: 32, inset: 0.62, circle: true },
-  "favicon-48.png": { size: 48, inset: 0.62, circle: true },
-  "favicon-96.png": { size: 96, inset: 0.62, circle: true },
+  // The site favicon. Three sizes because browsers pick per context — 16/32
+  // in a tab, 48 in a bookmark list, 96+ on a new-tab tile — and letting the
+  // browser choose beats making it downscale one. `inset` is used only by
+  // the monogram fallback; an upload is fitted to FAVICON_MARK_SHARE.
+  "favicon-32.png": { size: 32, inset: 0.9, favicon: true },
+  "favicon-48.png": { size: 48, inset: 0.9, favicon: true },
+  "favicon-96.png": { size: 96, inset: 0.9, favicon: true },
 }
 
-/** An opaque white disc the size of the icon, used as an alpha mask. */
-function circleMask(size: number): Buffer {
-  const radius = size / 2
-  return Buffer.from(
-    `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}">` +
-      `<circle cx="${radius}" cy="${radius}" r="${radius}" fill="#fff"/></svg>`
-  )
+/**
+ * Share of the favicon's edge the mark's longer side is drawn to. The rest is
+ * an even margin of background — the breathing room Sentry's and Supabase's
+ * icons keep, and what stops a mark's tips touching the tab's edge.
+ */
+const FAVICON_MARK_SHARE = 0.9
+
+/** Largest side the mark is located on; plenty for a 96px icon drawn at 4×. */
+const BOUNDS_WORKING_SIZE = 1024
+/**
+ * How far (0–255, on any channel) a pixel must differ from the background to
+ * count as part of the mark. Low enough to keep the faint, tapering tips of
+ * a metallic mark; high enough to ignore a vignette or JPEG noise in the
+ * backdrop, which is never flat black.
+ */
+const MARK_THRESHOLD = 28
+
+type Rgb = { r: number; g: number; b: number }
+
+/**
+ * The favicon tile, cut from the upload itself: a square centred on the mark,
+ * sized so the mark's longer side is FAVICON_MARK_SHARE of it.
+ *
+ * The mark is every pixel that is not background (for a transparent upload,
+ * every visible pixel). Cutting the tile out of the upload — rather than
+ * pasting the mark onto a flat square — keeps the upload's own backdrop,
+ * vignette and shadow intact around it, so there is no seam where a lifted
+ * mark meets a painted background. Where the square reaches past the upload's
+ * edge it is extended with the background colour (or transparency).
+ *
+ * An upload with no distinguishable mark is returned whole.
+ */
+async function faviconTile(source: Buffer, background: Rgb | null): Promise<Buffer> {
+  const working = await sharp(source, { limitInputPixels: 50_000_000 })
+    .rotate()
+    .resize(BOUNDS_WORKING_SIZE, BOUNDS_WORKING_SIZE, { fit: "inside", withoutEnlargement: true })
+    .ensureAlpha()
+    .png()
+    .toBuffer()
+
+  const { data, info } = await sharp(working).raw().toBuffer({ resolveWithObject: true })
+  const { width, height, channels } = info
+
+  let left = width
+  let top = height
+  let right = -1
+  let bottom = -1
+  for (let y = 0; y < height; y += 1) {
+    for (let x = 0; x < width; x += 1) {
+      const i = (y * width + x) * channels
+      const alpha = data[i + 3]!
+      const isMark = background
+        ? alpha > 0 &&
+          Math.max(
+            Math.abs(data[i]! - background.r),
+            Math.abs(data[i + 1]! - background.g),
+            Math.abs(data[i + 2]! - background.b)
+          ) > MARK_THRESHOLD
+        : alpha > MARK_THRESHOLD
+      if (isMark) {
+        if (x < left) left = x
+        if (x > right) right = x
+        if (y < top) top = y
+        if (y > bottom) bottom = y
+      }
+    }
+  }
+
+  if (right < left || bottom < top) return working
+
+  const side = Math.ceil(Math.max(right - left + 1, bottom - top + 1) / FAVICON_MARK_SHARE)
+  const squareLeft = Math.round((left + right + 1) / 2 - side / 2)
+  const squareTop = Math.round((top + bottom + 1) / 2 - side / 2)
+
+  const pad = {
+    left: Math.max(0, -squareLeft),
+    top: Math.max(0, -squareTop),
+    right: Math.max(0, squareLeft + side - width),
+    bottom: Math.max(0, squareTop + side - height),
+  }
+  const fill = background ? { ...background, alpha: 1 } : { r: 0, g: 0, b: 0, alpha: 0 }
+
+  const extended = await sharp(working).extend({ ...pad, background: fill }).png().toBuffer()
+  return sharp(extended)
+    .extract({ left: squareLeft + pad.left, top: squareTop + pad.top, width: side, height: side })
+    .png()
+    .toBuffer()
 }
 
 const MAX_SOURCE_BYTES = 6 * 1024 * 1024
@@ -126,12 +211,11 @@ async function composite(source: Buffer, variant: Variant): Promise<Buffer> {
   const image = sharp(source, { limitInputPixels: 50_000_000 }).rotate()
   const { data } = await image.clone().ensureAlpha().extract({ left: 0, top: 0, width: 1, height: 1 }).raw().toBuffer({ resolveWithObject: true })
   const opaque = data[3] === 255
-  const background = opaque ? { r: data[0]!, g: data[1]!, b: data[2]!, alpha: 1 } : BACKGROUND
+  const corner: Rgb = { r: data[0]!, g: data[1]!, b: data[2]! }
+  const background = opaque ? { ...corner, alpha: 1 } : BACKGROUND
 
-  // A disc has less usable area than the square it sits in: artwork that
-  // filled the square corner to corner would have its corners cut off, so an
-  // opaque upload is inset here as well rather than allowed to bleed.
-  const share = opaque ? (variant.circle ? 0.86 : variant.maskable ? 0.8 : 1) : variant.inset
+  // A favicon tile already carries its margin (faviconTile), so it fills the icon.
+  const share = variant.favicon ? 1 : opaque ? (variant.maskable ? 0.8 : 1) : variant.inset
   const inner = Math.round(variant.size * share)
 
   /**
@@ -142,10 +226,10 @@ async function composite(source: Buffer, variant: Variant): Promise<Buffer> {
    * icon in one Lanczos step keeps the edges clean, which is the other half
    * of what the dealership meant by "optimise it to appear better".
    */
-  const supersample = variant.circle && variant.size < 128 ? 4 : 1
+  const supersample = variant.favicon && variant.size < 128 ? 4 : 1
   const canvasSize = variant.size * supersample
 
-  const artwork = await image
+  const artwork = await (variant.favicon ? sharp(await faviconTile(source, opaque ? corner : null)) : image)
     .resize(inner * supersample, inner * supersample, {
       fit: "contain",
       background: opaque ? background : { r: 0, g: 0, b: 0, alpha: 0 },
@@ -154,11 +238,6 @@ async function composite(source: Buffer, variant: Variant): Promise<Buffer> {
     .toBuffer()
 
   const layers: OverlayOptions[] = [{ input: artwork, gravity: "center" }]
-  if (variant.circle) {
-    // `dest-in` keeps the composed pixels only where the mask is opaque,
-    // which turns the square into a disc with genuinely transparent corners.
-    layers.push({ input: circleMask(canvasSize), blend: "dest-in" })
-  }
 
   const composed = sharp({
     create: { width: canvasSize, height: canvasSize, channels: 4, background },
@@ -190,9 +269,7 @@ function monogram(name: string, variant: Variant): ImageResponse {
           fontSize: Math.round(variant.size * variant.inset * (text.length > 1 ? 0.5 : 0.66)),
           fontWeight: 700,
           letterSpacing: "0.04em",
-          // The fallback favicon is a disc for the same reason the rendered
-          // one is; every other variant stays square.
-          borderRadius: variant.circle ? "50%" : 0,
+          borderRadius: 0,
         }}
       >
         {text}

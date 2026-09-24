@@ -91,8 +91,17 @@ describe("requirePermission (pages)", () => {
 describe("every Server Action is guarded", () => {
   /** Public by design, and each protected in its own way instead: sign-in and
    *  reset are rate-limited and never reveal whether an account exists; the
-   *  quote request is validated, honeypotted and rate-limited per IP and phone. */
-  const PUBLIC_ACTIONS = new Set(["signInAction", "requestPasswordResetAction", "submitQuoteRequestAction"])
+   *  quote request is validated, honeypotted and rate-limited per IP and phone;
+   *  redeeming a reset link is authorised by the one-time token Supabase
+   *  verifies; accepting a quotation is authorised by its 256-bit share token,
+   *  rate-limited per IP, and reaches that one quote only. */
+  const PUBLIC_ACTIONS = new Set([
+    "signInAction",
+    "requestPasswordResetAction",
+    "redeemPasswordResetLinkAction",
+    "submitQuoteRequestAction",
+    "acceptQuoteAction",
+  ])
   const GUARD = /\b(authorizePermission|authorizeAdmin|getAdminAccess|getSessionUser)\(/
   const DATABASE = /\b(prisma|tx)\.\w|\.storage\.|supabase\.auth\.(?!getClaims)/
 

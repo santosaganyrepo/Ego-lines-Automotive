@@ -1,6 +1,7 @@
 // Static site configuration and the fallbacks behind BusinessSettings
 import { DEFAULT_BUSINESS_NAME } from "@/lib/constants/branding-options"
 import { mainNavLinks, type NavLink } from "@/lib/constants/nav-links"
+import { publicOriginProblem, resolveSiteUrl } from "@/lib/utils/site-url"
 
 /**
  * Reads NEXT_PUBLIC_WHATSAPP_NUMBER at module load.
@@ -27,28 +28,44 @@ function readWhatsAppNumber(): string {
 
 /**
  * The site's public origin — used for canonical URLs, the sitemap, structured
- * data, Open Graph images and the links inside emails.
+ * data, Open Graph images and the links inside emails. The rules live in
+ * src/lib/utils/site-url.ts.
  *
- * NEXT_PUBLIC_SITE_URL is the source of truth and must be set in production
- * (see .env.example). If it is missing on Vercel, the project's own
- * production domain is used, which Vercel exposes to every build; the last
- * resort is the original domain, with a warning in the build log, because a
- * canonical URL pointing at the wrong domain quietly hands search ranking to
- * that domain.
+ * Every variable is read by its literal name, not by passing `process.env`
+ * along: Next.js inlines NEXT_PUBLIC_ values into the browser bundle only
+ * where they are written out like this, and the server-only ones (VERCEL_*,
+ * CODESPACE_*) simply read as undefined there.
  */
 function readSiteUrl(): string {
-  const value = process.env.NEXT_PUBLIC_SITE_URL?.trim()
-  if (value) return value.replace(/\/+$/, "")
+  const url = resolveSiteUrl({
+    NODE_ENV: process.env.NODE_ENV,
+    PORT: process.env.PORT,
+    NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
+    VERCEL: process.env.VERCEL,
+    VERCEL_ENV: process.env.VERCEL_ENV,
+    VERCEL_URL: process.env.VERCEL_URL,
+    VERCEL_BRANCH_URL: process.env.VERCEL_BRANCH_URL,
+    VERCEL_PROJECT_PRODUCTION_URL: process.env.VERCEL_PROJECT_PRODUCTION_URL,
+    NEXT_PUBLIC_VERCEL_ENV: process.env.NEXT_PUBLIC_VERCEL_ENV,
+    NEXT_PUBLIC_VERCEL_URL: process.env.NEXT_PUBLIC_VERCEL_URL,
+    NEXT_PUBLIC_VERCEL_BRANCH_URL: process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL,
+    NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL: process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL,
+    CODESPACE_NAME: process.env.CODESPACE_NAME,
+    GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN: process.env.GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN,
+  })
 
-  const vercel = process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL?.trim()
-  if (vercel) return `https://${vercel.replace(/^https?:\/\//, "").replace(/\/+$/, "")}`
-
-  if (process.env.NODE_ENV === "production" && typeof window === "undefined") {
-    console.warn(
-      "[config/site] NEXT_PUBLIC_SITE_URL is not set — canonical URLs, the sitemap and email links fall back to https://crownlinemotors.com. Set it to the live domain."
-    )
+  if (typeof window === "undefined" && process.env.NODE_ENV === "production") {
+    const configured = process.env.NEXT_PUBLIC_SITE_URL?.trim()
+    if (!configured) {
+      console.warn(`[config/site] NEXT_PUBLIC_SITE_URL is not set — using ${url}. Set it to the live domain.`)
+    } else if (publicOriginProblem(configured) && url !== configured.replace(/\/+$/, "")) {
+      console.warn(
+        `[config/site] NEXT_PUBLIC_SITE_URL ${publicOriginProblem(configured)} — using ${url} instead. Set it to the live https:// domain.`
+      )
+    }
   }
-  return "https://crownlinemotors.com"
+
+  return url
 }
 
 export const siteConfig = {

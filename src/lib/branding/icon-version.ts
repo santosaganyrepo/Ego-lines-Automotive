@@ -25,9 +25,19 @@ export interface BrandingIconSource {
   }
 }
 
+/**
+ * Bumped whenever the *drawing* in src/app/app-icon/[variant]/route.tsx
+ * changes, so browsers holding the old picture fetch the new one even though
+ * no branding was re-uploaded. 3: favicon is a square tile, the mark found by
+ * brightness and drawn at 90% of it (2 was a clipped interim render).
+ */
+const ICON_RENDERING_REVISION = "3"
+
 export function brandingIconVersion({ businessName, branding }: BrandingIconSource): string {
   return createHash("sha256")
-    .update([businessName, branding.faviconUrl, branding.logoDarkUrl, branding.logoLightUrl].join("|"))
+    .update(
+      [ICON_RENDERING_REVISION, businessName, branding.faviconUrl, branding.logoDarkUrl, branding.logoLightUrl].join("|")
+    )
     .digest("hex")
     .slice(0, 10)
 }

@@ -2,7 +2,7 @@ import type { ReactNode } from "react"
 import type { Metadata } from "next"
 import Link from "next/link"
 import { notFound } from "next/navigation"
-import { ArrowRight, PackageCheck } from "lucide-react"
+import { ArrowRight, BadgeCheck, PackageCheck } from "lucide-react"
 
 import { AdminMetaDivider, AdminPageHeader } from "@/components/admin/admin-page-header"
 import { OrderFinanceSummaryCard } from "@/components/admin/order-finance-summary"
@@ -22,6 +22,8 @@ import { ADMIN_BASE_PATH } from "@/lib/constants/admin-routes"
 import { QUOTE_TYPE_LABELS, isQuoteConvertible, isQuoteEditable, isQuoteSendable } from "@/lib/constants/quote-status"
 import { getQuoteById } from "@/lib/queries/quote.queries"
 import { QuotePricingProvider } from "@/lib/quotes/quote-pricing-context"
+import { formatCurrency } from "@/lib/utils/format-currency"
+import { formatDateTime } from "@/lib/utils/format-date-time"
 
 export async function generateMetadata(
   props: PageProps<"/Ricky@2000/quotes/[id]">
@@ -126,6 +128,41 @@ export default async function AdminQuoteDetailPage(props: PageProps<"/Ricky@2000
               <ArrowRight aria-hidden="true" />
             </Button>
           </div>
+        ) : null}
+
+        {/* The customer pressed "Accept quotation" on their link. Shown until
+            the order exists, as the prompt to convert it; the note is theirs,
+            rendered as text. */}
+        {quote.customerAcceptance && !quote.order ? (
+          <section
+            aria-label="Customer acceptance"
+            className="relative flex flex-col gap-3 overflow-hidden rounded-xl border border-success/30 bg-success/5 py-4 pr-5 pl-6"
+          >
+            <span aria-hidden="true" className="absolute inset-y-0 left-0 w-1 bg-success" />
+            <div className="flex items-start gap-3">
+              <span
+                aria-hidden="true"
+                className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-card text-success ring-1 ring-success/25"
+              >
+                <BadgeCheck className="size-4.5" />
+              </span>
+              <div className="flex flex-col gap-0.5">
+                <p className="text-body font-medium text-foreground">
+                  The customer accepted this quotation online
+                </p>
+                <p className="text-small text-muted-foreground">
+                  {formatDateTime(quote.customerAcceptance.acceptedAt)} · at{" "}
+                  {formatCurrency(quote.customerAcceptance.total)}. Convert it to an order to reserve the stock and
+                  set up the payments.
+                </p>
+              </div>
+            </div>
+            {quote.customerAcceptance.note ? (
+              <blockquote className="ml-12 border-l-2 border-border pl-3 text-small whitespace-pre-line text-foreground">
+                {quote.customerAcceptance.note}
+              </blockquote>
+            ) : null}
+          </section>
         ) : null}
 
         {/* ── Workspace ─────────────────────────────────────────────────

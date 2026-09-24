@@ -61,8 +61,8 @@ test.describe("sign-in page", () => {
   test("is reachable without a session", async ({ page }) => {
     await page.goto(adminPath("/login"))
 
-    await expect(page.getByLabel("Email address")).toBeVisible()
-    await expect(page.getByLabel("Password")).toBeVisible()
+    await expect(page.getByLabel("Email address", { exact: true })).toBeVisible()
+    await expect(page.getByLabel("Password", { exact: true })).toBeVisible()
   })
 
   test("does not reveal whether an account exists", async ({ page }) => {
@@ -70,8 +70,8 @@ test.describe("sign-in page", () => {
     // generic message has to survive the provider's own error text.
     await page.goto(adminPath("/login"))
 
-    await page.getByLabel("Email address").fill("definitely-not-a-user@example.com")
-    await page.getByLabel("Password").fill("not-the-right-password")
+    await page.getByLabel("Email address", { exact: true }).fill("definitely-not-a-user@example.com")
+    await page.getByLabel("Password", { exact: true }).fill("not-the-right-password")
     await page.getByRole("button", { name: "Sign in" }).click()
 
     // Scoped to our own Alert component: Next.js renders a
@@ -137,7 +137,7 @@ test.describe("password recovery", () => {
   test("gives the same answer for an unknown address", async ({ page }) => {
     await page.goto(adminPath("/forgot-password"))
 
-    await page.getByLabel("Email address").fill("nobody-here@example.com")
+    await page.getByLabel("Email address", { exact: true }).fill("nobody-here@example.com")
     await page.getByRole("button", { name: "Send reset link" }).click()
 
     await expect(page.locator('[data-slot="alert"]')).toContainText(
@@ -155,10 +155,14 @@ test.describe("password recovery", () => {
 })
 
 test.describe("auth callback", () => {
-  test("rejects a request with no token", async ({ page }) => {
+  test("explains a request with no token instead of signing anyone in", async ({ page }) => {
+    // With nothing in the query the result may be in the URL fragment, which
+    // only the browser can read — so the route forwards to the page that
+    // reads it, and that page says there was nothing to confirm.
     await page.goto("/auth/confirm")
 
-    await expect(page).toHaveURL(adminUrlPattern("/login?error=invalid_link"))
+    await expect(page).toHaveURL(adminUrlPattern("/login/confirm", { exact: false }))
+    await expect(page.getByText("There was nothing to confirm in that link")).toBeVisible()
   })
 
   test("rejects a forged token", async ({ page }) => {

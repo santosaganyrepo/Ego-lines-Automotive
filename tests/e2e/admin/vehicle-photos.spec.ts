@@ -87,17 +87,17 @@ function photoFile(name: string, rgb: [number, number, number]) {
 }
 
 async function fillVehicleForm(page: Page, model: string) {
-  await page.getByLabel("Make").fill(TEST_MAKE)
-  await page.getByLabel("Model").fill(model)
-  await page.getByLabel("Year").fill("2021")
-  await page.getByLabel("Price (USD)").fill("22500")
-  await page.getByLabel("Mileage (km)").fill("42000")
-  await page.getByLabel("Engine size").fill("2.0L")
-  await page.getByLabel("Current location").fill("Yokohama, Japan")
-  await page.getByLabel("Exterior colour").fill("Black")
-  await page.getByLabel("Interior colour").fill("Black")
+  await page.getByLabel("Make", { exact: true }).fill(TEST_MAKE)
+  await page.getByLabel("Model", { exact: true }).fill(model)
+  await page.getByLabel("Year", { exact: true }).fill("2021")
+  await page.getByLabel("Price (USD)", { exact: true }).fill("22500")
+  await page.getByLabel("Mileage (km)", { exact: true }).fill("42000")
+  await page.getByLabel("Engine size", { exact: true }).fill("2.0L")
+  await page.getByLabel("Current location", { exact: true }).fill("Yokohama, Japan")
+  await page.getByLabel("Exterior colour", { exact: true }).fill("Black")
+  await page.getByLabel("Interior colour", { exact: true }).fill("Black")
   await page
-    .getByLabel("Description")
+    .getByLabel("Description", { exact: true })
     .fill("Automated photograph test. Safe to archive — created by the e2e suite.")
 }
 
@@ -134,8 +134,16 @@ async function uploadPhotos(
 }
 
 /** The tiles in the "Other images" grid, in rendered order. */
+/**
+ * The main photograph's own controls. Counted rather than the words "Main
+ * image", which are both the section heading and the tile's badge.
+ */
+function mainPhoto(page: Page) {
+  return page.getByRole("button", { name: /^Options for .* main photograph$/ })
+}
+
 function otherTiles(page: Page) {
-  return page.locator('ul li [data-slot="button"][aria-label^="Options for"]')
+  return page.locator('ul li button[aria-label^="Options for"]')
 }
 
 test.describe("vehicle photographs", () => {
@@ -156,7 +164,7 @@ test.describe("vehicle photographs", () => {
 
       // Exactly one main image — the invariant the repair migration existed
       // to restore, asserted here on the surface that shows it.
-      await expect(page.getByText("Main image", { exact: true })).toHaveCount(1)
+      await expect(mainPhoto(page)).toHaveCount(1)
 
       // And the publish warning is gone, because the gallery is no longer
       // empty.
@@ -184,7 +192,7 @@ test.describe("vehicle photographs", () => {
 
       await expect(page.getByText("Main image updated.")).toBeVisible()
       // Still exactly one main image, and still two photographs in total.
-      await expect(page.getByText("Main image", { exact: true })).toHaveCount(1)
+      await expect(mainPhoto(page)).toHaveCount(1)
       await expect(otherTiles(page)).toHaveCount(1)
     } finally {
       await archiveCurrent(page)
@@ -258,7 +266,7 @@ test.describe("vehicle photographs", () => {
       ).toBeVisible()
 
       // One photograph left, and it is the main one — never zero primaries.
-      await expect(page.getByText("Main image", { exact: true })).toHaveCount(1)
+      await expect(mainPhoto(page)).toHaveCount(1)
       await expect(otherTiles(page)).toHaveCount(0)
     } finally {
       await archiveCurrent(page)
@@ -315,8 +323,10 @@ test.describe("vehicle photographs", () => {
       await page.locator('[aria-label^="Options for"]').first().click()
       await page.getByRole("menuitem", { name: "Add a description" }).click()
 
+      // Scoped to the dialog: the vehicle form has a Description field too.
       await page
-        .getByLabel("Description")
+        .getByRole("dialog")
+        .getByLabel("Description", { exact: true })
         .fill("Front three-quarter view showing the offside wing")
       await page.getByRole("button", { name: "Save description" }).click()
 
@@ -331,7 +341,7 @@ test.describe("vehicle photographs", () => {
       // an empty alt, which would tell a screen reader to skip the image.
       await page.locator('[aria-label^="Options for"]').first().click()
       await page.getByRole("menuitem", { name: "Edit description" }).click()
-      await page.getByLabel("Description").fill("")
+      await page.getByRole("dialog").getByLabel("Description", { exact: true }).fill("")
       await page.getByRole("button", { name: "Save description" }).click()
 
       await expect(page.getByText("Description cleared.")).toBeVisible()

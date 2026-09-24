@@ -63,11 +63,11 @@ export default async function AdminDashboardLayout({
     }))
     .filter((group) => group.links.length > 0)
 
-  // Settings → Notifications: the new-quote alert, through the dashboard channel.
-  const showLeadAlerts =
-    can(admin.role, "quote:read") &&
-    operational.notifications.notifyAdminsOfNewQuotes &&
-    operational.notifications.dashboardNotificationsEnabled
+  // Settings → Notifications, dashboard channel: live alerts for customers
+  // accepting quotations, and — under its own switch — for new enquiries.
+  const showQuoteAlerts =
+    can(admin.role, "quote:read") && operational.notifications.dashboardNotificationsEnabled
+  const showLeadAlerts = showQuoteAlerts && operational.notifications.notifyAdminsOfNewQuotes
 
   return (
     <AdminThemeProvider initialTheme={theme}>
@@ -108,7 +108,7 @@ export default async function AdminDashboardLayout({
           </main>
         </div>
 
-        {showLeadAlerts ? <QuoteLeadWatcher /> : null}
+        {showQuoteAlerts ? <QuoteLeadWatcher watchLeads={showLeadAlerts} /> : null}
       </div>
     </AdminThemeProvider>
   )

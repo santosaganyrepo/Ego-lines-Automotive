@@ -1,4 +1,4 @@
-import { Document, Page, StyleSheet, Text, View } from "@react-pdf/renderer"
+import { Document, Link, Page, StyleSheet, Text, View } from "@react-pdf/renderer"
 
 import { formatCurrency, formatCurrencyOrDash } from "@/lib/utils/format-currency"
 import { formatQuoteDate } from "@/lib/quotes/quote-messages"
@@ -198,6 +198,39 @@ const styles = StyleSheet.create({
     lineHeight: 1.6,
     fontSize: 11,
   },
+  acceptBlock: {
+    marginTop: SPACE.xl,
+    padding: SPACE.lg,
+    borderWidth: 1,
+    borderColor: BORDER,
+    borderRadius: 6,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  acceptText: {
+    flex: 1,
+    paddingRight: SPACE.md,
+    lineHeight: 1.5,
+    fontSize: 10.5,
+    color: MUTED,
+  },
+  acceptTitle: {
+    fontFamily: "Helvetica-Bold",
+    fontSize: 12,
+    color: INK,
+    marginBottom: 2,
+  },
+  acceptButton: {
+    backgroundColor: GOLD,
+    color: INK,
+    fontFamily: "Helvetica-Bold",
+    fontSize: 11,
+    paddingVertical: SPACE.sm + 2,
+    paddingHorizontal: SPACE.lg,
+    borderRadius: 6,
+    textDecoration: "none",
+  },
   footer: {
     position: "absolute",
     bottom: SPACE.xxl,
@@ -212,7 +245,14 @@ const styles = StyleSheet.create({
   },
 })
 
-export function QuoteDocument({ data }: { data: QuotePdfData }) {
+/**
+ * `acceptUrl`: the customer's "Accept quotation" page, printed as a button
+ * under the total. Present on the copies a customer receives (the emailed
+ * attachment and their secure link); absent on the operator's preview, which
+ * has no share link to point at yet. The customer may equally reply by
+ * WhatsApp or email — the box says so.
+ */
+export function QuoteDocument({ data, acceptUrl }: { data: QuotePdfData; acceptUrl?: string | null }) {
   const listedLines = data.lines.filter((line) => line.kind === "ITEM")
   const accessoryLines = data.lines.filter((line) => line.kind === "ACCESSORY")
 
@@ -328,6 +368,20 @@ export function QuoteDocument({ data }: { data: QuotePdfData }) {
             This quotation is valid until {formatQuoteDate(data.validUntil)}. Figures marked as
             estimates are confirmed once the order is placed.
           </Text>
+        ) : null}
+
+        {acceptUrl ? (
+          <View style={styles.acceptBlock} wrap={false}>
+            <View style={styles.acceptText}>
+              <Text style={styles.acceptTitle}>Ready to go ahead?</Text>
+              <Text>
+                Accept online in one tap, or reply to us on WhatsApp or by email — whichever you prefer.
+              </Text>
+            </View>
+            <Link src={acceptUrl} style={styles.acceptButton}>
+              Accept quotation
+            </Link>
+          </View>
         ) : null}
 
         {data.paymentInstructions ? (

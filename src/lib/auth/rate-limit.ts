@@ -86,6 +86,8 @@ export const RATE_LIMIT_SCOPES = {
   quoteRequestIp: "quote-request:ip",
   quoteRequestPhone: "quote-request:phone",
   quotationPdfIp: "quotation-pdf:ip",
+  // The customer's "Accept quotation" button — public, token-authorised.
+  quoteAcceptIp: "quote-accept:ip",
   trackingLookupIp: "tracking-lookup:ip",
   // Confirming the current password before a sensitive account change —
   // keyed by administrator, so a stolen session cannot guess the password
@@ -113,6 +115,15 @@ export const TWO_FACTOR_MAX_ATTEMPTS = 5
  *  reload the page, forward the link, and reopen it themselves. */
 export const QUOTATION_PDF_MAX_PER_IP = 30
 export const QUOTATION_PDF_WINDOW_MS = 60 * 60 * 1000
+
+/**
+ * "Accept quotation" submissions per host per hour. A real customer presses
+ * it once or twice; the limit is there so the endpoint cannot be used to
+ * guess share tokens (256 bits — not feasibly guessable anyway) or to flood
+ * the dealership with acceptance notifications.
+ */
+export const QUOTE_ACCEPT_MAX_PER_IP = 10
+export const QUOTE_ACCEPT_WINDOW_MS = 60 * 60 * 1000
 
 /**
  * Track My Order lookups per host inside the window.

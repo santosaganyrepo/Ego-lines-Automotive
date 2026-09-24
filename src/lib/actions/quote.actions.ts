@@ -28,6 +28,7 @@ import { sendQuoteEmail, type SendQuoteEmailAttachment } from "@/lib/email/send-
 import { buildQuotationFilename, buildQuotePdfData, type QuotePdfSource } from "@/lib/pdf/quote-pdf-data"
 import { renderQuotePdfBuffer } from "@/lib/pdf/render-quote-pdf"
 import { prisma } from "@/lib/prisma"
+import { quoteAcceptanceUrl } from "@/lib/quotes/quote-acceptance"
 import { buildQuoteMessage, defaultQuoteNote, type QuoteMessageInput } from "@/lib/quotes/quote-messages"
 import { UnknownListingReferenceError, resolveQuoteLines } from "@/lib/quotes/quote-line-resolution"
 import {
@@ -357,7 +358,10 @@ export async function updateQuoteStatusAction(
     return { status: "error", message: auth.message }
   }
 
-  const existing = await prisma.quote.findUnique({ where: { id: quoteId }, select: { status: true } })
+  const existing = await prisma.quote.findUnique({
+    where: { id: quoteId },
+    select: { status: true, customerAcceptedAt: true, customerAcceptedTotal: true },
+  })
   if (!existing) {
     return { status: "error", message: "That quote no longer exists." }
   }
@@ -379,9 +383,34 @@ export async function updateQuoteStatusAction(
     return { status: "error", message: describeRefusedQuoteTransition(existing.status, status) }
   }
 
+  /**
+   * Reopening an accepted quote for revision withdraws the customer's online
+   * acceptance with it: they agreed to figures that are about to change, and
+   * the Accept page must offer them the revised ones. What they had accepted
+   * is kept in the audit entry.
+   */
+  const withdrawsCustomerAcceptance =
+    existing.status === QuoteStatus.ACCEPTED && status === QuoteStatus.SENT && existing.customerAcceptedAt !== null
+
+  let changed = true
   try {
     await prisma.$transaction(async (tx) => {
-      await tx.quote.update({ where: { id: quoteId }, data: { status } })
+      // Conditional on the status this decision was made from: a customer
+      // may press "Accept quotation" at any moment, and marking the quote
+      // lost or expired must not silently overwrite that.
+      const { count } = await tx.quote.updateMany({
+        where: { id: quoteId, status: existing.status },
+        data: {
+          status,
+          ...(withdrawsCustomerAcceptance
+            ? { customerAcceptedAt: null, customerAcceptedTotal: null, customerAcceptanceNote: null }
+            : {}),
+        },
+      })
+      if (count === 0) {
+        changed = false
+        return
+      }
 
       await recordAuditLog(
         {
@@ -393,6 +422,14 @@ export async function updateQuoteStatusAction(
             previousStatus: existing.status,
             newStatus: status,
             ...(reason ? { reason } : {}),
+            ...(withdrawsCustomerAcceptance
+              ? {
+                  withdrawnCustomerAcceptance: {
+                    acceptedAt: existing.customerAcceptedAt?.toISOString() ?? null,
+                    acceptedTotal: existing.customerAcceptedTotal?.toString() ?? null,
+                  },
+                }
+              : {}),
           },
         },
         tx
@@ -401,6 +438,14 @@ export async function updateQuoteStatusAction(
   } catch (error) {
     console.error("[quote] failed to change quote status", error)
     return { status: "error", message: "Could not change the status. Please try again." }
+  }
+
+  if (!changed) {
+    revalidateQuoteSurfaces(quoteId)
+    return {
+      status: "error",
+      message: "This quote changed while you were looking at it — the customer may have just accepted it. Reload the page to see its current status.",
+    }
   }
 
   revalidateQuoteSurfaces(quoteId)
@@ -544,6 +589,11 @@ export async function sendQuoteDispatchAction(
 
   const totals = computeQuoteTotals(priced, fees, discount)
   const link = includeLink && shareToken ? `${siteConfig.url}/quotation/${shareToken}` : null
+  // Not offered again on a reminder to a customer who has already accepted.
+  const acceptUrl =
+    includeLink && shareToken && quote.status !== QuoteStatus.ACCEPTED
+      ? quoteAcceptanceUrl(siteConfig.url, shareToken)
+      : null
 
   const listedItems = quote.items
     .filter((item) => item.kind === QuoteLineKind.ITEM)
@@ -581,6 +631,7 @@ export async function sendQuoteDispatchAction(
     // without a validity date.
     validUntil: quote.validUntil as Date,
     link,
+    acceptUrl,
     paymentInstructions: quote.paymentInstructions,
     isVehicle: quote.type === QuoteType.VEHICLE,
     instructions: instructions ?? null,
@@ -642,7 +693,7 @@ export async function sendQuoteDispatchAction(
 
       attachment = {
         filename: buildQuotationFilename(quote.quoteNumber, quote.contactName ?? "Customer"),
-        content: await renderQuotePdfBuffer(buildQuotePdfData(pdfSource, businessName)),
+        content: await renderQuotePdfBuffer(buildQuotePdfData(pdfSource, businessName), { acceptUrl }),
       }
     }
 
@@ -664,6 +715,8 @@ export async function sendQuoteDispatchAction(
       to: quote.contactEmail as string,
       subject: message.subject,
       text: message.body,
+      acceptUrl,
+      pdfUrl: link,
       attachment,
       idempotencyKey,
     })

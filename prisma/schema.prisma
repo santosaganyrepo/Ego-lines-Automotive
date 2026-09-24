@@ -1095,6 +1095,21 @@ model Quote {
   /// customer record, or the dashboard.
   shareToken String? @unique
 
+  /// ── The customer's own "Accept quotation" ─────────────────────────────
+  /// Set when the customer presses Accept on the page their quotation link
+  /// opens (/quotation/<token>/accept), which also moves the quote to
+  /// ACCEPTED. Null when an operator marked it accepted on the customer's
+  /// word, and cleared again if the quote is reopened for revision — the
+  /// customer then accepts the revised figures, not these.
+  ///
+  /// `customerAcceptedTotal` is the total they saw and agreed to, kept as a
+  /// snapshot (like Order.totalAmount) so what was accepted can always be
+  /// shown exactly, whatever happens to the quote afterwards. The note is
+  /// anything they chose to write alongside; it is optional.
+  customerAcceptedAt     DateTime?
+  customerAcceptedTotal  Decimal?  @db.Decimal(12, 2)
+  customerAcceptanceNote String?   @db.Text
+
   status     QuoteStatus @default(NEW)
   adminNotes String?     @db.Text
 
@@ -1111,6 +1126,7 @@ model Quote {
   @@index([customerId])
   @@index([createdAt])
   @@index([type, status])
+  @@index([customerAcceptedAt])
 }
 
 /// One line of a quotation.

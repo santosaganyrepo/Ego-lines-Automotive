@@ -11,8 +11,10 @@ import { formatCurrency } from "@/lib/utils/format-currency"
  *
  * ── What goes in, and what does not ───────────────────────────────────
  * The greeting, what is being quoted, the breakdown, the total, the validity
- * date, and either the secure PDF link or — when the operator chooses a
- * text-only message — the payment instructions themselves. Nothing internal:
+ * date, and either the secure PDF link and the "Accept quotation" link or —
+ * when the operator chooses a text-only message — the payment instructions
+ * themselves. Accepting online is offered, never required: the message
+ * always invites a plain reply as well. Nothing internal:
  * no admin notes, no supplier, no reference beyond the quote number the
  * customer will quote back.
  *
@@ -52,6 +54,11 @@ export interface QuoteMessageInput {
   validUntil: Date
   /** The secure PDF link, or null for a text-only message. */
   link: string | null
+  /**
+   * The customer's "Accept quotation" page, sent alongside the PDF link.
+   * Null for a text-only message; the customer can always accept by reply.
+   */
+  acceptUrl?: string | null
   paymentInstructions: string | null
   isVehicle: boolean
   /** Optional operator notes or instructions for this customer ("the car
@@ -171,7 +178,15 @@ export function buildQuoteMessage(
   }
 
   lines.push("")
-  lines.push("To accept, simply reply to this message. We are happy to answer any questions.")
+  if (input.acceptUrl) {
+    lines.push(bold("Ready to go ahead?"))
+    lines.push("Accept your quotation online in one tap:")
+    lines.push(input.acceptUrl)
+    lines.push("")
+    lines.push("Or simply reply to this message — ask us anything, or accept in your own words.")
+  } else {
+    lines.push("To accept, simply reply to this message. We are happy to answer any questions.")
+  }
   lines.push("")
   lines.push(input.siteName)
 

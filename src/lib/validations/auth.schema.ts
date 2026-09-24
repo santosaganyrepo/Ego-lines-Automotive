@@ -87,6 +87,15 @@ export const passwordResetRequestSchema = z.object({
 
 export type PasswordResetRequestInput = z.infer<typeof passwordResetRequestSchema>
 
+/**
+ * The one-time token from a password-reset email. Supabase's hashed tokens
+ * are lowercase hex; anything else is not one, and is refused before it is
+ * sent anywhere.
+ */
+export const passwordResetTokenSchema = z.object({
+  tokenHash: z.string().trim().regex(/^[a-f0-9]{16,128}$/, "This reset link is not valid."),
+})
+
 export const updatePasswordSchema = z
   .object({
     password: newPasswordField,

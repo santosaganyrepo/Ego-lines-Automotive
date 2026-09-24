@@ -259,7 +259,12 @@ export function QuoteDispatchDialog({
                 onChange={(event) => setIncludeLink(event.target.checked)}
                 className="mt-0.5 size-4 rounded border-input"
               />
-              <span>Attach PDF quotation</span>
+              <span className="flex flex-col gap-0.5">
+                <span>Attach PDF quotation and “Accept quotation” link</span>
+                <span className="text-xs text-muted-foreground">
+                  The customer can accept online in one tap, or simply reply as before.
+                </span>
+              </span>
             </label>
 
             <div className="flex flex-col gap-2">

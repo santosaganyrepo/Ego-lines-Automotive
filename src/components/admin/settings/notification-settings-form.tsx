@@ -57,7 +57,7 @@ export function NotificationSettingsForm({
             <SettingsSwitchRow
               name="customerEmailsEnabled"
               label="Automatic customer emails"
-              description="Request received, order confirmed, payment receipts, refunds, tracking number and tracking updates. Sending a quotation yourself is never affected."
+              description="Request received, quotation accepted, order confirmed, payment receipts, refunds, tracking number and tracking updates. Sending a quotation yourself is never affected."
               defaultChecked={settings.customerEmailsEnabled}
               onCheckedChange={markDirty}
             />
@@ -67,7 +67,7 @@ export function NotificationSettingsForm({
         <SettingsPanel
           id="notification-channels"
           title="Notification channels"
-          description="How administrator notifications reach staff."
+          description="How administrator notifications reach staff. A customer accepting their quotation online is always announced on every channel that is on."
         >
           <SettingsSwitchList>
             <SettingsSwitchRow
